@@ -3,15 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:client/pages/router/path.dart';
 
 // Import pages
-/*
 import 'package:client/pages/login.dart';
-import 'package:client/pages/map.dart';
+// import 'package:client/pages/map.dart';
 import 'package:client/pages/home.dart';
 import 'package:client/pages/chat.dart';
 import 'package:client/pages/scan.dart';
 import 'package:client/pages/setting.dart';
 import 'package:client/components/navbar.dart';
-*/
 
 
 // Define a key for the root navigator
@@ -29,11 +27,13 @@ final GoRouter router = GoRouter(
       builder: (context, state) => LoginPage(),
     ),
 
+    /*
     // Map Page Route
     GoRoute(
       path: Path.mapPage,
       builder: (context, state) => HospitalMapScreen(),
     ),
+    */
 
     // Bottom Navigation Shell Route
     ShellRoute(
