@@ -51,6 +51,7 @@ class MainTheme {
   // misc
   static const Color white = Color.fromRGBO(255, 255, 255, 1);
   static const Color black = Color.fromRGBO(0, 0, 0, 1);
+  static const Color grey = Color.fromRGBO(158, 158, 158, 1);
   static const Color logoBorder = Color.fromRGBO(217, 217, 217, 1);
   static const Color transparent = Color.fromRGBO(0, 0, 0, 0);
   // static const Color test = Colors.blue;

@@ -8,23 +8,31 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MainTheme.mainBackground,
-
+    
       appBar: AppBar(
-        toolbarHeight: 100,
+        toolbarHeight: 60,
         elevation: 0,
         backgroundColor: MainTheme.mainBackground,
         leading: Padding(
-          padding: const EdgeInsets.only(
-              // Padding from the screen edge
-              left: 16.0, top: 16.0), 
+          padding: const EdgeInsets.only(left: 16.0, top: 20.0),
           child: Container(
             decoration: BoxDecoration(
-              color: MainTheme.white,
-              borderRadius: BorderRadius.circular(10), // Rounded edges
+              color: MainTheme.mainBackground,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                // Border color
+                color: MainTheme.black,
+                width: 0.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  // Shadow color
+                  color: MainTheme.black.withOpacity(0.2),
+                  blurRadius: 1,
+                  offset: const Offset(1, 1),
+                ),
+              ],
             ),
-            padding: const EdgeInsets.symmetric(
-                // Control spacing around the text
-                horizontal: 8, vertical: 4), 
             child: Center(
               child: Text(
                 'กฟ',

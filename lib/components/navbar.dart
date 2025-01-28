@@ -78,7 +78,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
           topLeft: Radius.circular(15),
           topRight: Radius.circular(15),
         ),
-        shadowColor: Colors.grey.withOpacity(0.5),
+        shadowColor: const Color.fromRGBO(158, 158, 158, 1).withOpacity(0.5),
         elevation: 15,
         tabCurve: Curves.decelerate,
         tabDurationMillSec: 0,
