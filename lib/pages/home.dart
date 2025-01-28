@@ -2,29 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:client/components/Color/theme.dart';
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MainTheme.mainBackground,
+
       appBar: AppBar(
         toolbarHeight: 100,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: MainTheme.mainBackground,
         leading: Padding(
-          padding:
-              const EdgeInsets.only(left: 16.0, top: 16.0), // ระยะห่างจากขอบจอ
+          padding: const EdgeInsets.only(
+              // Padding from the screen edge
+              left: 16.0, top: 16.0), 
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10), // ปรับขอบให้เหมาะสม
+              color: MainTheme.white,
+              borderRadius: BorderRadius.circular(10), // Rounded edges
             ),
             padding: const EdgeInsets.symmetric(
-                horizontal: 8, vertical: 4), // ควบคุมพื้นที่รอบตัวอักษร
+                // Control spacing around the text
+                horizontal: 8, vertical: 4), 
             child: Center(
               child: Text(
                 'กฟ',
                 style: TextStyle(
-                  color: Color(0xFF12358F),
+                  color: MainTheme.blueText,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -34,12 +39,13 @@ class HomePage extends StatelessWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(
-                right: 16.0, top: 8.0), // ระยะห่างจากขอบจอ
+                // Padding from the screen edge
+                right: 16.0, top: 8.0), 
             child: Image.asset(
-              'assets/images/SE_logo 3.png', // แทน path รูปจริง
-              width: 60, // ขนาดโลโก้ยังคงเดิม
-              height: 60,
-              fit: BoxFit.contain, // รูปภาพไม่ถูกครอบตัด
+              'assets/images/SE_logo 3.png', // Replace with the actual path of the image
+              width: 60, // Logo width
+              height: 60, // Logo height
+              fit: BoxFit.contain, // Ensure the image is not cropped
             ),
           ),
         ],
@@ -53,16 +59,19 @@ class HomePage extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   style: DefaultTextStyle.of(context).style.copyWith(
-                        color: Colors.black, // ตั้งสีข้อความเป็นสีดำ
+                        color: MainTheme.black, 
                       ),
                   children: [
                     TextSpan(
                       text: 'สวัสดี,\n',
                       style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none, // ลบขีดใดๆ
-                        backgroundColor: Colors.transparent, // ลบสีพื้นหลัง
+                        fontFamily: 'BaiJamjuree',
+                        // Remove underline
+                        decoration: TextDecoration.none, 
+                        backgroundColor:
+                            // Remove background color
+                            MainTheme.transparent, 
                       ),
                     ),
                     TextSpan(
@@ -70,97 +79,119 @@ class HomePage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.none, // ลบขีดใดๆ
-                        backgroundColor: Colors.transparent, // ลบสีพื้นหลัง
+                        fontFamily: 'BaiJamjuree',
+                        // Remove underline
+                        decoration: TextDecoration.none,
+                        backgroundColor:
+                            // Remove background color
+                            MainTheme.transparent, 
                       ),
                     ),
                   ],
                 ),
               ),
+
               SizedBox(height: 16),
+
               Row(
                 children: [
-                  // การ์ดสแกนตา
+                  // Eye Scan Card
                   Expanded(
                     child: Container(
                       height: 170,
                       decoration: BoxDecoration(
-                        color: Color(0xFF12358F),
+                        color: MainTheme.blueBox,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0), // ระยะห่างภายใน
+                        padding: const EdgeInsets.all(16.0), // Inner padding
                         child: Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.start, // ชิดซ้าย
+                              CrossAxisAlignment.start, // Align left
                           children: [
                             Container(
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: MainTheme.white,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(Icons.remove_red_eye,
-                                  color: Color(0xFF12358F), size: 30),
+                                  color: MainTheme.blueBox, size: 30),
                             ),
+
                             SizedBox(height: 16),
+
                             Text(
                               'สแกนตา',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  fontFamily: 'BaiJamjuree',
+                                  color: MainTheme.white,
                                   fontSize: 16),
                             ),
+                            
                             SizedBox(height: 4),
+
                             Text(
                               'อยู่ในสถานะ: ปกติ',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
+                              style: TextStyle(
+                                  color: MainTheme.white,
+                                  fontFamily: 'BaiJamjuree',
+                                  fontSize: 14),
                             ),
                           ],
                         ),
                       ),
                     ),
                   ),
+
                   SizedBox(width: 16),
-                  // การ์ดค่าสายตา
+
+                  // Vision Status Card
                   Expanded(
                     child: Container(
                       height: 170,
                       decoration: BoxDecoration(
-                        color: Color(0xFFF5BBD1),
+                        color: MainTheme.pinkBox,
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0), // ระยะห่างภายใน
+                        padding: const EdgeInsets.all(16.0), // Inner padding
                         child: Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.start, // ชิดซ้าย
+                              CrossAxisAlignment.start, // Align left
                           children: [
                             Container(
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: MainTheme.white,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(Icons.visibility_off,
-                                  color: Color(0xFFF5BBD1), size: 30),
+                                  color: MainTheme.pinkBox, size: 30),
                             ),
+
                             SizedBox(height: 16),
+
                             Text(
                               'ค่าสายตา',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                                  fontFamily: 'BaiJamjuree',
+                                  color: MainTheme.black,
                                   fontSize: 16),
                             ),
+
                             SizedBox(height: 4),
+
                             Text(
                               'อยู่ในสถานะ: มีความเสี่ยง',
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 14),
+                              style: TextStyle(
+                                  color: MainTheme.black,
+                                  fontFamily: 'BaiJamjuree',
+                                  fontSize: 14),
                             ),
                           ],
                         ),
@@ -169,35 +200,42 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
+
               SizedBox(height: 16),
+
               Container(
                 height: 100,
                 decoration: BoxDecoration(
-                  color: Color(0xFF12358F),
+                  color: MainTheme.blueBox,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0), // ระยะห่างภายใน
+                  padding: const EdgeInsets.all(16.0), // Inner padding
                   child: Row(
                     children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment:
-                              CrossAxisAlignment.start, // ชิดซ้าย
+                              CrossAxisAlignment.start, // Align left
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               'ประวัติการสแกนตา',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  fontFamily: 'BaiJamjuree',
+                                  color: MainTheme.white,
                                   fontSize: 16),
                             ),
+
                             SizedBox(height: 4),
+
                             Text(
                               'สแกนไปแล้วทั้งหมด 1 ครั้ง',
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
+                              style: TextStyle(
+                                  color: MainTheme.white,
+                                  fontFamily: 'BaiJamjuree',
+                                  fontSize: 14),
                             ),
                           ],
                         ),
@@ -206,30 +244,36 @@ class HomePage extends StatelessWidget {
                         width: 50,
                         height: 50,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: MainTheme.white,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(Icons.history,
-                            color: Color(0xFF12358F), size: 30),
+                            color: MainTheme.blueBox, size: 30),
                       ),
                     ],
                   ),
                 ),
               ),
+
               SizedBox(height: 16),
+
               Row(
                 mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween, // จัดให้อยู่หัวและท้าย
+                    MainAxisAlignment.spaceBetween, // Align to start and end
                 children: [
                   Text(
                     'การแจ้งเตือน',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'BaiJamjuree',
+                        fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'ดูทั้งหมด',
                     style: TextStyle(
-                        color: Color(0xFF12358F),
+                        color: MainTheme.blueText,
                         fontSize: 12,
+                        fontFamily: 'BaiJamjuree',
                         fontWeight: FontWeight.bold),
                   ),
                 ],
