@@ -11,6 +11,10 @@ class MainTheme {
   static const Color navbarText = Color.fromRGBO(179, 179, 179, 1);
   static const Color navbarFocusText = Color.fromRGBO(18, 53, 143, 1);
 
+  // home page
+  static const Color pinkBox = Color.fromRGBO(245, 187, 209, 1);
+  static const Color blueBox = Color.fromRGBO(18, 53, 143, 1);
+
   // button (* include gradient button *)
   static const Color buttonBackground = Color.fromRGBO(18, 53, 143, 1);
 
@@ -35,6 +39,7 @@ class MainTheme {
   // text
   static const Color mainText = Color.fromRGBO(0, 0, 0, 1);
   static const Color hyperlinkedText = Color.fromRGBO(18, 53, 143, 1);
+  static const Color blueText = Color.fromRGBO(18, 53, 143, 1);
   static const Color buttonText = Color.fromRGBO(255, 255, 255, 1);
   static const Color placeholderText = Color.fromRGBO(179, 179, 179, 1);
 
@@ -45,7 +50,9 @@ class MainTheme {
 
   // misc
   static const Color white = Color.fromRGBO(255, 255, 255, 1);
+  static const Color black = Color.fromRGBO(0, 0, 0, 1);
   static const Color logoBorder = Color.fromRGBO(217, 217, 217, 1);
+  static const Color transparent = Color.fromRGBO(0, 0, 0, 0);
   // static const Color test = Colors.blue;
   // static const Color test2 = Colors.pink;
 
