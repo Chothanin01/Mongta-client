@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:client/components/Color/theme.dart';
-import 'package:client/components/EntryForm/circle_logo.dart';
-import 'package:client/components/EntryForm/entry_button.dart';
-import 'package:client/components/EntryForm/entry_textfield.dart';
+import 'package:client/core/theme/theme.dart';
+import 'package:client/core/components/entryForm/circle_logo.dart';
+import 'package:client/core/components/entryForm/entry_button.dart';
+import 'package:client/core/components/entryForm/entry_textfield.dart';
 import 'package:iconify_flutter/icons/bxs.dart';
 import 'package:go_router/go_router.dart';
 

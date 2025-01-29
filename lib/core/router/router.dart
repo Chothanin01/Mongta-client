@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:client/pages/router/path.dart';
+import 'package:client/core/router/path.dart';
 
 // Import pages
-import 'package:client/pages/login.dart';
+import 'package:client/pages/auth/login.dart';
 // import 'package:client/pages/map.dart';
-import 'package:client/pages/home.dart';
-import 'package:client/pages/chat.dart';
-import 'package:client/pages/scan.dart';
-import 'package:client/pages/setting.dart';
-import 'package:client/components/navbar.dart';
+import 'package:client/pages/home/home.dart';
+import 'package:client/pages/chat/chat.dart';
+import 'package:client/pages/scan/scan.dart';
+import 'package:client/pages/misc/setting.dart';
+import 'package:client/core/components/navbar.dart';
 
 
 // Define a key for the root navigator

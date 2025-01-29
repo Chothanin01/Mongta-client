@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:client/components/Color/theme.dart';
+import 'package:client/core/theme/theme.dart';
 
 
 /// A *reusable* widget representing a square tile with an image inside

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:client/components/Color/theme.dart';
+import 'package:client/core/theme/theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 
 /// A *reusable* custom text field widget for user input.

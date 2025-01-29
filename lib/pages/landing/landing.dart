@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
-class SettingPage extends StatelessWidget {
+class ScanPage extends StatelessWidget {
+  const ScanPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Setting Page'),
+        title: const Text('Scan Page'),
       ),
       body: const Center(
-        child: Text('Mockup หน้า Setting'),
+        child: Text('Mockup หน้า landing'),
       ),
     );
   }
