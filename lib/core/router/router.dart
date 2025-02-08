@@ -8,10 +8,6 @@ import 'package:client/pages/auth/login.dart';
 import 'package:client/pages/home/home.dart';
 import 'package:client/pages/chat/chat.dart';
 import 'package:client/pages/scan/scan.dart';
-import 'package:client/pages/near_chart/near_chart_one.dart';
-import 'package:client/pages/near_chart/near_chart_two.dart';
-import 'package:client/pages/near_chart/near_chart_three.dart';
-import 'package:client/pages/near_chart/near_chart_four.dart';
 import 'package:client/pages/misc/setting.dart';
 import 'package:client/core/components/navbar.dart';
 
