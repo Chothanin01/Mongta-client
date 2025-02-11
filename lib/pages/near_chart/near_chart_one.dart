@@ -2,22 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/pages/near_chart/near_chart_two.dart';
 
-// Test
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: NearChartOne(),
-    );
-  }
-}
-
 // Class
 class NearChartOne extends StatefulWidget {
   const NearChartOne({super.key});
