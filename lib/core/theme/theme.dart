@@ -15,6 +15,13 @@ class MainTheme {
   static const Color pinkBox = Color.fromRGBO(245, 187, 209, 1);
   static const Color blueBox = Color.fromRGBO(18, 53, 143, 1);
 
+  // near chart
+  static const Color nearchartSoftPink = Color.fromARGB(255, 248, 219, 230);
+  static const Color nearchartWhite = Color.fromARGB(255, 252, 252, 252);
+  static const Color nearchartPink = Color.fromARGB(255, 245, 187, 209);
+  static const Color nearchartRed = Color.fromARGB(255, 228, 77, 81);
+  static const Color nearchartGrey = Color.fromARGB(255, 217, 217, 217);
+
   // button (* include gradient button *)
   static const Color buttonBackground = Color.fromRGBO(18, 53, 143, 1);
 

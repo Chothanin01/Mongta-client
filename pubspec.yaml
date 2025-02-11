@@ -38,6 +38,7 @@ dependencies:
   badges: ^3.1.2
   iconify_flutter: ^0.0.7
   circle_nav_bar: ^2.2.0
+  dropdown_button2: ^2.3.9
 
 dev_dependencies:
   flutter_test:
