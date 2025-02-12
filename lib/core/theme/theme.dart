@@ -17,19 +17,21 @@ class MainTheme {
 
   // button (* include gradient button *)
   static const Color buttonBackground = Color.fromRGBO(18, 53, 143, 1);
+  static const Color maleButtonBackground = Color.fromRGBO(116, 157, 245, 1);
+  static const Color femaleButtonBackground = Color.fromRGBO(245, 187, 209, 1);
 
   static const buttonNearChartBackground = LinearGradient(
     colors: [
-      Color(0xFF12358F),
-      Color(0xFFF5BBD1)
+      Color.fromRGBO(18, 53, 143, 1),
+      Color.fromRGBO(245, 187, 209, 1)
     ],
     stops: [0.4, 1.0],
   );
 
   static const buttonScanBackground = LinearGradient(
     colors: [
-      Color(0xFF12358F),
-      Color(0xFF749DF5)
+      Color.fromRGBO(18, 53, 143, 1),
+      Color.fromRGBO(116, 157, 245, 1)
     ],
     stops: [0.4, 1.0],
   );
@@ -40,6 +42,7 @@ class MainTheme {
   static const Color mainText = Color.fromRGBO(0, 0, 0, 1);
   static const Color hyperlinkedText = Color.fromRGBO(18, 53, 143, 1);
   static const Color blueText = Color.fromRGBO(18, 53, 143, 1);
+  static const Color redText = Color.fromRGBO(228, 77, 81, 1);
   static const Color buttonText = Color.fromRGBO(255, 255, 255, 1);
   static const Color placeholderText = Color.fromRGBO(179, 179, 179, 1);
 
@@ -47,6 +50,13 @@ class MainTheme {
   static const Color textfieldBorder = Color.fromRGBO(179, 179, 179, 1);
   static const Color textfieldFocus = Color.fromRGBO(18, 53, 143, 1);
   static const Color textfieldBackground = Color.fromRGBO(255, 255, 255, 1);
+
+  // progress bar (page indicator)
+  static const Color activeDot = Color.fromRGBO(18, 53, 143, 1);
+  static const Color inactiveDot = Color.fromRGBO(179, 179, 179, 1);
+  
+  // warning + error
+  static const Color redWarning = Color.fromRGBO(244, 67, 54, 1);
 
   // misc
   static const Color white = Color.fromRGBO(255, 255, 255, 1);
