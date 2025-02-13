@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 
 /// A reusable custom button widget used for user entry actions
-class EntryButton extends StatelessWidget {
+class NcTutorialButton extends StatelessWidget {
   /// Callback function triggered when the button is tapped.
   final Function()? onTap;
 
   /// Text to display on the button
   final String buttonText;
 
-  const EntryButton({
+  const NcTutorialButton({
     super.key,
     required this.onTap,
     required this.buttonText,
@@ -23,7 +23,7 @@ class EntryButton extends StatelessWidget {
         padding: const EdgeInsets.all(16), // Inner padding for button content
         margin: const EdgeInsets.symmetric(horizontal: 50.0), // Horizontal margin
         decoration: BoxDecoration(
-          color: MainTheme.buttonBackground,
+          gradient: MainTheme.buttonNearChartBackground,
           borderRadius: BorderRadius.circular(30), // Rounded corners
         ),
         // Button text

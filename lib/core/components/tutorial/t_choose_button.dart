@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 
 /// A reusable custom button widget used for user entry actions
-class EntryButton extends StatelessWidget {
+class ChooseTutorialButton extends StatelessWidget {
   /// Callback function triggered when the button is tapped.
   final Function()? onTap;
 
   /// Text to display on the button
   final String buttonText;
 
-  const EntryButton({
+  const ChooseTutorialButton({
     super.key,
     required this.onTap,
     required this.buttonText,

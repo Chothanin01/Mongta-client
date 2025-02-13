@@ -2,43 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 
-/// A *reusable* custom text field widget for user input.
-class EntryTextField extends StatefulWidget {
-
-  /// Controller for managing the input text
+class EntryDatePicker extends StatefulWidget {
   final TextEditingController controller;
-
-  /// Hint text displayed when the input is empty
   final String hintText;
-
-  /// Label text displayed above the text field
   final String label;
-
-  /// Determines whether the text is obscured
-  final bool obscureText; 
-
-  /// Icon to display inside the text field
   final String icon;
 
-  const EntryTextField({
+
+  const EntryDatePicker({
     super.key,
     required this.controller,
     required this.hintText,
     required this.label,
-    required this.obscureText,
     required this.icon,
   });
 
   @override
-  State<EntryTextField> createState() => _EntryTextFieldState();
+  State<EntryDatePicker> createState() => _EntryDatePickerState();
 }
 
-class _EntryTextFieldState extends State<EntryTextField> {
-
-  // FocusNode to track focus state of the text field
+class _EntryDatePickerState extends State<EntryDatePicker> {
   final FocusNode _focusNode = FocusNode();
-
-  // Tracks whether the text field is focused
   bool _isFocused = false;
 
   @override
@@ -51,23 +35,31 @@ class _EntryTextFieldState extends State<EntryTextField> {
     });
   }
 
-  // Clean up the focus node when the widget is removed.
   @override
   void dispose() {
     _focusNode.dispose();
     super.dispose();
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      widget.controller.text = picked.toString().split(' ')[0]; // Format as YYYY-MM-DD
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-
-      // Horizontal padding for alignment.
-      padding: const EdgeInsets.symmetric(horizontal: 40.0), 
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Label displayed above the text field.
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
@@ -76,19 +68,16 @@ class _EntryTextFieldState extends State<EntryTextField> {
                 fontSize: 16,
                 fontFamily: 'BaiJamjuree',
                 fontWeight: FontWeight.w500,
-                color: Colors.black,
+                color: MainTheme.mainText,
                 letterSpacing: -0.5,
               ),
             ),
           ),
-
-          // The text field with icon and focus styling
           Container(
             decoration: BoxDecoration(
-              // Subtle shadow effect.
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: MainTheme.black.withOpacity(0.1),
                   spreadRadius: 0,
                   blurRadius: 8,
                   offset: const Offset(0, 2),
@@ -98,36 +87,27 @@ class _EntryTextFieldState extends State<EntryTextField> {
             child: TextField(
               controller: widget.controller,
               focusNode: _focusNode,
-              obscureText: widget.obscureText,
+              readOnly: true,
+              onTap: () => _selectDate(context),
               decoration: InputDecoration(
-
-                // Default border
                 enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: MainTheme.textfieldBorder), 
+                  borderSide: BorderSide(color: MainTheme.textfieldBorder),
                   borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),
-
-                // Focused border.
                 focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: MainTheme.textfieldFocus),
                   borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),
-
-                // color for textfield
                 fillColor: MainTheme.textfieldBackground,
                 filled: true,
-
                 hintText: widget.hintText,
-
                 hintStyle: const TextStyle(
                   fontSize: 14,
-                  color: MainTheme.placeholderText, // Placeholder text color.
+                  color: MainTheme.placeholderText,
                   fontFamily: 'BaiJamjuree',
                   fontWeight: FontWeight.w400,
                   letterSpacing: -0.5,
                 ),
-
-                // Icon in text field
                 prefixIcon: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Iconify(
@@ -138,6 +118,14 @@ class _EntryTextFieldState extends State<EntryTextField> {
                         : MainTheme.placeholderText, // Default icon color
                     size: 20,
                   ),
+                ),
+
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.calendar_month, 
+                    color: MainTheme.textfieldFocus, 
+                    size: 20,
+                  ),
+                  onPressed: () => _selectDate(context),
                 ),
               ),
             ),
