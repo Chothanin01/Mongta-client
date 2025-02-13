@@ -54,9 +54,16 @@ class MainTheme {
   // progress bar (page indicator)
   static const Color activeDot = Color.fromRGBO(18, 53, 143, 1);
   static const Color inactiveDot = Color.fromRGBO(179, 179, 179, 1);
+
+  // tutorial selection
+  static const Color pinkBorderT = Color.fromRGBO(245, 187, 209, 1);
+  static const Color blueBorderT = Color.fromRGBO(116, 157, 245, 1);
+  static const Color pinkBackgroundT = Color.fromRGBO(245, 187, 209, 1);
+  static const Color blueBackgroundT = Color.fromRGBO(116, 157, 245, 1);
   
   // warning + error
   static const Color redWarning = Color.fromRGBO(244, 67, 54, 1);
+  static const Color greenComplete = Color.fromRGBO(76, 175, 80, 1);
 
   // misc
   static const Color white = Color.fromRGBO(255, 255, 255, 1);
