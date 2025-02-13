@@ -25,4 +25,8 @@ class Path {
   static const String scanTutorial = '/scan-tutorial';
 
   
+  static const String nearchartonePage = '/near_chart_one';
+  static const String nearcharttwoPage = '/near_chart_two';
+  static const String nearchartthreePage = '/near_chart_three';
+  static const String nearchartfourPage = '/near_chart_four';
 }
