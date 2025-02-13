@@ -1,23 +1,103 @@
 import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
+import 'package:flutter/gestures.dart';
 import 'package:client/core/components/entryForm/circle_logo.dart';
 import 'package:client/core/components/entryForm/entry_button.dart';
 import 'package:client/core/components/entryForm/entry_textfield.dart';
 import 'package:iconify_flutter/icons/bxs.dart';
 import 'package:go_router/go_router.dart';
+import 'package:client/services/auth_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class LoginPage extends StatelessWidget {
-  LoginPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
-  // Controllers for handling user input in the text fields
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final AuthService _authService = AuthService();
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  String? warningMessage;
 
   /// Method to handle user login logic
-  void signUserIn(BuildContext context) {
-    // Placeholder for sign-in logic
-    // TODO: Add authentication implementation
-    context.go('/home'); // Navigate to HomePage
+  void signUserIn(
+      BuildContext context,
+      TextEditingController usernameController,
+      TextEditingController passwordController) async {
+    String username = usernameController.text.trim();
+    String password = passwordController.text.trim();
+
+    // Request body
+    Map<String, dynamic> requestBody = {
+      "username": usernameController.text,
+      "password": passwordController.text,
+    };
+
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("โปรดกรอกชื่อบัญชีและรหัสผ่าน")),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:5000/api/login'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("เข้าสู่ระบบสำเร็จ!")),
+        );
+        context.go('/home'); // Navigate on success
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data['message'] ?? "เข้าสู่ระบบล้มเหลว")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("เกิดข้อผิดพลาดในการเชื่อมต่อ")),
+      );
+    }
+  }
+
+  Future<void> socialSignIn(BuildContext context, String provider) async {
+    try {
+      final result = provider == 'google'
+          ? await _authService.signInWithGoogle()
+          : await _authService.signInWithFacebook();
+      if (!context.mounted) return;
+
+      if (result != null) {
+        if (!result['isRegister']) {
+          // Navigate to registration page if the user is not registered
+          context.push('/ggfb_register', extra: {
+            'userData': result['userData'],
+            'idToken': result['idToken'],
+            'provider': provider,
+          });
+        } else {
+          // User is registered, navigate to home page
+          context.go('/home');
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Google/Facebook เข้าสู่ระบบล้มเหลว')));
+    }
+  }
+
+  void goToRegister() {
+    context.go('/register');
   }
 
   @override
@@ -28,7 +108,6 @@ class LoginPage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Center(
             child: Padding(
-              // Add padding for entry textfield and button
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -81,7 +160,8 @@ class LoginPage extends StatelessWidget {
 
                   // Sign-in button
                   EntryButton(
-                    onTap: () => signUserIn(context),
+                    onTap: () => signUserIn(context, usernameController, passwordController),
+                    buttonText: "เข้าสู่ระบบ",
                   ),
 
                   const SizedBox(height: 13), // Spacer
@@ -123,50 +203,52 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: 17), // Spacer
 
                   // Sign-in buttons for Google & Facebook
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Google sign-in button
-                      SquareTile(imagePath: 'assets/icon/Google.png'),
-
+                      GestureDetector(
+                        onTap: () => socialSignIn(context, 'google'),
+                        child: const SquareTile(
+                            imagePath: 'assets/icon/Google.png'),
+                      ),
                       SizedBox(width: 18), // Spacer
-
-                      // Facebook sign-in button
-                      SquareTile(imagePath: 'assets/icon/Facebook.png'),
+                      GestureDetector(
+                        onTap: () => socialSignIn(context, 'facebook'),
+                        child: const SquareTile(
+                            imagePath: 'assets/icon/Facebook.png'),
+                      ),
                     ],
                   ),
 
                   const SizedBox(height: 150), // Spacer
 
-                  // แยก "หากยังไม่มีบัญชี" และ "สมัครสมาชิก" เพื่อมารวมกัน
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'หากยังไม่มีบัญชี,',
-                        style: TextStyle(
-                          color: MainTheme.mainText,
-                          fontSize: 16,
-                          fontFamily: 'BaiJamjuree',
-                          fontWeight: FontWeight.w400,
-                          letterSpacing: -0.5,
-                        ),
+                  // div "หากยังไม่มีบัญชี" และ "สมัครสมาชิก" to merge in
+                  RichText(
+                    text: TextSpan(
+                      text: 'หากยังไม่มีบัญชี, ',
+                      style: const TextStyle(
+                        color: MainTheme.mainText,
+                        fontSize: 16,
+                        fontFamily: 'BaiJamjuree',
+                        fontWeight: FontWeight.w400,
+                        letterSpacing: -0.5,
                       ),
-                      SizedBox(width: 4), // Spacer
-
-                      // Hyperlinked for สมัครสมาชิก
-                      Text(
-                        'สมัครสมาชิก',
-                        style: TextStyle(
-                          color: MainTheme.hyperlinkedText,
-                          fontSize: 16,
-                          fontFamily: 'BaiJamjuree',
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.5,
+                      children: [
+                        TextSpan(
+                          text: 'สมัครสมาชิก',
+                          style: const TextStyle(
+                            color: MainTheme.hyperlinkedText,
+                            fontSize: 16,
+                            fontFamily: 'BaiJamjuree',
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.5,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = goToRegister,
                         ),
-                      ),
-                    ],
-                  )
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
