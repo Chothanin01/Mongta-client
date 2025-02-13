@@ -26,7 +26,7 @@ class HospitalMapScreen extends StatefulWidget {
   @override
   State<HospitalMapScreen> createState() => _HospitalMapScreenState();
 }
-
+// Set map defult Bangkok
 class _HospitalMapScreenState extends State<HospitalMapScreen> {
   GoogleMapController? _mapController;
   final Map<MarkerId, Marker> _hospitalMarkers = {};
@@ -51,7 +51,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
     _mapController?.dispose();
     super.dispose();
   }
-
+  // Check LocationPermission
   Future<void> _checkLocationPermission() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -87,7 +87,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
 
     await _getCurrentLocation();
   }
-
+  // Get LocationPermission
   Future<void> _getCurrentLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -117,7 +117,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
       );
     }
   }
-
+  //backend NearbyHospitals
   Future<void> _fetchNearbyHospitals(LatLng currentLocation) async {
     const String backendUrl = 'http://localhost:3000/nearby-hospitals';
     try {
@@ -203,19 +203,17 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
 
     const String backendUrl = 'http://localhost:3000/search-hospitals';
     try {
-      // Log การส่งคำขอไปยัง Backend
+      // Log Backend
       print('Sending request to: $backendUrl?query=$query');
 
       final response = await http.get(Uri.parse('$backendUrl?query=$query'));
 
-      // Log การตอบกลับจากเซิร์ฟเวอร์
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final List hospitals = json.decode(response.body);
 
-        // Log ข้อมูลที่ได้รับจาก API
         print('Received hospitals: $hospitals');
 
         setState(() {
@@ -244,44 +242,37 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
         });
       } else {
         _showErrorDialog('Error', 'No hospitals found matching your search');
-        // Log เมื่อไม่พบผลลัพธ์ที่ตรงกับการค้นหา
         print('No hospitals found matching the search query');
       }
     } catch (e) {
-      // Log ข้อผิดพลาด
       print('Error occurred: $e');
     }
   }
 
-  // เรียกฟังก์ชันนี้เมื่อค้นหาหรือมีการเปลี่ยนแปลงใน SearchBar
+  // SearchBar
   void _onSearchChanged(String query) {
     if (query.isEmpty) {
-      // เมื่อไม่มีการค้นหา (กรณีลบคำค้นหาหรือไม่พิมพ์)
       _fetchNearbyHospitals(
-          _currentPosition.target); // เรียกใช้งานฟังก์ชันที่ใช้ตำแหน่ง
+          _currentPosition.target); 
     } else {
-      // เมื่อมีการค้นหาด้วยคำค้น
       _searchHospitals(query);
     }
   }
 
   void _onHospitalSelected(Map<String, dynamic> hospital) {
-    // แสดงข้อมูลโรงพยาบาลที่เลือก
     setState(() {
       _selectedHospital = hospital;
     });
 
-    // ดึงพิกัดของโรงพยาบาลที่เลือก
     final lat = _selectedHospital!['location']['lat'];
     final lng = _selectedHospital!['location']['lng'];
     final position = LatLng(lat, lng);
 
-    // ใช้ animateCamera เพื่อเลื่อนไปยังตำแหน่งโรงพยาบาลที่เลือก
     _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(position, 16.0), // ระยะซูม 14 (สามารถปรับได้)
+      CameraUpdate.newLatLngZoom(position, 16.0), 
     );
   }
-
+  // UX UI Design
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
@@ -294,7 +285,6 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
               _setMapStyle();
             },
           ),
-          // ปุ่มย้อนกลับที่มุมซ้ายบน
           Positioned(
             top: 40,
             left: 20,
@@ -302,10 +292,9 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
               icon: Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
                 setState(() {
-                  _selectedHospital = null; // รีเซ็ตการเลือกโรงพยาบาล
-                  _searchController.clear(); // ล้างข้อความใน search bar
+                  _selectedHospital = null; 
+                  _searchController.clear(); 
                 });
-                // เลื่อนแผนที่ไปที่ตำแหน่งเดิมของโรงพยาบาลใกล้เคียง
                 _mapController?.animateCamera(
                   CameraUpdate.newCameraPosition(_currentPosition),
                 );
@@ -328,26 +317,26 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                           ? 'ค้นหาโรงพยาบาล'
                           : _selectedHospital!['name'],
                       prefixIcon: Padding(
-                        padding: EdgeInsets.all(8), // ระยะห่างจากขอบกล่องค้นหา
+                        padding: EdgeInsets.all(8),
                         child: CircleAvatar(
                           backgroundColor: _selectedHospital == null
                               ? Color(0xFF12358F)
                               : Colors
-                                  .red, // ✅ สีฟ้า = ค้นหา, สีแดง = เลือกแล้ว
-                          radius: 16, // ขนาดวงกลม
+                                  .red, 
+                          radius: 16,
                           child: Icon(
                             _selectedHospital == null
                                 ? Icons.search
                                 : Icons.local_hospital,
-                            color: Colors.white, // ไอคอนสีขาว
-                            size: 20, // ขนาดไอคอน
+                            color: Colors.white,
+                            size: 20,
                           ),
                         ),
                       ),
                       filled: true,
                       fillColor: Colors.white,
                       enabled: _selectedHospital ==
-                          null, // ปิดการแก้ไขเมื่อเลือกโรงพยาบาลแล้ว
+                          null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25.0),
                         borderSide: BorderSide.none,
@@ -403,7 +392,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                         color: Colors.red),
                                     onTap: () {
                                       _onHospitalSelected(
-                                          hospital); // เมื่อเลือกโรงพยาบาล
+                                          hospital);
                                     },
                                   );
                                 },
@@ -441,7 +430,6 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              // รายละเอียดที่อยู่
                                               Row(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
@@ -510,8 +498,6 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                                   ),
                                                 ],
                                               ),
-
-                                              // เบอร์โทรศัพท์
                                               Row(
                                                 children: [
                                                   Container(
@@ -553,7 +539,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                                       launch(url);
                                                     },
                                                     child: Image.asset(
-                                                      'assets/images/Group 25.png', // ใช้รูป Google Maps Icon
+                                                      'assets/images/Group 25.png',
                                                       width: 80,
                                                       height: 80,
                                                     ),
