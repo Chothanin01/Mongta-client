@@ -18,7 +18,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List<String> routes = [
     '/home',
     '/map',
-    '/scan',
+    '/tutorial-category',
     '/chat',
     '/settings',
   ];
