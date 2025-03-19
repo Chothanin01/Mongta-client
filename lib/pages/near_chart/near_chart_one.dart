@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/pages/near_chart/near_chart_two.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Class
 class NearChartOne extends StatefulWidget {
@@ -14,6 +15,10 @@ _NearChartOneState createState() => _NearChartOneState();
 class _NearChartOneState extends State<NearChartOne> {
   String? selectedLine;
 
+  Future<void> saveSelectedLine(String line, int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_line_$index', line);
+  }
 
 // Start UI
 @override
@@ -200,6 +205,7 @@ class _NearChartOneState extends State<NearChartOne> {
                       ),
                     );
                   } else {
+                    saveSelectedLine(selectedLine!, 1); // 1 คือรอบที่ 1
                     // Selected line
                     Navigator.push(
                       context,
@@ -236,4 +242,11 @@ class _NearChartOneState extends State<NearChartOne> {
     ),
   );
 }
+}
+
+void main() {
+  runApp(const MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: NearChartOne(),
+  ));
 }
