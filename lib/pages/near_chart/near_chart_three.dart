@@ -1,6 +1,7 @@
 import 'package:client/pages/near_chart/near_chart_four.dart';
 import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Class
 class NearChartThree extends StatefulWidget {
@@ -14,6 +15,10 @@ _NearChartThreeState createState() => _NearChartThreeState();
 class _NearChartThreeState extends State<NearChartThree> {
   String? selectedLine;
 
+  Future<void> saveSelectedLine(String line, int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_line_$index', line);
+  }
 
 // Start UI
 @override
@@ -200,6 +205,7 @@ class _NearChartThreeState extends State<NearChartThree> {
                       ),
                     );
                   } else {
+                    saveSelectedLine(selectedLine!, 3);
                     // Selected line
                     Navigator.push(
                       context,
