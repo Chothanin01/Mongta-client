@@ -44,40 +44,25 @@ class TutorialSelection extends StatefulWidget {
   State<TutorialSelection> createState() => _TutorialSelectionScreenState();
 }
 
+// Update these methods in the _TutorialSelectionScreenState class
 class _TutorialSelectionScreenState extends State<TutorialSelection> {
-  // State variable to track selected category
-  String? selectedCategory;
+  // Fixed selection - no longer changeable
+  final String selectedCategory = 'scan'; // Always 'scan'
 
-  // Handles the selection of tutorial category
-  void _handleCategorySelection(String category) {
-    setState(() {
-      selectedCategory = category;
-    });
-  }
-
-  // Get step number based on selected category
+  // Step number is now fixed
   String _getStepNumber() {
-    if (selectedCategory == 'chart') {
-      return '2';
-    } else if (selectedCategory == 'scan') {
-      return '1';
-    }
-    return '1'; // Default step number when nothing is selected
+    return '1'; // Always step 1
   }
 
-  // Navigates to appropriate tutorial screen based on selection
+  // Navigate to near chart tutorial
   void _handleStartTutorial() {
-    if (selectedCategory == 'chart') {
-      context.go('/scan-tutorial');
-    } else if (selectedCategory == 'scan') {
-      context.go('/nearchart-tutorial');
-    }
+    context.go('/nearchart-tutorial');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: MainTheme.mainBackground,
       body: SafeArea(
         child: Stack(
           children: [
@@ -118,70 +103,52 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
                   
                   const SizedBox(height: 40),
 
-                  // First Option: Eye Measurement
-                  InkWell(
-                    onTap: () => _handleCategorySelection('scan'),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: selectedCategory == 'scan' 
-                            ? MainTheme.pinkBackgroundT 
-                            : MainTheme.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: selectedCategory == 'scan'
-                              ? MainTheme.transparent
-                              : MainTheme.pinkBorderT,
-                              width: 4.0
-                        ),
+                  // First Option: Eye Measurement - Now Container instead of InkWell
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: MainTheme.pinkBackgroundT, // Always highlighted
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: MainTheme.transparent,
+                        width: 4.0
                       ),
-                      child: Text(
-                        '1. การวัดค่าสายตา',
-                        style: TextStyle(
-                          color: selectedCategory == 'scan'
-                              ? Colors.black
-                              : Colors.black,
-                          fontSize: 16,
-                          fontFamily: 'BaiJamjuree',
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
+                    ),
+                    child: const Text(
+                      '1. การวัดค่าสายตา',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontFamily: 'BaiJamjuree',
+                        fontWeight: FontWeight.w600,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                   const SizedBox(height: 16),
 
-                  // Second Option: Eye Scanning
-                  InkWell(
-                    onTap: () => _handleCategorySelection('chart'),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: selectedCategory == 'chart'
-                            ? MainTheme.blueBackgroundT
-                            : MainTheme.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: selectedCategory == 'chart'
-                              ? MainTheme.transparent
-                              : MainTheme.blueBorderT,
-                              width: 4.0
-                        ),
+                  // Second Option: Eye Scanning - Now Container instead of InkWell
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: MainTheme.white, // Always unhighlighted
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: MainTheme.blueBorderT,
+                        width: 4.0
                       ),
-                      child: Text(
-                        '2. การสแกนตา',
-                        style: TextStyle(
-                          color: selectedCategory == 'chart'
-                              ? MainTheme.black
-                              : MainTheme.black,
-                          fontSize: 16,
-                          fontFamily: 'BaiJamjuree',
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
+                    ),
+                    child: const Text(
+                      '2. การสแกนตา',
+                      style: TextStyle(
+                        color: MainTheme.black,
+                        fontSize: 16,
+                        fontFamily: 'BaiJamjuree',
+                        fontWeight: FontWeight.w600,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ],
@@ -191,10 +158,15 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
         ),
       ),
       
-      // Bottom Action Button
+      // Bottom Action Button with increased padding at bottom
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16.0),
-        height: 90, // Fixed height for bottom section
+        padding: const EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          top: 16.0,
+          bottom: 32.0, // Increased bottom padding
+        ),
+        height: 106, // Increased height to accommodate the extra padding
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -202,10 +174,10 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
               width: double.infinity,
               height: 58,
               child: ElevatedButton(
-                onPressed: selectedCategory != null ? _handleStartTutorial : null,
+                // Always enabled now
+                onPressed: _handleStartTutorial,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: MainTheme.buttonBackground,
-                  disabledBackgroundColor: MainTheme.grey,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),

@@ -77,7 +77,7 @@ class _NearChartTutorialState extends State<NearChartTutorial> {
       _controller.nextPage(
           duration: Duration(milliseconds: 500), curve: Curves.ease);
     } else {
-      context.go('/home');
+      context.go('/near_chart_one');
     }
   }
 
@@ -91,6 +91,7 @@ class _NearChartTutorialState extends State<NearChartTutorial> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MainTheme.mainBackground,
       body: SafeArea(
         child: Stack(
           children: [
@@ -149,14 +150,14 @@ class _NearChartTutorialState extends State<NearChartTutorial> {
                         NcTutorialButton(
                           onTap: _nextPage,
                           buttonText: _currentIndex == _pages.length - 1
-                              ? "เสร็จสิ้น"
+                              ? "เริ่มวัดค่าสายตา"
                               : "ต่อไป",
                         ),
                         SizedBox(
                           height: 48, // Fixed height space for the skip button
                           child: _currentIndex == 0
                               ? TextButton(
-                                  onPressed: () => context.go('/home'),
+                                  onPressed: () => context.go('/near_chart_one'),
                                   child: Text(
                                     'ข้ามการสอนใช้งาน',
                                     style: TextStyle(

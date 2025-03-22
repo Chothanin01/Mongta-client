@@ -46,7 +46,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
       step: "2",
       title: "ขั้นตอนการใช้งาน",
       subtitle: "การสเเกนตา",
-      blackText: "เมื่อวางตาตรงกับกรอบเเล้ว\nให้มองกล้องของโทรศัพท์เเล้วกดปุ่มถ่ายรูป",
+      blackText: "ถอดแว่นตาและใช้ตาเปล่า\nแล้ววางตาตรงกับกรอบเเล้ว\nให้มองกล้องของโทรศัพท์เเล้วกดปุ่มถ่ายรูป",
       imagePath: 'assets/images/scan_tutorial_2.png',
     ),
     TutorialPageData(
@@ -63,7 +63,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
       _controller.nextPage(
           duration: Duration(milliseconds: 500), curve: Curves.ease);
     } else {
-      context.go('/home');
+      context.go('/scan');
     }
   }
 
@@ -77,6 +77,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MainTheme.mainBackground,
       body: SafeArea(
         child: Stack(
           children: [
@@ -134,14 +135,14 @@ class _ScanTutorialState extends State<ScanTutorial> {
                         ScanTutorialButton(
                           onTap: _nextPage,
                           buttonText: _currentIndex == _pages.length - 1
-                              ? "เสร็จสิ้น"
+                              ? "เริ่มสแกนตา ์"
                               : "ต่อไป",
                         ),
                         SizedBox(
                           height: 48, // Fixed height space for the skip button
                           child: _currentIndex == 0
                               ? TextButton(
-                                  onPressed: () => context.go('/home'),
+                                  onPressed: () => context.go('/scan'),
                                   child: Text(
                                     'ข้ามการสอนใช้งาน',
                                     style: TextStyle(
@@ -241,7 +242,7 @@ class OnboardingPage extends StatelessWidget {
 
           if (pageData.imagePath != null)
             Center(
-              child: Image.asset(pageData.imagePath!, width: 300, height: 300),
+              child: Image.asset(pageData.imagePath!, width: 250, height: 250),
             ),
         ],
       ),
