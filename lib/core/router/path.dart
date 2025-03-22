@@ -16,7 +16,8 @@ class Path {
   // รอ page ใหม่
   // static const String Page = '/Page';
 
-  static const String chatPage = '/chat';
+  static const String chatHistoryPage = '/chat-history';
+  static const String chatScreenPage = '/chat';
   static const String settingPage = '/settings';
   static const String scanPage = '/scan';
 
@@ -29,4 +30,8 @@ class Path {
   static const String nearcharttwoPage = '/near_chart_two';
   static const String nearchartthreePage = '/near_chart_three';
   static const String nearchartfourPage = '/near_chart_four';
+
+  static const String completeOtpPage = '/complete-otp';
+
+  static const String scanlogPage = '/scanlog';
 }
