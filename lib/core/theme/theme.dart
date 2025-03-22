@@ -22,6 +22,15 @@ class MainTheme {
   static const Color nearchartRed = Color.fromARGB(255, 228, 77, 81);
   static const Color nearchartGrey = Color.fromARGB(255, 217, 217, 217);
 
+  // chat
+  static const Color chatDivider = Color.fromARGB(255, 179, 179, 179);
+  static const Color chatInfo = Color.fromARGB(255, 240, 242, 245);
+  static const Color chatGrey = Color.fromARGB(255, 158, 158, 158);
+  static const Color chatGreen = Color.fromARGB(255, 142, 200, 52);
+  static const Color chatPink = Color.fromARGB(255, 245, 187, 209);
+  static const Color chatWhite = Color.fromARGB(255, 252, 252, 252);
+  static const Color chatBlue = Color.fromARGB(255, 18, 53, 143);
+
   // button (* include gradient button *)
   static const Color buttonBackground = Color.fromRGBO(18, 53, 143, 1);
   static const Color maleButtonBackground = Color.fromRGBO(116, 157, 245, 1);
@@ -80,5 +89,8 @@ class MainTheme {
   static const Color transparent = Color.fromRGBO(0, 0, 0, 0);
   // static const Color test = Colors.blue;
   // static const Color test2 = Colors.pink;
+
+  // placeholder
+  static const Color placeholderBackground = Color(0xFFEEEEEE);
 
 }
