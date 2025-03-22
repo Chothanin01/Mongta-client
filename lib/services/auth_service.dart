@@ -3,6 +3,9 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:client/services/user_service.dart';
+import 'package:client/services/http_client.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -41,6 +44,7 @@ class AuthService {
         if (data['isRegister']) {
 
           // User is already registered, navigate to home
+          await UserService.saveToken(data['token']);
           return {
             'userData': googleUser,
             'idToken': googleAuth.idToken,
@@ -82,6 +86,7 @@ class AuthService {
 
       if (user != null) {
         print("User signed in: ${user.displayName}");
+        await UserService.saveToken(accessToken);
         return {
           'userData': user,
           'idToken': accessToken,
@@ -139,4 +144,54 @@ class AuthService {
 
   // Auth state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  // Login with username and password
+  Future<Map<String, dynamic>> login(String username, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${HttpClient.baseUrl}/api/login'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "username": username,
+          "password": password,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      
+      if (response.statusCode == 200) {
+        // Save user ID and token
+        await UserService.saveUserId(data['user']['id'].toString());
+        await UserService.saveToken(data['token']);
+        
+        return {
+          'success': true,
+          'message': data['message'],
+          'user': data['user']
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Login failed'
+        };
+      }
+    } catch (e) {
+      debugPrint('Login error: $e');
+      return {
+        'success': false,
+        'message': 'Connection error: $e'
+      };
+    }
+  }
+
+  // Check if user is authenticated
+  Future<bool> isAuthenticated() async {
+    final token = await UserService.getToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  // Logout
+  Future<void> logout() async {
+    await UserService.logout();
+  }
 }
