@@ -31,12 +31,6 @@ class _LoginPageState extends State<LoginPage> {
     String username = usernameController.text.trim();
     String password = passwordController.text.trim();
 
-    // Request body
-    Map<String, dynamic> requestBody = {
-      "username": usernameController.text,
-      "password": passwordController.text,
-    };
-
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("โปรดกรอกชื่อบัญชีและรหัสผ่าน")),
@@ -45,22 +39,18 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2:5000/api/login'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(requestBody),
-      );
-
-      final data = jsonDecode(response.body);
-
-      if (response.statusCode == 200) {
+      final result = await _authService.login(username, password);
+      
+      if (!context.mounted) return;
+      
+      if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("เข้าสู่ระบบสำเร็จ!")),
         );
         context.go('/home'); // Navigate on success
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "เข้าสู่ระบบล้มเหลว")),
+          SnackBar(content: Text(result['message'])),
         );
       }
     } catch (e) {
@@ -210,12 +200,6 @@ class _LoginPageState extends State<LoginPage> {
                         onTap: () => socialSignIn(context, 'google'),
                         child: const SquareTile(
                             imagePath: 'assets/icon/Google.png'),
-                      ),
-                      SizedBox(width: 18), // Spacer
-                      GestureDetector(
-                        onTap: () => socialSignIn(context, 'facebook'),
-                        child: const SquareTile(
-                            imagePath: 'assets/icon/Facebook.png'),
                       ),
                     ],
                   ),
