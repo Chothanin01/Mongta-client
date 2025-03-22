@@ -1,22 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/pages/near_chart/near_chart_two.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:client/services/user_service.dart';
 
-// Class
 class NearChartOne extends StatefulWidget {
   const NearChartOne({super.key});
 
-// Collect selected line from dropdown
-@override
-_NearChartOneState createState() => _NearChartOneState();
+  @override
+  _NearChartOneState createState() => _NearChartOneState();
 }
 
 class _NearChartOneState extends State<NearChartOne> {
   String? selectedLine;
+  String userId = '';
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserId();
+  }
 
-// Start UI
-@override
+  Future<void> _loadUserId() async {
+    final id = await UserService.getCurrentUserId();
+    setState(() {
+      userId = id;
+    });
+  }
+
+  Future<void> saveSelectedLine(String line, int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_line_$index', line);
+    // Also save the user ID for API calls
+    await prefs.setString('near_chart_user_id', userId);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -27,7 +46,6 @@ class _NearChartOneState extends State<NearChartOne> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
             // Right Eye
             Container(
               width: screenWidth * 0.6,
@@ -37,7 +55,7 @@ class _NearChartOneState extends State<NearChartOne> {
                 boxShadow: [
                   BoxShadow(
                     color: MainTheme.black.withOpacity(0.2),
-                    offset: Offset(0, 4),
+                    offset: const Offset(0, 4),
                     blurRadius: 8,
                   ),
                 ],
@@ -46,7 +64,7 @@ class _NearChartOneState extends State<NearChartOne> {
                 children: [
                   Expanded(
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: MainTheme.nearchartSoftPink,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(20),
@@ -66,7 +84,7 @@ class _NearChartOneState extends State<NearChartOne> {
                   ),
                   Expanded(
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: MainTheme.nearchartWhite,
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(20),
@@ -93,7 +111,7 @@ class _NearChartOneState extends State<NearChartOne> {
             SizedBox(height: screenHeight * 0.02),
 
             // Near Chart Picture
-            Container(
+            SizedBox(
               width: 257,
               height: 557,
               child: FittedBox(
@@ -108,132 +126,129 @@ class _NearChartOneState extends State<NearChartOne> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
                 // Dropdown
-
                 Container(
-                width: screenWidth * 0.4,
-                height: screenHeight * 0.06,
-                decoration: BoxDecoration(
-                  color: MainTheme.nearchartPink,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: selectedLine,
-                    hint: Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                      'เลือกบรรทัด',
-                      style: TextStyle(
-                        color: MainTheme.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: screenWidth * 0.04,
-                        fontFamily: 'BaiJamjuree',
-                      ),
-                    ),
-                  ),
-                    selectedItemBuilder: (BuildContext context) {
-                      return List.generate(11, (index) {
-                        return Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            selectedLine ?? 'เลือกบรรทัด',
-                            style: TextStyle(
-                              color: MainTheme.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: screenWidth * 0.04,
-                              fontFamily: 'BaiJamjuree',
-
-                            ),
-                          ),
-                        );
-                      });
-                    },
-                    items: List.generate(11, (index) {
-                      return DropdownMenuItem(
-                        value: 'บรรทัดที่ ${index + 1}',
-                        child: Center(
-                          child: Text(
-                            'บรรทัดที่ ${index + 1}',
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.035,
-                              color: MainTheme.black,
-                              fontFamily: 'BaiJamjuree',
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      );
-                    }),
-                    onChanged: (value) {
-                      setState(() {
-                        selectedLine = value;
-                      });
-                    },
-                    isExpanded: true,
-                    icon: Icon(Icons.arrow_drop_down, color: MainTheme.black), // ใช้ default icon แทน
-                    dropdownColor: MainTheme.white,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-                      
-              SizedBox(width: screenWidth * 0.02),
-
-              // Confirm button
-              GestureDetector(
-                onTap: () {
-                  if (selectedLine == null) {
-                    // Not Selected line
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          "กรุณาเลือกบรรทัด",
-                          style: TextStyle(
-                            fontFamily: 'BaiJamjuree',
-                            color: MainTheme.white,
-                          ),
-                          ),
-                        backgroundColor: MainTheme.nearchartRed,
-                      ),
-                    );
-                  } else {
-                    // Selected line
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                      builder: (context) => const NearChartTwo(),
-                      ),
-                    );
-                    print('เลือกบรรทัด: $selectedLine');
-                  }
-                },
-                child: Container(
                   width: screenWidth * 0.4,
                   height: screenHeight * 0.06,
                   decoration: BoxDecoration(
-                    gradient: MainTheme.buttonNearChartBackground,
+                    color: MainTheme.nearchartPink,
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'ยืนยัน',
-                    style: TextStyle(
-                      color: MainTheme.white,
-                      fontSize: screenWidth * 0.04,
-                      fontFamily: 'BaiJamjuree',
-                      fontWeight: FontWeight.bold,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: selectedLine,
+                      hint: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          'เลือกบรรทัด',
+                          style: TextStyle(
+                            color: MainTheme.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: screenWidth * 0.04,
+                            fontFamily: 'BaiJamjuree',
+                          ),
+                        ),
+                      ),
+                      selectedItemBuilder: (BuildContext context) {
+                        return List.generate(11, (index) {
+                          return Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              selectedLine ?? 'เลือกบรรทัด',
+                              style: TextStyle(
+                                color: MainTheme.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: screenWidth * 0.04,
+                                fontFamily: 'BaiJamjuree',
+                              ),
+                            ),
+                          );
+                        });
+                      },
+                      items: List.generate(11, (index) {
+                        return DropdownMenuItem(
+                          value: 'บรรทัดที่ ${index + 1}',
+                          child: Center(
+                            child: Text(
+                              'บรรทัดที่ ${index + 1}',
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.035,
+                                color: MainTheme.black,
+                                fontFamily: 'BaiJamjuree',
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        );
+                      }),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedLine = value;
+                        });
+                      },
+                      isExpanded: true,
+                      icon: const Icon(Icons.arrow_drop_down, color: MainTheme.black),
+                      dropdownColor: MainTheme.white,
+                      borderRadius: BorderRadius.circular(15),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                      
+                SizedBox(width: screenWidth * 0.02),
+
+                // Confirm button
+                GestureDetector(
+                  onTap: () {
+                    if (selectedLine == null) {
+                      // Not Selected line
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "กรุณาเลือกบรรทัด",
+                            style: TextStyle(
+                              fontFamily: 'BaiJamjuree',
+                              color: MainTheme.white,
+                            ),
+                          ),
+                          backgroundColor: MainTheme.nearchartRed,
+                        ),
+                      );
+                    } else {
+                      saveSelectedLine(selectedLine!, 1); // 1 คือรอบที่ 1
+                      // Selected line
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NearChartTwo(),
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: screenWidth * 0.4,
+                    height: screenHeight * 0.06,
+                    decoration: BoxDecoration(
+                      gradient: MainTheme.buttonNearChartBackground,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      'ยืนยัน',
+                      style: TextStyle(
+                        color: MainTheme.white,
+                        fontSize: screenWidth * 0.04,
+                        fontFamily: 'BaiJamjuree',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
