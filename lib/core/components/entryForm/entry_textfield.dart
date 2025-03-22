@@ -20,6 +20,15 @@ class EntryTextField extends StatefulWidget {
   /// Icon to display inside the text field
   final String icon;
 
+  /// Optional helper text displayed below the text field
+  final String? helperText;
+
+  /// Determines whether to show the helper text
+  final bool showHelper;
+
+  /// Color for the helper text
+  final Color? helperTextColor;
+
   const EntryTextField({
     super.key,
     required this.controller,
@@ -27,6 +36,9 @@ class EntryTextField extends StatefulWidget {
     required this.label,
     required this.obscureText,
     required this.icon,
+    this.helperText,
+    this.showHelper = false,
+    this.helperTextColor,
   });
 
   @override
@@ -61,7 +73,6 @@ class _EntryTextFieldState extends State<EntryTextField> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-
       // Horizontal padding for alignment.
       padding: const EdgeInsets.symmetric(horizontal: 40.0), 
       child: Column(
@@ -100,7 +111,6 @@ class _EntryTextFieldState extends State<EntryTextField> {
               focusNode: _focusNode,
               obscureText: widget.obscureText,
               decoration: InputDecoration(
-
                 // Default border
                 enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: MainTheme.textfieldBorder), 
@@ -141,7 +151,23 @@ class _EntryTextFieldState extends State<EntryTextField> {
                 ),
               ),
             ),
-          )
+          ),
+          
+          // Add helper text if provided and should be shown
+          if (widget.showHelper && widget.helperText != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 4, top: 4),
+              child: Text(
+                widget.helperText!,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'BaiJamjuree',
+                  fontWeight: FontWeight.w400,
+                  color: widget.helperTextColor ?? MainTheme.placeholderText, // Use provided color or default
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -19,7 +19,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     '/home',
     '/map',
     '/tutorial-category',
-    '/chat',
+    '/chat-history',
     '/settings',
   ];
 
