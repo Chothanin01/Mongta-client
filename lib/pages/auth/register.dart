@@ -14,6 +14,10 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+// Add these imports
+import 'package:client/services/api_service.dart';
+import 'package:client/pages/auth/otp/email/verify_email_otp.dart'; // Create this file
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -37,8 +41,82 @@ class _RegisterPageState extends State<RegisterPage> {
 
   bool isChecked = false;
   bool showWarning = false;
+  bool _showPhoneHelper = true;
 
   int currentPage = 0;
+
+  // Add these variables
+  bool _isLoading = false;
+  String? _otpRef;
+  String? _errorMessage;
+
+  // Add these to your _RegisterPageState class
+  String? _phoneHelperText; // New variable for dynamic helper text
+  Color? _phoneHelperColor; // Add a color variable
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Add phone number validation listener
+    numberController.addListener(_validatePhoneNumber);
+    
+    // Set initial helper text
+    _phoneHelperText = 'กรุณากรอกในรูปแบบ 06-XXXX-XXXX, 08-XXXX-XXXX หรือ 09-XXXX-XXXX';
+  }
+
+  @override
+  void dispose() {
+    // Remove the listener when disposing
+    numberController.removeListener(_validatePhoneNumber);
+    super.dispose();
+  }
+
+  // Validate Thai phone number format
+  void _validatePhoneNumber() {
+    final value = numberController.text;
+    
+    // Skip validation when empty
+    if (value.isEmpty) {
+      setState(() {
+        _phoneHelperText = 'กรุณากรอกในรูปแบบ 06-XXXX-XXXX, 08-XXXX-XXXX หรือ 09-XXXX-XXXX';
+        _showPhoneHelper = true;
+        _phoneHelperColor = MainTheme.placeholderText; // Default color
+      });
+      return;
+    }
+    
+    // Clean the phone number for validation
+    final cleanNumber = value.replaceAll(RegExp(r'\D'), '');
+    
+    // Check if the number starts with a valid Thai prefix
+    bool hasValidPrefix = cleanNumber.startsWith('06') || 
+                          cleanNumber.startsWith('08') || 
+                          cleanNumber.startsWith('09');
+                         
+    // Check if the number has correct length
+    bool hasCorrectLength = cleanNumber.length == 10;
+    
+    setState(() {
+      if (!hasValidPrefix && cleanNumber.length >= 2) {
+        _phoneHelperText = 'เบอร์โทรศัพท์ต้องขึ้นต้นด้วย 06, 08 หรือ 09';
+        _showPhoneHelper = true;
+        _phoneHelperColor = MainTheme.redWarning; // Red for error
+      } else if (!hasCorrectLength && cleanNumber.length > 0) {
+        _phoneHelperText = 'เบอร์โทรศัพท์ต้องมี 10 หลัก (ปัจจุบัน ${cleanNumber.length} หลัก)';
+        _showPhoneHelper = true;
+        _phoneHelperColor = MainTheme.redWarning; // Red for error
+      } else if (hasValidPrefix && hasCorrectLength) {
+        _phoneHelperText = 'รูปแบบเบอร์โทรศัพท์ถูกต้อง';
+        _showPhoneHelper = true;
+        _phoneHelperColor = Colors.green; // Green for success
+      } else {
+        _phoneHelperText = 'กรุณากรอกในรูปแบบ 06-XXXX-XXXX, 08-XXXX-XXXX หรือ 09-XXXX-XXXX';
+        _showPhoneHelper = true;
+        _phoneHelperColor = MainTheme.placeholderText; // Default color
+      }
+    });
+  }
 
   void nextPage(context) {
     _pageController.nextPage(
@@ -50,126 +128,159 @@ class _RegisterPageState extends State<RegisterPage> {
         duration: Duration(milliseconds: 300), curve: Curves.ease);
   }
 
-  void signUp(BuildContext context) async {
+  // Update the signUp method in your _RegisterPageState class
 
-    // Check if passwords match
-  if (passwordController.text != passwordConfirmController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง',
-            style: TextStyle(
-              fontFamily: 'BaiJamjuree',
-              fontSize: 14,
-            ),
-          ),
-          backgroundColor: MainTheme.redWarning,
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
-
-    if (!isChecked) {
-      setState(() {
-        showWarning = true;
-      });
-
-      // Show snackbar with warning
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'กรุณายอมรับเงื่อนไขและข้อตกลงการให้บริการก่อนดำเนินการต่อ',
-            style: TextStyle(
-              fontFamily: 'BaiJamjuree',
-              fontSize: 14,
-            ),
-          ),
-          backgroundColor: MainTheme.redWarning,
-          duration: Duration(seconds: 3),
-        ),
-      );
-      return;
-    }
+void signUp(BuildContext context) async {
+  // Add phone validation at the top of the method
+  final phoneNumber = numberController.text.replaceAll(RegExp(r'\D'), '');
+  bool isValidPhone = false;
   
-  if (!isChecked) {
-    setState(() {
-      showWarning = true;
-    });
-
-    // Show snackbar with warning
+  if (phoneNumber.length == 10 && 
+      (phoneNumber.startsWith('06') || 
+       phoneNumber.startsWith('08') || 
+       phoneNumber.startsWith('09'))) {
+    isValidPhone = true;
+  }
+  
+  if (!isValidPhone) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'กรุณายอมรับเงื่อนไขและข้อตกลงการให้บริการก่อนดำเนินการต่อ',
-          style: TextStyle(
-            fontFamily: 'BaiJamjuree',
-            fontSize: 14,
-          ),
-        ),
+      const SnackBar(
+        content: Text('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอกเบอร์โทรศัพท์ที่ขึ้นต้นด้วย 06, 08 หรือ 09 และมี 10 หลัก'),
         backgroundColor: MainTheme.redWarning,
-        duration: Duration(seconds: 3),
+      ),
+    );
+    return;
+  }
+  
+  // Input validation
+  if (passwordController.text != passwordConfirmController.text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง'),
+        backgroundColor: MainTheme.redWarning,
       ),
     );
     return;
   }
 
+  if (!isChecked) {
+    setState(() {
+      showWarning = true;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('กรุณายอมรับเงื่อนไขและข้อตกลงการให้บริการก่อนดำเนินการต่อ'),
+        backgroundColor: MainTheme.redWarning,
+      ),
+    );
+    return;
+  }
+
+  // Show loading state
   setState(() {
+    _isLoading = true;
     showWarning = false;
+    _errorMessage = null;
   });
 
-  // API URL
-  const String apiUrl = "http://10.0.2.2:5000/api/register";
-
-  // Request body
-  Map<String, dynamic> requestBody = {
-    "username": usernameController.text,
-    "password": passwordController.text,
-    "confirm_password": passwordConfirmController.text,
-    "phonenumber": numberController.text,
-    "email": emailController.text,
-    "first_name": firstNameController.text,
-    "last_name": lastNameController.text,
-    "dob": dateController.text,
-    "sex": genderController.text
-  };
-
   try {
-    var response = await http.post(
-      Uri.parse(apiUrl),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(requestBody),
-    );
-
-    if (response.statusCode == 201) {
-      // Success: Navigate to home page
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("สมัครสมาชิกสำเร็จ!"),
-          backgroundColor: MainTheme.greenComplete,
-        ),
-      );
-      context.go('/home');
+    // Step 1: Collect user data for registration
+    final Map<String, String> userData = {
+      'username': usernameController.text,
+      'password': passwordController.text,
+      'phonenumber': numberController.text,
+      'email': emailController.text,
+      'first_name': firstNameController.text,
+      'last_name': lastNameController.text,
+      'sex': genderController.text,
+      'dob': dateController.text,
+    };
+    
+    // Step 2: Request OTP
+    final otpResponse = await ApiService.requestEmailOTP(emailController.text);
+    
+    setState(() {
+      _isLoading = false;
+    });
+    
+    if (otpResponse['success'] == true) {
+      // Navigate to OTP verification using consistent GoRouter navigation
+      if (context.mounted) {
+        context.push('/verify_otp', extra: {
+          'email': emailController.text,
+          'ref': otpResponse['Ref'],
+          'userData': userData,
+        });
+      }
     } else {
-      // Error: Show error message
-      Map<String, dynamic> responseData = jsonDecode(response.body);
+      setState(() {
+        _errorMessage = otpResponse['message'] ?? 'ไม่สามารถส่ง OTP ได้';
+      });
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(responseData["message"] ?? "สมัครสมาชิกไม่สำเร็จ"),
+          content: Text(_errorMessage!),
           backgroundColor: MainTheme.redWarning,
         ),
       );
     }
-  } catch (error) {
-    // Handle network errors
+  } catch (e) {
+    setState(() {
+      _isLoading = false;
+      _errorMessage = 'เกิดข้อผิดพลาด: $e';
+    });
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("เกิดข้อผิดพลาด กรุณาลองอีกครั้ง"),
+        content: Text('เกิดข้อผิดพลาด: $e'),
         backgroundColor: MainTheme.redWarning,
       ),
     );
   }
 }
+
+  void _showVerificationPrompt(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('สมัครสมาชิกสำเร็จ!'),
+        content: const Text(
+          'คุณต้องการยืนยันอีเมลของคุณเลยหรือไม่?\n'
+          'คุณสามารถทำภายหลังได้จากหน้าโปรไฟล์',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.go('/login'); // Navigate to login
+            },
+            child: const Text('ทำภายหลัง'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // Navigate to OTP verification with email and reference
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => VerifyOtpPage(
+                    params: {
+                      'email': emailController.text,
+                      'ref': _otpRef!,
+                    },
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: MainTheme.blueText,
+            ),
+            child: const Text('ยืนยันเลย'),
+          ),
+        ],
+      ),
+    );
+  }
 
   void backToLogin(BuildContext context) {
     // Placeholder for sign-in logic
@@ -255,6 +366,9 @@ class _RegisterPageState extends State<RegisterPage> {
                     hintText: 'เบอร์โทรศัพท์',
                     obscureText: false,
                     icon: Bxs.phone,
+                    helperText: _phoneHelperText,
+                    showHelper: _showPhoneHelper,
+                    helperTextColor: _phoneHelperColor, // Add this line
                   ),
 
                   const SizedBox(height: 15), // Spacer
@@ -319,14 +433,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       // Google sign-in button
                       SquareTile(imagePath: 'assets/icon/Google.png'),
 
-                      SizedBox(width: 18), // Spacer
-
-                      // Facebook sign-in button
-                      SquareTile(imagePath: 'assets/icon/Facebook.png'),
                     ],
                   ),
 
-                  const SizedBox(height: 30), // Spacer
+                  const SizedBox(height: 15), // Spacer
 
                   // แยก "หากยังไม่มีบัญชี" และ "สมัครสมาชิก" เพื่อมารวมกัน
                   RichText(
@@ -586,14 +696,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       // Google sign-in button
                       SquareTile(imagePath: 'assets/icon/Google.png'),
 
-                      SizedBox(width: 18), // Spacer
-
-                      // Facebook sign-in button
-                      SquareTile(imagePath: 'assets/icon/Facebook.png'),
                     ],
                   ),
 
-                  const SizedBox(height: 30), // Spacer
+                  const SizedBox(height: 22), // Spacer
 
                   // แยก "หากยังไม่มีบัญชี" และ "สมัครสมาชิก" เพื่อมารวมกัน
                   RichText(
