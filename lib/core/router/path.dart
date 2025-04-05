@@ -1,6 +1,7 @@
 class Path {
   // Home section
   static const String homePage = '/home';
+  static const String homeOphtPage = '/home-opht';
 
   // Entry section
   static const String landingPage = '/landing';
@@ -19,6 +20,7 @@ class Path {
   static const String chatHistoryPage = '/chat-history';
   static const String chatScreenPage = '/chat';
   static const String settingPage = '/settings';
+  static const String settingOphtPage = '/settings-opht';
   static const String scanPage = '/scan';
 
   static const String chooseTutorial = '/tutorial-category';
@@ -34,4 +36,7 @@ class Path {
   static const String completeOtpPage = '/complete-otp';
 
   static const String scanlogPage = '/scanlog';
+
+  static const String editProfilePage = '/edit-profile';
+
 }
