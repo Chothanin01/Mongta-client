@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:client/core/theme/theme.dart';
 
 class MessageCard extends StatefulWidget {
   const MessageCard({super.key});
@@ -181,7 +182,6 @@ Widget _whiteMessage(String text, String time, double screenWidth) {
             ),
           ),
         ),
-        SizedBox(height: 3),
         Padding(
           padding: EdgeInsets.only(left: 10),
           child: Text(
