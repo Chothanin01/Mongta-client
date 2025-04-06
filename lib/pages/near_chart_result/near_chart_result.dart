@@ -5,6 +5,8 @@ import 'package:client/services/http_client.dart';
 import 'package:client/services/user_service.dart';
 import 'package:client/core/router/path.dart';
 import 'package:go_router/go_router.dart';
+import 'package:client/services/tutorial_preferences.dart';
+
 
 class EyeTestResultsScreen extends StatefulWidget {
   const EyeTestResultsScreen({Key? key}) : super(key: key);
@@ -140,7 +142,6 @@ class _EyeTestResultsScreenState extends State<EyeTestResultsScreen> {
   }
 }
 
-// Add this method to save results to SharedPreferences
 Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
   try {
     final prefs = await SharedPreferences.getInstance();
@@ -333,10 +334,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
         ),
       ),
       child: ElevatedButton(
-        onPressed: () {
-          // Use GoRouter instead of Navigator.pushReplacementNamed
-          context.go(Path.scanTutorial);
-        },
+        onPressed: _onFinishedPressed, // Change to call new method instead of direct navigation
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
@@ -356,5 +354,15 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
         ),
       ),
     );
+  }
+
+  void _onFinishedPressed() async {
+    final hasViewedScanTutorial = await TutorialPreferences.hasViewedScanTutorial();
+    
+    if (hasViewedScanTutorial) {
+      context.go('/scan'); 
+    } else {
+      context.go('/scan-tutorial');
+    }
   }
 }
