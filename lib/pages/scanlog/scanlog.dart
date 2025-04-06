@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:client/services/user_service.dart';
 import 'package:client/services/http_client.dart';
-import 'package:client/core/theme/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
 
