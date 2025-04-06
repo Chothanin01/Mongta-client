@@ -19,7 +19,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     '/home',
     '/map',
     '/tutorial-category',
-    '/chat-history',
+    '/chat',
     '/settings',
   ];
 
@@ -85,10 +85,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
         iconDurationMillSec: 0,
         activeIndex: _tabIndex,
         onTap: (index) {
+          if (index == 1) { // Map index
+            context.push(routes[index]);
+          } else {
+            context.go(routes[index]);
+          }
           setState(() {
             _tabIndex = index;
           });
-          context.go(routes[_tabIndex]);
         },
       ),
       body: widget.child,
