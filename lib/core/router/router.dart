@@ -4,7 +4,6 @@ import 'package:client/core/router/path.dart';
 
 import 'package:client/pages/landing/landing.dart';
 
-// Import auth section
 import 'package:client/pages/auth/login.dart';
 import 'package:client/pages/auth/register.dart';
 import 'package:client/pages/auth/ggfb_register.dart';
@@ -12,9 +11,6 @@ import 'package:client/pages/auth/otp/complete_otp.dart';
 
 import 'package:client/pages/map/map.dart';
 import 'package:client/pages/home/home.dart';
-import 'package:client/pages/chat/chat_history.dart';
-import 'package:client/pages/chat/chat_screen.dart';
-// import 'package:client/pages/scan/scan.dart';
 import 'package:client/pages/near_chart/near_chart_one.dart';
 import 'package:client/pages/near_chart/near_chart_two.dart';
 import 'package:client/pages/near_chart/near_chart_three.dart';
@@ -22,10 +18,14 @@ import 'package:client/pages/near_chart/near_chart_four.dart';
 import 'package:client/pages/misc/setting/setting.dart';
 import 'package:client/core/components/navbar.dart';
 
-// import tutorial section
 import 'package:client/pages/tutorial/first_time_choose_tutorial.dart';
 import 'package:client/pages/tutorial/nearchart_tutorial.dart';
 import 'package:client/pages/tutorial/scan_tutorial.dart';
+
+import 'package:client/pages/tutorial/option_choose_tutorial.dart';
+import 'package:client/pages/tutorial/manual_nearchart_tutorial.dart';
+import 'package:client/pages/tutorial/manual_scan_tutorial.dart';
+
 import 'package:client/pages/auth/otp/email/verify_email_otp.dart';
 
 import 'package:client/pages/scan/scan_coordinator.dart';
@@ -42,12 +42,20 @@ import 'package:client/pages/misc/change-password/change_password_OTP.dart';
 import 'package:client/pages/misc/change-password/change_password_mail.dart';
 import 'package:client/pages/misc/change-password/complete_change_password.dart';
 
-// Add these imports at the top of router.dart
 import 'package:client/pages/homeopht/homeopht.dart';
 import 'package:client/pages/misc/settingopht/settingopht.dart';
 
-// Add to the import section in router.dart
 import 'package:client/pages/change_profile/change_profile.dart';
+
+import 'package:client/pages/chat/chat_navigator.dart';
+import 'package:client/pages/chat/user/chat_empty_view.dart';
+import 'package:client/pages/chat/user/chat_user_history.dart';
+import 'package:client/pages/chat/user/chat_user_screen.dart';
+import 'package:client/pages/chat/user/chat_search.dart';
+import 'package:client/pages/chat/ophth/chat_ophth_history.dart';
+import 'package:client/pages/chat/ophth/chat_ophth_screen.dart';
+
+import 'package:client/services/tutorial_preferences.dart';
 
 // Create a function that returns a GoRouter with the given initial location
 GoRouter createRouter({String initialLocation = '/login'}) {
@@ -75,8 +83,51 @@ GoRouter createRouter({String initialLocation = '/login'}) {
 
       // Chat Page Route
       GoRoute(
-        path: Path.chatScreenPage,
-        builder: (context, state) => ChatScreen(),
+        path: Path.chatEntryPage,
+        redirect: AuthGuard.requireAuth,
+        builder: (context, state) => const ChatNavigator(),
+      ),
+
+      GoRoute(
+        path: Path.chatHistoryPage,
+        redirect: AuthGuard.requireAuth,
+        builder: (context, state) => const ChatUserHistory(),
+      ),
+
+      GoRoute(
+        path: Path.chatEmptyPage,
+        redirect: AuthGuard.requireAuth,
+        builder: (context, state) => const ChatEmptyView(),
+      ),
+
+      GoRoute(
+        path: Path.chatSearchPage,
+        redirect: AuthGuard.requireAuth,
+        builder: (context, state) => const ChatSearch(),
+      ),
+
+      GoRoute(
+        path: Path.chatOphthHistoryPage,
+        redirect: AuthGuard.requireAuth,
+        builder: (context, state) => const ChatOphthHistory(),
+      ),
+
+      GoRoute(
+        path: '${Path.chatUserScreenPage}/:conversationId',
+        redirect: AuthGuard.requireAuth,
+        builder: (context, state) {
+          final conversationId = int.parse(state.pathParameters['conversationId']!);
+          return ChatUserScreen(conversationId: conversationId);
+        },
+      ),
+
+      GoRoute(
+        path: '${Path.chatOphthScreenPage}/:conversationId',
+        redirect: AuthGuard.requireAuth,
+        builder: (context, state) {
+          final conversationId = int.parse(state.pathParameters['conversationId']!);
+          return ChatOphthScreen(conversationId: conversationId);
+        },
       ),
 
       // Scan Page Route
@@ -167,7 +218,6 @@ GoRouter createRouter({String initialLocation = '/login'}) {
         builder: (context, state) => const OphtSettingsPage(),
       ),
 
-      // Add inside routes array in createRouter() function
       GoRoute(
         path: Path.editProfilePage,
         redirect: AuthGuard.requireAuth, // Ensure authentication
@@ -188,11 +238,6 @@ GoRouter createRouter({String initialLocation = '/login'}) {
           ),
 
           GoRoute(
-            path: Path.chatHistoryPage,
-            builder: (context, state) => ChatHistory(),
-          ),
-
-          GoRoute(
             path: Path.settingPage,
             builder: (context, state) => SettingsPage(),
           ),
@@ -207,11 +252,39 @@ GoRouter createRouter({String initialLocation = '/login'}) {
       GoRoute(
         path: Path.nearChartTutorial,
         builder: (context, state) => NearChartTutorial(),
+        redirect: (context, state) async {
+          if (await TutorialPreferences.hasViewedNearChartTutorial()) {
+            return '/near_chart_one'; // Skip to the actual chart
+          }
+          return null;
+        },
       ),
       GoRoute(
         path: Path.scanTutorial,
         builder: (context, state) => ScanTutorial(),
+        redirect: (context, state) async {
+          if (await TutorialPreferences.hasViewedScanTutorial()) {
+            return '/scan'; // Skip to the actual scan
+          }
+          return null;
+        },
       ),
+
+      // Manual Tutorial routes
+      GoRoute(
+        path: Path.manualTutorialSelection,
+        builder: (context, state) => ManualTutorialSelection(),
+      ),
+      GoRoute(
+        path: Path.manualNearChartTutorial,
+        builder: (context, state) => ManualNearChartTutorial(),
+      ),
+      GoRoute(
+        path: Path.manualScanTutorial,
+        builder: (context, state) => ManualScanTutorial(),
+      ),
+    
+
       GoRoute(
         path: Path.nearchartonePage,
         builder: (context, state) => NearChartOne(),
