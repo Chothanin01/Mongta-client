@@ -1,7 +1,7 @@
+import 'package:client/pages/chat/user/chat_user_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/pages/chat/user/chat_empty_view.dart';
-import 'package:client/pages/chat/old/chat_screen_client.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -63,7 +63,7 @@ void _searchOphth() async {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>  ChatScreenClient (chatSession: chatSession),
+            builder: (context) =>  ChatUserScreen (),
           ),
         );
       } else {
@@ -206,40 +206,27 @@ void _searchOphth() async {
   }
   
 
-  Widget _buildRoundedBox(BuildContext context, String text) {
-    double screenWidth = MediaQuery.of(context).size.width;
+  Widget _buildRoundedBox(BuildContext context, String imageUrl) {
+    double boxSize = MediaQuery.of(context).size.width * 0.18;
 
-    return Container(
-      width: screenWidth * 0.2,
-      padding: EdgeInsets.all(screenWidth * 0.05),
-      decoration: BoxDecoration(
-        color: MainTheme.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: MainTheme.chatGrey,
-          width: 1,
-        )
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: screenWidth * 0.05,
-            fontWeight: FontWeight.bold,
-            color: MainTheme.chatBlue,
-            fontFamily: 'BaiJamjuree',
-          ),
-        ),
-      ),
-    );
-  }
+    return ClipRRect(
+    borderRadius: BorderRadius.circular(20),
+    child: Image.network(
+      imageUrl,
+      width: boxSize,
+      height: boxSize,
+      fit: BoxFit.cover,
+    ),
+  );
+}
 
   Widget _buildBlueBox(BuildContext context, String text) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    double boxWidth = MediaQuery.of(context).size.width * 0.55;
+    double boxHeight = MediaQuery.of(context).size.width * 0.18;
 
     return Container(
-      width: screenWidth * 0.6,
-      padding: EdgeInsets.all(screenWidth * 0.05),
+      width: boxWidth,
+      height: boxHeight,
       decoration: BoxDecoration(
         color: MainTheme.chatBlue,
         borderRadius: BorderRadius.circular(20),
@@ -248,9 +235,10 @@ void _searchOphth() async {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: screenWidth * 0.045,
+            fontSize: 16,
             color: MainTheme.white,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -301,7 +289,6 @@ void _searchOphth() async {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return GestureDetector(
-      // onTap: () => _showPopup(context),
       child: Container(
         width: screenWidth * 0.7,
         height: screenWidth * 0.14,

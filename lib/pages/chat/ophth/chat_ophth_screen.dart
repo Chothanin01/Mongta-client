@@ -1,9 +1,11 @@
+import 'package:client/core/theme/theme.dart';
+import 'package:client/widgets/ophth/navbar_ophth.dart';
 import 'package:flutter/material.dart';
 import 'package:client/widgets/chat_input.dart';
 import 'package:client/widgets/message_card.dart';
-import 'package:client/pages/chat/ophth/chat_ophth_history.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -29,14 +31,17 @@ class ChatOphthScreen extends StatefulWidget {
 class _ChatOphthScreenState extends State<ChatOphthScreen> {
   final GlobalKey<MessageCardState> _messageCardKey = GlobalKey<MessageCardState>();
 
+   @override
+  void initState() {
+    super.initState();
+    fetchAndSaveConversationId();
+  }
+
 @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        flexibleSpace: _appBar(),
-      ),
+      backgroundColor: MainTheme.mainBackground,
+      appBar: ChatAppBarOphth(),
       body: Column(
         children: [
           Expanded(child: MessageCard(key: _messageCardKey)), 
@@ -50,20 +55,28 @@ class _ChatOphthScreenState extends State<ChatOphthScreen> {
     );
   }
 
-  Future<Map<String, dynamic>> fetchProfileData() async {
+Future<void> fetchAndSaveConversationId() async {
   final url = Uri.parse('http://localhost:5000/api/chat/186265273/1960006314');
+
   try {
     final response = await http.get(url);
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      // เก็บข้อมูลของ profile และ id
-      return data['profile'][0]['User_Conversation_user_idToUser'];
+
+      // get conversation_id from chatlog
+      final conversationId = data['chatlog'][0]['conversation_id'];
+
+      // SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('conversation_id', conversationId);
+
+      print("saved conversation_id: $conversationId");
     } else {
-      throw Exception('Failed to load profile');
+      throw Exception('โหลดข้อมูลไม่สำเร็จ: ${response.statusCode}');
     }
   } catch (e) {
-    print('Error fetching profile data: $e');
-    throw e;
+    print('เกิดข้อผิดพลาด: $e');
   }
 }
 

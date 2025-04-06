@@ -1,7 +1,8 @@
+import 'package:client/pages/chat/user/chat_search.dart';
+import 'package:client/widgets/user/chat_user_card.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:client/widgets/user/chat_user_card.dart';
 import 'package:client/core/theme/theme.dart';
 
 void main() {
@@ -80,21 +81,14 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
                 ),
               ),
               SizedBox(height: 20),
-
-              Expanded(
-                child: ListView.builder(
-                  itemCount: 2,
-                  physics: const BouncingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return ChatUserCard();
-                  }, 
-                )
-              )
-               ],
+              _buildSearchRow(),
+              SizedBox(height: 20),
+              ChatUserCard(),
+            ]   
           ),
         ),
-        ),
-      );
+      ),
+    );
   }
 
   
@@ -128,7 +122,7 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
           text,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white,
+            color: MainTheme.white,
           ),
           textAlign: TextAlign.center,
         ),
@@ -136,4 +130,36 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
     );
   }
 
+   Widget _buildSearchRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          'ค้นหาจักษุแพทย์ ',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: MainTheme.black,
+            fontFamily: 'BaiJamjuree'),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => ChatSearch()),
+              );
+          print("ค้นหาจักษุแพทย์");
+          },
+          child: Text(
+            'กดตรงนี้เลย',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'BaiJamjuree',
+              color: MainTheme.chatBlue),
+          ),
+        ),
+      ],
+    );
+  }
 }

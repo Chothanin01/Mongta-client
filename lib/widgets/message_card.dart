@@ -12,7 +12,7 @@ class MessageCard extends StatefulWidget {
 
 class MessageCardState extends State<MessageCard> {
   List<dynamic> _chatLog = [];
-  final int userId = 1960006314; // User Id
+  final int userId = 4; // User Id
   bool _isLoading = true;
 
   @override
@@ -38,17 +38,27 @@ class MessageCardState extends State<MessageCard> {
       print('Error fetching chat data: $e');
     }
   }
-  
-  // โหลดข้อความใหม่หลังกดปุ่มส่งข้อความ
 
   void refreshMessages() {
     fetchChatData();
   }
 
   String _formatDate(String timestamp) {
-    final date = DateTime.parse(timestamp);
-    return "${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}";
+    try {
+      final date = DateTime.parse(timestamp);
+      final thaiYear = date.year + 543;
+      const thaiMonths = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+      ];
+      final day = date.day;
+      final month = thaiMonths[date.month - 1];
+      return 'วันที่ $day $month พ.ศ. $thaiYear';
+    }
+    catch (e) {
+    return 'รูปแบบวันที่ไม่ถูกต้อง';
   }
+}
 
   String _formatTime(String timestamp) {
     final date = DateTime.parse(timestamp);
@@ -97,24 +107,27 @@ class MessageCardState extends State<MessageCard> {
 
   // Date
   Widget _dateMessage(String dateMessage, double screenWidth) {
-  return Container(
-          width: screenWidth * 0.1,
-          height: 30,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: Colors.grey,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            dateMessage,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.black,
-              fontFamily: 'BaiJamjuree',
-            ),
-          ),
-        );
-  }
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 50),
+    child: Container(
+      width: screenWidth * 0.1,
+      height: 30,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: MainTheme.chatInfo,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        dateMessage,
+        style: TextStyle(
+          fontSize: 14,
+          color: MainTheme.black,
+          fontFamily: 'BaiJamjuree',
+        ),
+      ),
+    ),
+  );
+}
 
   //sender message
   Widget _pinkMessage(String text, String time, double screenWidth) {
@@ -128,26 +141,25 @@ class MessageCardState extends State<MessageCard> {
             margin: EdgeInsets.symmetric(vertical: 5),
           padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.pink,
+            color: MainTheme.chatPink,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
             text,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.black,
+              color: MainTheme.black,
               fontFamily: 'BaiJamjuree',
             ),
           ),
         ),
-        SizedBox(height: 3),
         Padding(
           padding: EdgeInsets.only(right: 10),
           child: Text(
             time,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: MainTheme.chatGrey,
               fontFamily: 'BaiJamjuree',
             ),
           ),
@@ -158,10 +170,10 @@ class MessageCardState extends State<MessageCard> {
 }
   
   // reciever message
-Widget _whiteMessage(String text, String time, double screenWidth) {
-  return Align(
-    alignment: Alignment.centerLeft,
-    child: Column(
+  Widget _whiteMessage(String text, String time, double screenWidth) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
@@ -169,15 +181,15 @@ Widget _whiteMessage(String text, String time, double screenWidth) {
           margin: EdgeInsets.symmetric(vertical: 5),
           padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.pink),
+            color: MainTheme.chatWhite,
+            border: Border.all(color: MainTheme.chatPink),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
             text,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.black,
+              color: MainTheme.black,
               fontFamily: 'BaiJamjuree',
             ),
           ),
@@ -188,7 +200,7 @@ Widget _whiteMessage(String text, String time, double screenWidth) {
             time,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: MainTheme.chatGrey,
               fontFamily: 'BaiJamjuree',
             ),
           ),

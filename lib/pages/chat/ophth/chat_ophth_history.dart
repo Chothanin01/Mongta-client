@@ -79,22 +79,13 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
                 ),
               ),
               SizedBox(height: 20),
-
-              Expanded(
-                child: ListView.builder(
-                  itemCount: 2,
-                  physics: const BouncingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return ChatOphthCard();
-                  }, 
-                )
-              )
+              ChatOphthCard(),
                ],
+            ),
           ),
         ),
-        ),
       );
-  }
+    }
 
   
   Widget _buildRoundedBox(BuildContext context, String imageUrl) {

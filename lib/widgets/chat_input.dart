@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http_parser/http_parser.dart'; 
 import 'dart:io'; 
+import 'package:client/core/theme/theme.dart';
 
 class ChatInput extends StatefulWidget {
   final VoidCallback onMessageSent;
@@ -19,7 +20,7 @@ class _ChatInputState extends State<ChatInput> {
   bool _isButtonEnabled = false; // On-Off send button
   bool _showEmoji = false; // Emoji keyboard
   XFile? _selectedImage;
-
+  
   @override
   void initState() {
     super.initState();
@@ -135,7 +136,7 @@ class _ChatInputState extends State<ChatInput> {
             IconButton(
               onPressed: _toggleEmojiKeyboard, // เปิด/ปิด แป้นพิมพ์ Emoji
               icon: const Icon(Icons.emoji_emotions,
-              color: Colors.blueAccent, size: 26)),
+              color: MainTheme.chatBlue, size: 26)),
 
             // TextField
             Expanded(
@@ -166,7 +167,7 @@ class _ChatInputState extends State<ChatInput> {
                 }
               },
               icon: const Icon(Icons.image,
-              color: Colors.blueAccent, size: 26)),
+              color: MainTheme.chatBlue, size: 26)),
 
             // Camera Button (Take Photo)
             IconButton(
@@ -180,11 +181,13 @@ class _ChatInputState extends State<ChatInput> {
                 }
               },
               icon: const Icon(Icons.camera_alt_rounded,
-              color: Colors.blueAccent, size: 26)),
+              color: MainTheme.chatBlue, size: 26)),
             ],
           ),
           ),
         ),
+
+        SizedBox(height: 3),
 
         // Send Button
         MaterialButton(
@@ -194,9 +197,14 @@ class _ChatInputState extends State<ChatInput> {
           minWidth: 0,
           padding: const EdgeInsets.only(top: 10, bottom: 10, right: 10, left: 10),
           shape: const CircleBorder(),
-          color: _isButtonEnabled ? Colors.green : Colors.grey, // ปรับสีของปุ่ม
-          child: Icon(Icons.send, color: Colors.white, size: 28),
-        )
+          color: _isButtonEnabled ? MainTheme.chatBlue : MainTheme.chatDivider,
+          child: Center(
+            child: Icon(
+            Icons.send,
+            color: MainTheme.chatWhite,
+            size: 20,),
+          ),
+        ),
       ],
     ),
     );

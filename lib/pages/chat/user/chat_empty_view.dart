@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
-import 'package:client/pages/chat/old/chat_search.dart';
+import 'package:client/pages/chat/user/chat_search.dart';
 
 void main() {
   runApp(MyApp());
@@ -50,40 +50,27 @@ class ChatEmptyView extends StatelessWidget {
     );
   }
 
-  Widget _buildRoundedBox(BuildContext context, String text) {
-    double screenWidth = MediaQuery.of(context).size.width;
+  Widget _buildRoundedBox(BuildContext context, String imageUrl) {
+    double boxSize = MediaQuery.of(context).size.width * 0.18;
 
-    return Container(
-      width: screenWidth * 0.2,
-      padding: EdgeInsets.all(screenWidth * 0.05),
-      decoration: BoxDecoration(
-        color: MainTheme.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: MainTheme.chatGrey,
-          width: 1,
-        )
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: screenWidth * 0.05,
-            fontWeight: FontWeight.bold,
-            color: MainTheme.chatBlue,
-            fontFamily: 'BaiJamjuree',
-          ),
-        ),
-      ),
-    );
-  }
+    return ClipRRect(
+    borderRadius: BorderRadius.circular(20),
+    child: Image.network(
+      imageUrl,
+      width: boxSize,
+      height: boxSize,
+      fit: BoxFit.cover,
+    ),
+  );
+}
 
   Widget _buildBlueBox(BuildContext context, String text) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    double boxWidth = MediaQuery.of(context).size.width * 0.55;
+    double boxHeight = MediaQuery.of(context).size.width * 0.18;
 
     return Container(
-      width: screenWidth * 0.6,
-      padding: EdgeInsets.all(screenWidth * 0.055),
+      width: boxWidth,
+      height: boxHeight,
       decoration: BoxDecoration(
         color: MainTheme.chatBlue,
         borderRadius: BorderRadius.circular(20),
@@ -92,22 +79,24 @@ class ChatEmptyView extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: screenWidth * 0.045,
+            fontSize: 16,
             color: MainTheme.white,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     );
   }
-}
-
-Widget _buildWhiteBox(BuildContext context) {
+  
+  Widget _buildWhiteBox(BuildContext context) {
   double screenWidth = MediaQuery.of(context).size.width;
   double screenHeight = MediaQuery.of(context).size.height;
 
   return Container(
     width: screenWidth * 0.85,
-    height: screenHeight * 0.5,
+    constraints: BoxConstraints(
+      maxHeight: screenHeight * 0.7,
+    ),
     decoration: BoxDecoration(
       color: MainTheme.white,
       borderRadius: BorderRadius.circular(20),
@@ -119,62 +108,61 @@ Widget _buildWhiteBox(BuildContext context) {
         ),
       ],
     ),
-    child: Center(
-    child: SingleChildScrollView(  
-        child: Column(
-          mainAxisSize: MainAxisSize.min, 
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: screenWidth * 0.5,
-              height: screenWidth * 0.5,
-              child: Image.asset('assets/images/chat.png'),
+    child: SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: screenWidth * 0.5,
+            height: screenWidth * 0.5,
+            child: Image.asset('assets/images/chat.png'),
+          ),
+          SizedBox(height: screenHeight * 0.02),
+          Text(
+            "ยังไม่เคยมีประวัติแชท",
+            style: TextStyle(
+              fontSize: screenWidth * 0.05,
+              color: MainTheme.black,
+              fontFamily: 'BaiJamjuree',
             ),
-            SizedBox(height: screenHeight * 0.02),
-            Text(
-              "ยังไม่เคยมีประวัติแชท",
-              style: TextStyle(
-                fontSize: screenWidth * 0.05,
-                color: MainTheme.black,
-                fontFamily: 'BaiJamjuree',
+          ),
+          SizedBox(height: screenHeight * 0.01),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center, 
+            children: [
+              Text(
+                "ค้นหาจักษุแพทย์ ",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.04,
+                  color: MainTheme.black,
+                  fontFamily: 'BaiJamjuree',
+                ),
               ),
-            ),
-            SizedBox(height: screenHeight * 0.01),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center, 
-              children: [
-                Text(
-                  "ค้นหาจักษุแพทย์ ",
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ChatSearch(),
+                    ),
+                  );
+                },
+                child: Text(
+                  "กดตรงนี้เลย",
                   style: TextStyle(
                     fontSize: screenWidth * 0.04,
-                    color: MainTheme.black,
+                    fontWeight: FontWeight.bold,
+                    color: MainTheme.chatBlue,
                     fontFamily: 'BaiJamjuree',
                   ),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ChatSearch(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    "กดตรงนี้เลย",
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                      fontWeight: FontWeight.bold,
-                      color: MainTheme.chatBlue,
-                      fontFamily: 'BaiJamjuree',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     ),
   );
+}
 }
