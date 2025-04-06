@@ -3,25 +3,20 @@ import 'package:client/core/theme/theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/material_symbols.dart';
 import '/services/user_api_service.dart';
-import 'package:iconify_flutter/icons/mdi.dart';
 import '/services/user_service.dart'; 
 import 'package:go_router/go_router.dart'; 
 
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class OphtHomePage extends StatefulWidget {
+  const OphtHomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _OphtHomePageState createState() => _OphtHomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _OphtHomePageState extends State<OphtHomePage> {
   int chatCount = 0;
-  List<Map<String, String>> notifications =
-      [];
-  int scanCount = 0;
-  String? eyeStatus;
-  String? vaStatus;
+  List<String> chatNoti = [];
   bool isLoading = true;
   String? userFullName;
   bool? isOpthamologist;
@@ -46,7 +41,7 @@ class _HomePageState extends State<HomePage> {
       final currentUserId = await UserService.getCurrentUserId();
 
       await Future.wait([
-        fetchUserNotification(),
+        fetchOphthNotification(),
         fetchUserData(currentUserId),
       ]);
 
@@ -61,46 +56,18 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> fetchUserNotification() async {
+  Future<void> fetchOphthNotification() async {
     try {
-      final data = await apiService.getUserNotifications();
+      final data = await apiService.getOphtNotifications();
 
       setState(() {
         chatCount = data['chat_count'];
-        scanCount = data['scan_count'];
-
-        // Process chat notifications
-        List<Map<String, String>> chatNotifications =
-            (data['chat_noti'] as List)
-                .map((item) => {
-                      'type': 'chat',
-                      'content': item['User']['first_name'] as String,
-                    })
-                .toList();
-
-        // Process scan notifications
-        List<Map<String, String>> scanNotifications = [];
-        if (data['scan'] != null) {
-          eyeStatus = data['scan']['eye'] as String?;
-          vaStatus = data['scan']['va'] as String?;
-          scanNotifications.add({
-            'type': 'scan',
-            'content': data['scan']['date'] as String,
-          });
-        } else {
-          eyeStatus = 'ไม่พบข้อมูล';
-          vaStatus = 'ไม่พบข้อมูล';
-        }
-
-        // Combine notifications
-        notifications = [...chatNotifications, ...scanNotifications];
+        chatNoti = (data['chat_noti'] as List)
+            .map((item) => item['User']['first_name'] as String)
+            .toList();
       });
     } catch (e) {
       print('Error fetching notification: $e');
-      setState(() {
-        eyeStatus = 'ไม่พบข้อมูล';
-        vaStatus = 'ไม่พบข้อมูล';
-      });
     }
   }
 
@@ -129,7 +96,7 @@ class _HomePageState extends State<HomePage> {
 
   String _getFullNameWithPrefix(
       String firstName, String lastName, bool? isOphth, String? sex) {
-    String prefix = 'คุณ ';
+    String prefix = 'คุณ';
 
     if (isOphth == true) {
       if (sex?.toLowerCase() == 'male') {
@@ -262,140 +229,157 @@ class _HomePageState extends State<HomePage> {
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      height: 170,
-                      decoration: BoxDecoration(
-                        color: MainTheme.blueBox,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16.0,
-                          top: 27.0,
-                          right: 16.0,
-                          bottom: 16.0,
+                    child: GestureDetector(
+                      onTap: () {
+                        // Navigate to the ophthalmologist settings page
+                        context.go('/settings-opht');
+                      },
+                      child: Container(
+                        height: 170,
+                        decoration: BoxDecoration(
+                          color: MainTheme.blueBox,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                color: MainTheme.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Iconify(
-                                      Mdi.eye_check,
-                                      color: Colors.black,
-                                      size: 43,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16.0,
+                            top: 27.0,
+                            right: 16.0,
+                            bottom: 16.0,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  color: MainTheme.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Iconify(
+                                        MaterialSymbols.settings,
+                                        color: Colors.black,
+                                        size: 43,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'สแกนตา',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'BaiJamjuree',
-                                  color: MainTheme.white,
-                                  letterSpacing: -0.5,
-                                  fontSize: 12),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              isLoading
-                                  ? 'กำลังโหลด...'
-                                  : 'อยู่ในเกณฑ์ : ${eyeStatus ?? 'ปกติ'}',
-                              style: TextStyle(
-                                  color: MainTheme.white,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'BaiJamjuree',
-                                  letterSpacing: -0.5,
-                                  fontSize: 14),
-                            ),
-                          ],
+                              SizedBox(height: 16),
+                              Text(
+                                'การตั้งค่า',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'BaiJamjuree',
+                                    color: MainTheme.white,
+                                    letterSpacing: -0.5,
+                                    fontSize: 12),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'แก้ไขโปรไฟล์ รหัสผ่าน',
+                                style: TextStyle(
+                                    color: MainTheme.white,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'BaiJamjuree',
+                                    letterSpacing: -0.5,
+                                    fontSize: 14),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                   SizedBox(width: 16),
                   Expanded(
-                    child: Container(
-                      height: 170,
-                      decoration: BoxDecoration(
-                        color: MainTheme.pinkBox,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16.0,
-                          top: 27.0,
-                          right: 16.0,
-                          bottom: 16.0,
+                    child: GestureDetector(
+                      onTap: () {
+                        context.go('/chat-ophth-history');
+                      },
+                      child: Container(
+                        height: 170,
+                        decoration: BoxDecoration(
+                          color: MainTheme.pinkBox,
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                color: MainTheme.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: Iconify(
-                                      Mdi.comment_eye,
-                                      color: Colors.black,
-                                      size: 43,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16.0,
+                            top: 27.0,
+                            right: 16.0,
+                            bottom: 16.0,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 70,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  color: MainTheme.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Iconify(
+                                        MaterialSymbols.chat,
+                                        color: Colors.black,
+                                        size: 43,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'ค่าสายตา',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'BaiJamjuree',
-                                  color: MainTheme.black,
-                                  letterSpacing: -0.5,
-                                  fontSize: 12),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
+                              SizedBox(height: 16),
+                              Text(
+                                'แชท',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'BaiJamjuree',
+                                    color: MainTheme.black,
+                                    letterSpacing: -0.5,
+                                    fontSize: 12),
+                              ),
+                              SizedBox(height: 4),
                               isLoading
-                                  ? 'กำลังโหลด...'
-                                  : 'อยู่ในเกณฑ์ : ${vaStatus ?? 'ปกติ'}',
-                              style: TextStyle(
-                                  color: MainTheme.black,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'BaiJamjuree',
-                                  letterSpacing: -0.5,
-                                  fontSize: 14),
-                            ),
-                          ],
+                                  ? Text(
+                                      'กำลังโหลด...',
+                                      style: TextStyle(
+                                          color: MainTheme.black,
+                                          fontWeight: FontWeight.w500,
+                                          fontFamily: 'BaiJamjuree',
+                                          letterSpacing: -0.5,
+                                          fontSize: 14),
+                                    )
+                                  : Text(
+                                      'ทั้งหมด: $chatCount คน',
+                                      style: TextStyle(
+                                          color: MainTheme.black,
+                                          fontWeight: FontWeight.w500,
+                                          fontFamily: 'BaiJamjuree',
+                                          letterSpacing: -0.5,
+                                          fontSize: 14),
+                                    ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -403,66 +387,6 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               SizedBox(height: 16),
-              GestureDetector(
-                onTap: () {
-                  // Navigate to scan log page
-                  context.go('/scanlog');
-                },
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: MainTheme.blueBox,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'ประวัติการสแกนตา',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'BaiJamjuree',
-                                  fontSize: 16,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                isLoading
-                                    ? 'กำลังโหลด...'
-                                    : 'สแกนไปแล้วทั้งหมด $scanCount ครั้ง',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'BaiJamjuree',
-                                  fontSize: 14,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Container(
-                          child: Center(
-                            child: Image.asset(
-                              'assets/images/Result2.png',
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
               SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -478,7 +402,7 @@ class _HomePageState extends State<HomePage> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
-                        showAll = true;
+                        showAll = true; // เปลี่ยนสถานะเมื่อกด "ดูทั้งหมด"
                       });
                     },
                     child: Text(
@@ -496,7 +420,7 @@ class _HomePageState extends State<HomePage> {
               SizedBox(height: 12),
               isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : notifications.isEmpty
+                  : chatNoti.isEmpty
                       ? Center(
                           child: Column(
                             children: [
@@ -518,14 +442,14 @@ class _HomePageState extends State<HomePage> {
                           ),
                         )
                       : SizedBox(
-                          height: showAll ? 6 * 80.0 : 3 * 80.0,
+                          height: showAll
+                              ? 6 * 80.0
+                              : 3 * 80.0, // กำหนดความสูงตามจำนวนรายการ (ประมาณการต่อ item)
                           child: SingleChildScrollView(
                             child: Column(
-                              children: notifications
-                                  .take(showAll ? 6 : 3)
-                                  .map((notification) {
-                                final type = notification['type'];
-                                final content = notification['content'] ?? '';
+                              children: chatNoti
+                                  .take(showAll ? 6 : 3) // เปลี่ยนจำนวนตามสถานะ
+                                  .map((firstName) {
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 11.0),
                                   child: Container(
@@ -549,18 +473,13 @@ class _HomePageState extends State<HomePage> {
                                             width: 32,
                                             height: 32,
                                             decoration: BoxDecoration(
-                                              color: type == 'chat'
-                                                  ? Color(0xFFFFC0CB)
-                                                  : MainTheme
-                                                      .blueBox, // เปลี่ยนสีตามประเภท
+                                              color: Color(0xFFFFC0CB),
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                             ),
                                             child: Center(
                                               child: Iconify(
-                                                type == 'chat'
-                                                    ? MaterialSymbols.chat
-                                                    : MaterialSymbols.docs,
+                                                MaterialSymbols.chat,
                                                 color: MainTheme.white,
                                                 size: 20,
                                               ),
@@ -574,9 +493,7 @@ class _HomePageState extends State<HomePage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  type == 'chat'
-                                                      ? 'แชท'
-                                                      : 'ประวัติการสแกน',
+                                                  'แชท',
                                                   style: TextStyle(
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily: 'BaiJamjuree',
@@ -585,9 +502,7 @@ class _HomePageState extends State<HomePage> {
                                                   ),
                                                 ),
                                                 Text(
-                                                  type == 'chat'
-                                                      ? '$content ส่งข้อความเข้ามา'
-                                                      : content, // ใช้ date ตรงๆ สำหรับ scan
+                                                  '$firstName ส่งข้อความเข้ามา',
                                                   style: TextStyle(
                                                     color: Colors.grey[600],
                                                     fontFamily: 'BaiJamjuree',
