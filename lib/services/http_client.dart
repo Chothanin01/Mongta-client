@@ -4,9 +4,14 @@ import 'package:http/http.dart' as http;
 import 'package:client/services/user_service.dart';
 
 class HttpClient {
-  static final String baseUrl = kReleaseMode 
-      ? 'https://your-production-url.com' 
+  static String get baseUrl {
+    final url = kReleaseMode 
+      ? 'https://mongta-server.vercel.app' // Replace with your actual production URL
       : 'http://10.0.2.2:5000';
+    
+    print('Using backend URL: $url');
+    return url;
+  }
 
   // GET request with authentication
   static Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
