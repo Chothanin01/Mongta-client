@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:go_router/go_router.dart';
 
-// BackButton Widget - Handles navigation back to home
 class TutorialBackButton extends StatelessWidget {
   const TutorialBackButton({super.key});
 
@@ -19,7 +18,6 @@ class TutorialBackButton extends StatelessWidget {
   }
 }
 
-// Logo Widget - Displays SE logo in header
 class SELogo extends StatelessWidget {
   const SELogo({super.key});
 
@@ -44,14 +42,12 @@ class TutorialSelection extends StatefulWidget {
   State<TutorialSelection> createState() => _TutorialSelectionScreenState();
 }
 
-// Update these methods in the _TutorialSelectionScreenState class
 class _TutorialSelectionScreenState extends State<TutorialSelection> {
   // Fixed selection - no longer changeable
-  final String selectedCategory = 'scan'; // Always 'scan'
+  final String selectedCategory = 'scan';
 
-  // Step number is now fixed
   String _getStepNumber() {
-    return '1'; // Always step 1
+    return '1'; 
   }
 
   // Navigate to near chart tutorial
@@ -77,7 +73,7 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 80), // Space for header
+                  const SizedBox(height: 80), 
                   
                   // Title Section
                   const Text(
@@ -108,7 +104,7 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
                     padding: const EdgeInsets.all(16),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: MainTheme.pinkBackgroundT, // Always highlighted
+                      color: MainTheme.pinkBackgroundT, 
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: MainTheme.transparent,
@@ -128,12 +124,12 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Second Option: Eye Scanning - Now Container instead of InkWell
+                  // Second Option: Eye Scanning 
                   Container(
                     padding: const EdgeInsets.all(16),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: MainTheme.white, // Always unhighlighted
+                      color: MainTheme.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: MainTheme.blueBorderT,
@@ -158,15 +154,15 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
         ),
       ),
       
-      // Bottom Action Button with increased padding at bottom
+      // Bottom Action Button
       bottomNavigationBar: Container(
         padding: const EdgeInsets.only(
           left: 16.0,
           right: 16.0,
           top: 16.0,
-          bottom: 32.0, // Increased bottom padding
+          bottom: 32.0, 
         ),
-        height: 106, // Increased height to accommodate the extra padding
+        height: 106, 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -174,7 +170,6 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
               width: double.infinity,
               height: 58,
               child: ElevatedButton(
-                // Always enabled now
                 onPressed: _handleStartTutorial,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: MainTheme.buttonBackground,

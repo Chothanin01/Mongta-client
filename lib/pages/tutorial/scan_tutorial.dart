@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:client/core/components/tutorial/t_scan_button.dart';
 import 'package:client/core/components/tutorial/custom_step_indicator.dart';
 import 'package:client/core/theme/theme.dart';
+import 'package:client/services/tutorial_preferences.dart';
 
 class TutorialPageData {
   final String step;
@@ -58,11 +59,13 @@ class _ScanTutorialState extends State<ScanTutorial> {
     ),
   ];
 
-  void _nextPage() {
+  void _nextPage() async {
     if (_currentIndex < _pages.length - 1) {
       _controller.nextPage(
           duration: Duration(milliseconds: 500), curve: Curves.ease);
     } else {
+      // Mark this tutorial as viewed
+      await TutorialPreferences.setScanTutorialViewed();
       context.go('/scan');
     }
   }
@@ -126,20 +129,19 @@ class _ScanTutorialState extends State<ScanTutorial> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: SizedBox(
-                    // Added fixed height container
-                    height: 120, // Adjust this value based on your needs
+                    height: 120,
                     child: Column(
                       mainAxisAlignment:
-                          MainAxisAlignment.end, // Align items to bottom
+                          MainAxisAlignment.end, 
                       children: [
                         ScanTutorialButton(
                           onTap: _nextPage,
                           buttonText: _currentIndex == _pages.length - 1
-                              ? "เริ่มสแกนตา ์"
+                              ? "เริ่มสแกนตา"
                               : "ต่อไป",
                         ),
                         SizedBox(
-                          height: 48, // Fixed height space for the skip button
+                          height: 48, 
                           child: _currentIndex == 0
                               ? TextButton(
                                   onPressed: () => context.go('/scan'),
@@ -155,7 +157,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
                                   ),
                                 )
                               : const SizedBox
-                                  .shrink(), // Empty widget when button is hidden
+                                  .shrink(),
                         ),
                       ],
                     ),
