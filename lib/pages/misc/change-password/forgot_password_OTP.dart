@@ -4,48 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/services/api_service.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:pin_code_fields/pin_code_fields.dart'; 
 
-class VerifyOtpPage extends StatefulWidget {
+class ForgotPasswordOTPPage extends StatefulWidget {
   final Map<String, dynamic> params;
   
-  const VerifyOtpPage({
+  const ForgotPasswordOTPPage({
     Key? key,
     required this.params,
   }) : super(key: key);
 
   @override
-  State<VerifyOtpPage> createState() => _VerifyOtpPageState();
+  State<ForgotPasswordOTPPage> createState() => _ForgotPasswordOTPPageState();
 }
 
-class _VerifyOtpPageState extends State<VerifyOtpPage> {
+class _ForgotPasswordOTPPageState extends State<ForgotPasswordOTPPage> {
   final TextEditingController _otpController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
-  int _timeLeft = 300; // 5 minutes in seconds
+  int _timeLeft = 300; // 5 minutes
   Timer? _timer;
   late String _email;
   late String _ref;
-  late Map<String, String> _userData;
 
   @override
   void initState() {
     super.initState();
     _email = widget.params['email'] as String;
     _ref = widget.params['ref'] as String;
-    _userData = widget.params['userData'] as Map<String, String>;
     _startTimer();
   }
 
   @override
   void dispose() {
-    // Cancel timer first to prevent any timer callbacks
     _timer?.cancel();
     _timer = null;
-    
-    // Then dispose controller
     _otpController.dispose();
-    
     super.dispose();
   }
 
@@ -74,7 +68,9 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     });
 
     try {
-      final response = await ApiService.requestEmailOTP(_email);
+      final response = await ApiService.requestPasswordResetOTP(_email);
+      
+      if (!mounted) return;
       
       if (response['success'] == true) {
         setState(() {
@@ -107,11 +103,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   }
 
   Future<void> _verifyOtp() async {
-    // Get value immediately and store in a local variable
     final String otpValue = _otpController.text.trim();
-    final Map<String, String> userDataCopy = Map.from(_userData);
-    final String emailCopy = _email;
-    final String refCopy = _ref;
     
     if (otpValue.isEmpty || otpValue.length < 6) {
       setState(() {
@@ -126,36 +118,32 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     });
 
     try {
-      final response = await ApiService.registerWithOtp(
-        username: userDataCopy['username']!,
-        password: userDataCopy['password']!,
-        phonenumber: userDataCopy['phonenumber']!,
-        email: emailCopy,
-        first_name: userDataCopy['first_name']!,
-        last_name: userDataCopy['last_name']!,
-        sex: userDataCopy['sex']!,
-        dob: userDataCopy['dob']!,
-        otp: otpValue, 
-        otp_ref: refCopy,
+      // Capture all values before async operations
+      final String emailCopy = _email;
+      final String otpCopy = otpValue;
+      final String refCopy = _ref;
+      
+      final response = await ApiService.verifyPasswordResetOTP(
+        emailCopy, 
+        otpCopy, 
+        refCopy
       );
       
       if (!mounted) return;
       
       if (response['success'] == true) {
-        // Cancel timer before navigation to prevent any continued access
+        // OTP is valid, navigate to set new password
         _timer?.cancel();
         
-        // Use Future.microtask to ensure navigation happens after the current frame is complete
         Future.microtask(() {
-          // Check mounted again just before navigation
           if (mounted) {
-            context.pushReplacement('/complete-otp');
+            context.push('/forgot-password', extra: {'email': emailCopy});
           }
         });
       } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = response['message'] ?? 'การยืนยัน OTP ไม่สำเร็จ';
+          _errorMessage = response['message'] ?? 'รหัส OTP ไม่ถูกต้อง';
         });
       }
     } catch (e) {

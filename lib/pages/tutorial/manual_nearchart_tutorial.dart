@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:client/core/components/tutorial/t_scan_button.dart';
+import 'package:client/core/components/tutorial/t_nc_button.dart';
 import 'package:client/core/components/tutorial/custom_step_indicator.dart';
 import 'package:client/core/theme/theme.dart';
-import 'package:client/services/tutorial_preferences.dart';
 
 class TutorialPageData {
   final String step;
@@ -23,14 +22,14 @@ class TutorialPageData {
   });
 }
 
-class ScanTutorial extends StatefulWidget {
-  const ScanTutorial({super.key});
+class ManualNearChartTutorial extends StatefulWidget {
+  const ManualNearChartTutorial({super.key});
 
   @override
-  State<ScanTutorial> createState() => _ScanTutorialState();
+  State<ManualNearChartTutorial> createState() => _ManualNearChartTutorialState();
 }
 
-class _ScanTutorialState extends State<ScanTutorial> {
+class _ManualNearChartTutorialState extends State<ManualNearChartTutorial> {
   final PageController _controller = PageController();
   int _currentIndex = 0;
 
@@ -38,35 +37,47 @@ class _ScanTutorialState extends State<ScanTutorial> {
     TutorialPageData(
       step: "1",
       title: "ขั้นตอนการใช้งาน",
-      subtitle: "การสเเกนตา",
-      redText: "วางตาให้ตรงกรอบของหน้าจอที่วางไว้\nทีละข้างโดย",
-      blackText: "เริ่มจากข้างขวาไปซ้าย",
-      imagePath: 'assets/images/scan_tutorial_1.png',
+      subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "เพิ่มแสงหน้าจอเป็น 100%",
+      blackText: "ถือโทรศัพท์ให้สุดเเขน เเละอยู่ในเเนวตั้ง",
+      imagePath: 'assets/images/nc_tutorial_1.png',
     ),
     TutorialPageData(
       step: "2",
       title: "ขั้นตอนการใช้งาน",
-      subtitle: "การสเเกนตา",
-      blackText: "ถอดแว่นตาและใช้ตาเปล่า\nแล้ววางตาตรงกับกรอบเเล้ว\nให้มองกล้องของโทรศัพท์เเล้วกดปุ่มถ่ายรูป",
-      imagePath: 'assets/images/scan_tutorial_2.png',
+      subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "เริ่มต้นดูด้วยตาข้างขวา",
+      blackText: "โดยใช้มือซ้ายปิดตาข้างซ้าย",
     ),
     TutorialPageData(
       step: "3",
       title: "ขั้นตอนการใช้งาน",
-      subtitle: "การสเเกนตา",
-      blackText: "เมื่อพอใจกับภาพ สามารถกดยืนยันได้เลย \nเเต่ถ้าไม่พอใจให้กดถ่ายอีกรอบ",
-      imagePath: 'assets/images/scan_tutorial_3.png',
+      subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "อ่านภาพโดยเริ่มจากข้างบน \n เเล้วไล่ลงมาที่ข้างล่าง",
+      blackText: "ให้บันทึกผลบรรทัดล่างสุดที่ยังอ่านได้",
+    ),
+    TutorialPageData(
+      step: "4",
+      title: "ขั้นตอนการใช้งาน",
+      subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "อ่านตัวอักษรและเลือกคำตอบ",
+      blackText: "ในรอบที่ 1 และ 3 ให้ใช้ตาเปล่าหากมี เเว่นหรือคอนแทคเลนส์ ให้ใช้ในรอบที่ 2 และรอบที่ 4 หากไม่มี ให้ใช้ตาเปล่าในทุกๆรอบ",
+    ),
+    TutorialPageData(
+      step: "5",
+      title: "ขั้นตอนการใช้งาน",
+      subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "เมื่อจบตาข้างขวาเเล้วให้ทำตาข้างซ้ายต่อ",
+      blackText: "โดยใช้มือขวาปิดตาข้างขวา รวมทั้งสิ้น 4 รอบ",
     ),
   ];
 
-  void _nextPage() async {
+  void _nextPage() {
     if (_currentIndex < _pages.length - 1) {
       _controller.nextPage(
           duration: Duration(milliseconds: 500), curve: Curves.ease);
     } else {
-      // Mark this tutorial as viewed
-      await TutorialPreferences.setScanTutorialViewed();
-      context.go('/scan');
+      context.go('/manual-tutorial-selection');
     }
   }
 
@@ -84,6 +95,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
       body: SafeArea(
         child: Stack(
           children: [
+          // Back Button - Positioned independently
           Positioned(
             top: 8,
             left: 16,
@@ -132,19 +144,19 @@ class _ScanTutorialState extends State<ScanTutorial> {
                     height: 120,
                     child: Column(
                       mainAxisAlignment:
-                          MainAxisAlignment.end, 
+                          MainAxisAlignment.end,
                       children: [
-                        ScanTutorialButton(
+                        NcTutorialButton(
                           onTap: _nextPage,
                           buttonText: _currentIndex == _pages.length - 1
-                              ? "เริ่มสแกนตา"
+                              ? "เสร็จสิ้น"
                               : "ต่อไป",
                         ),
                         SizedBox(
                           height: 48, 
                           child: _currentIndex == 0
                               ? TextButton(
-                                  onPressed: () => context.go('/scan'),
+                                  onPressed: () => context.go('/'),
                                   child: Text(
                                     'ข้ามการสอนใช้งาน',
                                     style: TextStyle(
@@ -157,7 +169,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
                                   ),
                                 )
                               : const SizedBox
-                                  .shrink(),
+                                  .shrink(), 
                         ),
                       ],
                     ),
@@ -244,7 +256,7 @@ class OnboardingPage extends StatelessWidget {
 
           if (pageData.imagePath != null)
             Center(
-              child: Image.asset(pageData.imagePath!, width: 250, height: 250),
+              child: Image.asset(pageData.imagePath!, width: 300, height: 300),
             ),
         ],
       ),

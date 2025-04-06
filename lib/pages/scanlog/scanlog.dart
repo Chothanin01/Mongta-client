@@ -5,6 +5,7 @@ import 'package:client/services/user_service.dart';
 import 'package:client/services/http_client.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
 
 class ScanlogPage extends StatefulWidget {
   const ScanlogPage({Key? key}) : super(key: key);
@@ -310,8 +311,16 @@ class _ScanlogPageState extends State<ScanlogPage> {
       final date = DateTime.parse(dateString);
       // Format date in Thai Buddhist calendar (BE = CE + 543)
       final thaiYear = date.year + 543;
-      final formatter = DateFormat('d MMMM');
-      return 'วันที่ ${formatter.format(date)} พ.ศ. $thaiYear';
+      const thaiMonths = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+      ];
+      final day = date.day;
+      final month = thaiMonths[date.month - 1];
+      final hour = date.hour.toString().padLeft(2, '0'); // ทำให้เป็น 2 หลัก
+      final minute = date.minute.toString().padLeft(2, '0'); // ทำให้เป็น 2 หลัก
+
+      return 'วันที่ $day $month พ.ศ. $thaiYear เวลา $hour:$minute น.';
     } catch (e) {
       return dateString;
     }
@@ -339,7 +348,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
               icon: const Icon(Icons.arrow_back_ios,
                   color: Colors.black, size: 20),
               onPressed: () {
-                Navigator.of(context).pop();
+                context.go('/home'); // Navigate directly to home
               },
             ),
             title: const Text(
@@ -369,7 +378,10 @@ class _ScanlogPageState extends State<ScanlogPage> {
                           errorMessage,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                              color: Colors.red, letterSpacing: -0.5),
+                            color: Colors.red, 
+                            letterSpacing: -0.5,
+                            fontFamily: 'BaiJamjuree',
+                          ),
                         ),
                         const SizedBox(height: 20),
                         ElevatedButton(
@@ -390,7 +402,11 @@ class _ScanlogPageState extends State<ScanlogPage> {
                         children: [
                           const Text(
                             'ไม่พบประวัติการสแกน',
-                            style: TextStyle(fontSize: 16, letterSpacing: -0.5),
+                            style: TextStyle(
+                              fontSize: 16, 
+                              letterSpacing: -0.5,
+                              fontFamily: 'BaiJamjuree',
+                            ),
                           ),
                           const SizedBox(height: 20),
                           ElevatedButton(
@@ -398,7 +414,10 @@ class _ScanlogPageState extends State<ScanlogPage> {
                               fetchScanHistory();
                             },
                             child: const Text('รีเฟรช',
-                                style: TextStyle(letterSpacing: -0.5)),
+                                style: TextStyle(
+                                  letterSpacing: -0.5,
+                                  fontFamily: 'BaiJamjuree',
+                                )),
                           ),
                         ],
                       ),
@@ -470,6 +489,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.5,
+                            fontFamily: 'BaiJamjuree',
                           ),
                         ),
                         Text(
@@ -478,6 +498,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                             fontSize: 12,
                             color: Colors.grey[600],
                             letterSpacing: -0.5,
+                            fontFamily: 'BaiJamjuree',
                           ),
                         ),
                       ],
@@ -519,6 +540,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                 fontSize: 14,
                 color: Colors.black87,
                 letterSpacing: -0.5,
+                fontFamily: 'BaiJamjuree',
               ),
               textAlign: TextAlign.center,
             ),
@@ -543,6 +565,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
+            fontFamily: 'BaiJamjuree',
           ),
         ),
         // 2px gap between the text and container
@@ -550,7 +573,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
         // Pink container without the title
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0), // Reduced padding
           decoration: BoxDecoration(
             color: const Color(0xFFFBD6E3), // Light pink
             borderRadius: BorderRadius.circular(20),
@@ -558,21 +581,40 @@ class _ScanlogPageState extends State<ScanlogPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildEyeResult('ตาข้างซ้าย อยู่บรรทัดที่ ${leftEye['line']}',
-                      leftEye['value'], leftEye['percentage']),
-                  _buildEyeResult('ตาข้างขวา อยู่บรรทัดที่ ${rightEye['line']}',
-                      rightEye['value'], rightEye['percentage']),
-                ],
+              // Wrap the Row in a LayoutBuilder to control sizing
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemWidth = constraints.maxWidth / 2 - 8;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: itemWidth,
+                        child: _buildEyeResult(
+                          'ตาข้างซ้าย อยู่บรรทัดที่ ${leftEye['line']}',
+                          leftEye['value'], 
+                          leftEye['percentage']
+                        ),
+                      ),
+                      SizedBox(
+                        width: itemWidth,
+                        child: _buildEyeResult(
+                          'ตาข้างขวา อยู่บรรทัดที่ ${rightEye['line']}',
+                          rightEye['value'], 
+                          rightEye['percentage']
+                        ),
+                      ),
+                    ],
+                  );
+                }
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12), // Reduced space
               Text(
                 eyeTest['result'],
                 style: const TextStyle(
                   fontSize: 14,
                   letterSpacing: -0.5,
+                  fontFamily: 'BaiJamjuree',
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -596,6 +638,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
             fontSize: 12,
             fontWeight: FontWeight.w500,
             letterSpacing: -0.5,
+            fontFamily: 'BaiJamjuree',
           ),
           textAlign: TextAlign.center,
         ),
@@ -665,6 +708,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
             fontWeight: FontWeight.bold,
             color: Colors.black,
             letterSpacing: -0.5,
+            fontFamily: 'BaiJamjuree',
           ),
         ),
         // 2px gap between the text and container
@@ -724,6 +768,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
                       letterSpacing: -0.5,
+                      fontFamily: 'BaiJamjuree',
                     ),
                   ),
                 ),
@@ -738,6 +783,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
                       letterSpacing: -0.5,
+                      fontFamily: 'BaiJamjuree',
                     ),
                   ),
                 ),
@@ -762,6 +808,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                     letterSpacing: -0.5,
+                    fontFamily: 'BaiJamjuree',
                   ),
                 ),
               ),
@@ -801,6 +848,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                     letterSpacing: -0.5,
+                    fontFamily: 'BaiJamjuree',
                   ),
                 ),
               ),

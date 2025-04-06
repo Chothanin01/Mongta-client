@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:client/core/components/tutorial/t_nc_button.dart';
 import 'package:client/core/components/tutorial/custom_step_indicator.dart';
 import 'package:client/core/theme/theme.dart';
+import 'package:client/services/tutorial_preferences.dart';
 
 class TutorialPageData {
   final String step;
@@ -72,11 +73,12 @@ class _NearChartTutorialState extends State<NearChartTutorial> {
     ),
   ];
 
-  void _nextPage() {
+  void _nextPage() async {
     if (_currentIndex < _pages.length - 1) {
       _controller.nextPage(
           duration: Duration(milliseconds: 500), curve: Curves.ease);
     } else {
+      await TutorialPreferences.setNearChartTutorialViewed();
       context.go('/near_chart_one');
     }
   }
@@ -141,11 +143,10 @@ class _NearChartTutorialState extends State<NearChartTutorial> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: SizedBox(
-                    // Added fixed height container
-                    height: 120, // Adjust this value based on your needs
+                    height: 120,
                     child: Column(
                       mainAxisAlignment:
-                          MainAxisAlignment.end, // Align items to bottom
+                          MainAxisAlignment.end,
                       children: [
                         NcTutorialButton(
                           onTap: _nextPage,

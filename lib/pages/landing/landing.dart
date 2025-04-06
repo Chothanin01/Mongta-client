@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client/core/components/landing/landing_button.dart';
 import 'package:client/core/theme/theme.dart';
+import 'package:client/services/tutorial_preferences.dart';
 
 class LandingPageData {
   final String step;
@@ -58,11 +59,13 @@ class _LandingPageState extends State<LandingPage> {
     ),
   ];
 
-  void _nextPage() {
+  void _nextPage() async {
     if (_currentIndex < _pages.length - 1) {
       _controller.nextPage(
           duration: Duration(milliseconds: 500), curve: Curves.ease);
     } else {
+      // Mark landing page as viewed
+      await TutorialPreferences.setLandingPageViewed();
       context.go('/login');
     }
   }

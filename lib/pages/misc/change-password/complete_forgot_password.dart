@@ -3,8 +3,8 @@ import 'package:client/core/theme/theme.dart';
 import 'package:client/core/components/entryForm/entry_button.dart';
 import 'package:go_router/go_router.dart';
 
-class CompleteOtpPage extends StatelessWidget {
-  const CompleteOtpPage({super.key});
+class CompleteForgotPasswordPage extends StatelessWidget {
+  const CompleteForgotPasswordPage({super.key});
 
   // Changed: Navigate to login page instead of home
   void goToLogin(BuildContext context) {
@@ -18,7 +18,7 @@ class CompleteOtpPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Main content in SingleChildScrollView
+            // Main content in Expanded ScrollView
             Expanded(
               child: SingleChildScrollView(
                 child: Center(
@@ -29,7 +29,7 @@ class CompleteOtpPage extends StatelessWidget {
                       children: [
                         const SizedBox(height: 80),
                         
-                        // Success image (keeping your original image)
+                        // Success image
                         Image.asset(
                           'assets/images/complete_verify.png', 
                           height: 150,
@@ -40,7 +40,7 @@ class CompleteOtpPage extends StatelessWidget {
                         
                         // Success title
                         const Text(
-                          'สร้างบัญชี สำเร็จ!',
+                          'เปลี่ยนรหัสผ่าน สำเร็จ!',
                           style: TextStyle(
                             color: MainTheme.black,
                             fontSize: 20,
@@ -57,7 +57,7 @@ class CompleteOtpPage extends StatelessWidget {
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 20.0),
                           child: Text(
-                            'ตอนนี้บัญชีของคุณทำการสมัครเสร็จสิ้นเเล้ว\nสามารถเข้าสู่ระบบเพื่อทำการใช้งาน',
+                            'ตอนนี้บัญชีของคุณทำการเปลี่ยนรหัสผ่านเสร็จสิ้นเเล้ว\nสามารถเข้าสู่ระบบเพื่อทำการใช้งาน',
                             style: TextStyle(
                               color: MainTheme.mainText,
                               fontSize: 14,

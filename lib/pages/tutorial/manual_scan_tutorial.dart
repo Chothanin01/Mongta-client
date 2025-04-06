@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:client/core/components/tutorial/t_scan_button.dart';
 import 'package:client/core/components/tutorial/custom_step_indicator.dart';
 import 'package:client/core/theme/theme.dart';
-import 'package:client/services/tutorial_preferences.dart';
 
 class TutorialPageData {
   final String step;
@@ -23,14 +22,14 @@ class TutorialPageData {
   });
 }
 
-class ScanTutorial extends StatefulWidget {
-  const ScanTutorial({super.key});
+class ManualScanTutorial extends StatefulWidget {
+  const ManualScanTutorial({super.key});
 
   @override
-  State<ScanTutorial> createState() => _ScanTutorialState();
+  State<ManualScanTutorial> createState() => _ManualScanTutorialState();
 }
 
-class _ScanTutorialState extends State<ScanTutorial> {
+class _ManualScanTutorialState extends State<ManualScanTutorial> {
   final PageController _controller = PageController();
   int _currentIndex = 0;
 
@@ -59,14 +58,12 @@ class _ScanTutorialState extends State<ScanTutorial> {
     ),
   ];
 
-  void _nextPage() async {
+  void _nextPage() {
     if (_currentIndex < _pages.length - 1) {
       _controller.nextPage(
           duration: Duration(milliseconds: 500), curve: Curves.ease);
     } else {
-      // Mark this tutorial as viewed
-      await TutorialPreferences.setScanTutorialViewed();
-      context.go('/scan');
+      context.go('/manual-tutorial-selection');
     }
   }
 
@@ -98,7 +95,6 @@ class _ScanTutorialState extends State<ScanTutorial> {
           // Main Content Column
           Column(
             children: [
-              // Indicator centered at top
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: Center(
@@ -129,7 +125,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: SizedBox(
-                    height: 120,
+                    height: 120, 
                     child: Column(
                       mainAxisAlignment:
                           MainAxisAlignment.end, 
@@ -137,14 +133,14 @@ class _ScanTutorialState extends State<ScanTutorial> {
                         ScanTutorialButton(
                           onTap: _nextPage,
                           buttonText: _currentIndex == _pages.length - 1
-                              ? "เริ่มสแกนตา"
+                              ? "เสร็จสิ้น"
                               : "ต่อไป",
                         ),
                         SizedBox(
                           height: 48, 
                           child: _currentIndex == 0
                               ? TextButton(
-                                  onPressed: () => context.go('/scan'),
+                                  onPressed: () => context.go('/manual-tutorial-selection'),
                                   child: Text(
                                     'ข้ามการสอนใช้งาน',
                                     style: TextStyle(
@@ -157,7 +153,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
                                   ),
                                 )
                               : const SizedBox
-                                  .shrink(),
+                                  .shrink(), 
                         ),
                       ],
                     ),

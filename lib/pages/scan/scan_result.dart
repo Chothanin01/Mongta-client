@@ -146,39 +146,48 @@ class ScanResultPage extends StatelessWidget {
                 const SizedBox(height: 30),
 
                 // Action buttons
-                Row(
-                  children: [
-                    // Changed: Go home button (was Consult doctor)
-                    Expanded(
-                      child: _buildCustomButton(
-                        context: context,
-                        onTap: () {
-                          Navigator.of(context).popUntil((route) => route.isFirst);
-                          context.go('/home');
-                        },
-                        icon: Icons.home,
-                        title: 'หน้าโฮมเพจ',
-                        subtitle: 'กลับสู่หน้าแรก',
-                        isBlueButton: false,
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  child: Row(
+                    children: [
+                      // Home button
+                      Expanded(
+                        child: SizedBox(
+                          height: 80,
+                          child: _buildCustomButton(
+                            context: context,
+                            onTap: () {
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+                              context.go('/home');
+                            },
+                            icon: Icons.home,
+                            title: 'หน้าโฮมเพจ',
+                            subtitle: 'กลับสู่หน้าแรก',
+                            isBlueButton: false,
+                          ),
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(width: 16),
+                      const SizedBox(width: 16),
 
-                    // Changed: View scan history button (was New scan)
-                    Expanded(
-                      child: _buildCustomButton(
-                        context: context,
-                        onTap: () {
-                          context.go('/scanlog');
-                        },
-                        icon: Icons.history,
-                        title: 'ผลการสแกน',
-                        subtitle: 'เข้าไปดูประวัติ',
-                        isBlueButton: true,
+                      // View scan history button
+                      Expanded(
+                        child: SizedBox(
+                          height: 80,
+                          child: _buildCustomButton(
+                            context: context,
+                            onTap: () {
+                              context.go('/scanlog');
+                            },
+                            icon: Icons.history,
+                            title: 'ผลการสแกน',
+                            subtitle: 'เข้าไปดูประวัติ',
+                            isBlueButton: true,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
                 const SizedBox(height: 20),

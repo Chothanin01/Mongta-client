@@ -85,24 +85,29 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
     }
     
     return Scaffold(
-      backgroundColor: Colors.transparent, // Changed from MainTheme.mainBackground to transparent
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Main content area
-            Column(
+      // Remove the background color entirely
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // Camera preview first (full screen)
+          _buildFullScreenCameraPreview(),
+          
+          // SafeArea for UI controls
+          SafeArea(
+            child: Column(
               children: [
-                // Top segmented control for eye selection
+                // Top segmented control for eye selection (keep as is)
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   width: double.infinity,
-                  color: Colors.transparent, // Already transparent
+                  // Make background transparent
+                  color: Colors.transparent,
                   child: Center(
                     child: Container(
                       width: 280,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.white, // Keep this as is (tab)
+                        color: Colors.white.withOpacity(0.85), // Semi-transparent background
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(color: MainTheme.blueText, width: 1),
                       ),
@@ -183,20 +188,13 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                   ),
                 ),
                 
-                // Camera preview area with bounding box
-                Expanded(
-                  child: Container(
-                    color: Colors.transparent, // Changed from black to transparent
-                    child: Center(
-                      child: _buildCameraPreview(),
-                    ),
-                  ),
-                ),
+                // Spacer to push capture button to bottom
+                Spacer(),
                 
                 // Bottom section with capture button
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 30),
-                  color: Colors.transparent, // Already transparent
+                  color: Colors.transparent,
                   child: Center(
                     child: GestureDetector(
                       onTap: _isCameraInitializing 
@@ -209,7 +207,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                         width: 60,
                         height: 60,
                         decoration: BoxDecoration(
-                          color: MainTheme.white, // Keep this as is (button)
+                          color: MainTheme.white,
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: (_isRightEyeSelected && widget.rightEyeImage != null) || 
@@ -233,7 +231,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                                       width: 48,
                                       height: 48,
                                       decoration: const BoxDecoration(
-                                        color: MainTheme.blueText, // Keep this as is (button)
+                                        color: MainTheme.blueText,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -244,233 +242,270 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                 ),
               ],
             ),
-            
-            // Back button
-            Positioned(
+          ),
+          
+          // Back button
+          SafeArea(
+            child: Positioned(
               top: 8,
               left: 8,
               child: IconButton(
                 icon: const Icon(
                   Icons.arrow_back_ios,
-                  color: MainTheme.mainText,
+                  color: Colors.white,
                   size: 22,
                 ),
                 onPressed: widget.onBackPressed,
               ),
             ),
-            
-            // Gallery button
-            Positioned(
-              bottom: 30,
-              right: 32,
-              child: GestureDetector(
-                onTap: _isCameraInitializing ? null : _pickImageFromGallery,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: MainTheme.white, // Keep this as is (button)
-                    shape: BoxShape.circle,
-                    border: Border.all(color: MainTheme.textfieldBorder, width: 1.5),
-                  ),
-                  child: Icon(
-                    Icons.photo_library,
-                    color: _isCameraInitializing 
-                        ? MainTheme.placeholderText
-                        : MainTheme.blueText,
-                    size: 22,
-                  ),
+          ),
+          
+          // Gallery button
+          Positioned(
+            bottom: 40,
+            right: 32,
+            child: GestureDetector(
+              onTap: _isCameraInitializing ? null : _pickImageFromGallery,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: MainTheme.white.withOpacity(0.85),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: MainTheme.textfieldBorder, width: 1.5),
+                ),
+                child: Icon(
+                  Icons.photo_library,
+                  color: _isCameraInitializing 
+                      ? MainTheme.placeholderText
+                      : MainTheme.blueText,
+                  size: 22,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
   
-  Widget _buildCameraPreview() {
-    // Display error message if camera service has an error
-    if (_cameraService.errorMessage != null) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, color: MainTheme.redWarning, size: 64),
-          const SizedBox(height: 16),
-          Text(
-            'Camera error: ${_cameraService.errorMessage}',
-            style: const TextStyle(color: MainTheme.redWarning),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              _cameraService.enableMockCamera();
-              setState(() {});
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: MainTheme.blueText,
-            ),
-            child: const Text('Use Mock Camera Instead'),
-          ),
-        ],
-      );
-    }
-  
-    // Display error message if there's an issue
-    if (_errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, color: MainTheme.redWarning, size: 64),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              style: const TextStyle(
-                color: MainTheme.redWarning,
-                fontFamily: 'BaiJamjuree',
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Show loading indicator while camera initializes
-    if (_isCameraInitializing) {
-      return const Center(
-        child: CircularProgressIndicator(color: MainTheme.blueText),
-      );
-    }
-
-    // Show already captured images if available
+  Widget _buildFullScreenCameraPreview() {
+    // If images are already captured, show them
     if ((_isRightEyeSelected && widget.rightEyeImage != null) || 
         (!_isRightEyeSelected && widget.leftEyeImage != null)) {
       final File imageToShow = _isRightEyeSelected 
           ? widget.rightEyeImage! 
           : widget.leftEyeImage!;
       
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Image.file(
-          imageToShow,
-          fit: BoxFit.contain,
-          width: 300,
-          height: 300,
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.black,
+        child: Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.file(
+              imageToShow,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    // Handle error states
+    if (_cameraService.errorMessage != null) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.black,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: MainTheme.redWarning, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Camera error: ${_cameraService.errorMessage}',
+              style: const TextStyle(color: MainTheme.redWarning),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                _cameraService.enableMockCamera();
+                setState(() {});
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MainTheme.blueText,
+              ),
+              child: const Text('Use Mock Camera Instead'),
+            ),
+          ],
         ),
       );
     }
 
-    // Show camera preview with improved selection frame
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        // Camera preview
-        if (_cameraService.controller?.value.isInitialized ?? false)
-          SizedBox(
-            width: double.infinity,
-            child: AspectRatio(
-              aspectRatio: _cameraService.controller!.value.aspectRatio,
-              child: CameraPreview(_cameraService.controller!),
-            ),
-          ),
-          
-        // New mobile-camera-style focus frame
-        Container(
-          width: 240,
-          height: 240,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            border: Border.all(color: Colors.transparent),
-          ),
-          child: Stack(
+    if (_errorMessage != null) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.black,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Top-left corner
-              Positioned(
-                top: 0,
-                left: 0,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: Colors.white, width: 3),
-                      left: BorderSide(color: Colors.white, width: 3),
-                    ),
-                  ),
+              const Icon(Icons.error_outline, color: MainTheme.redWarning, size: 64),
+              const SizedBox(height: 16),
+              Text(
+                _errorMessage!,
+                style: const TextStyle(
+                  color: MainTheme.redWarning,
+                  fontFamily: 'BaiJamjuree',
+                  fontSize: 16,
                 ),
-              ),
-              // Top-right corner
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: Colors.white, width: 3),
-                      right: BorderSide(color: Colors.white, width: 3),
-                    ),
-                  ),
-                ),
-              ),
-              // Bottom-left corner
-              Positioned(
-                bottom: 0,
-                left: 0,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.white, width: 3),
-                      left: BorderSide(color: Colors.white, width: 3),
-                    ),
-                  ),
-                ),
-              ),
-              // Bottom-right corner
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.white, width: 3),
-                      right: BorderSide(color: Colors.white, width: 3),
-                    ),
-                  ),
-                ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-        
-        // Focus point indicator
-        Container(
-          width: 15,
-          height: 15,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 1.5),
-          ),
-          child: Center(
-            child: Container(
-              width: 5,
-              height: 5,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+      );
+    }
+
+    if (_isCameraInitializing) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.black,
+        child: const Center(
+          child: CircularProgressIndicator(color: MainTheme.blueText),
+        ),
+      );
+    }
+
+    // Full-screen camera preview with focus frame overlay
+    if (_cameraService.controller?.value.isInitialized ?? false) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Full-screen camera preview
+            CameraPreview(_cameraService.controller!),
+            
+            // Centered focus frame
+            Center(
+              child: Container(
+                width: 240,
+                height: 240,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  border: Border.all(color: Colors.transparent),
+                ),
+                child: Stack(
+                  children: [
+                    // Top-left corner
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(color: Colors.white, width: 3),
+                            left: BorderSide(color: Colors.white, width: 3),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Top-right corner
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(color: Colors.white, width: 3),
+                            right: BorderSide(color: Colors.white, width: 3),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Bottom-left corner
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(color: Colors.white, width: 3),
+                            left: BorderSide(color: Colors.white, width: 3),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Bottom-right corner
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(color: Colors.white, width: 3),
+                            right: BorderSide(color: Colors.white, width: 3),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+            
+            // Focus point indicator
+            Center(
+              child: Container(
+                width: 15,
+                height: 15,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: Center(
+                  child: Container(
+                    width: 5,
+                    height: 5,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      );
+    }
+    
+    // Fallback if camera isn't initialized
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.black,
+      child: const Center(
+        child: Text(
+          'กล้องไม่พร้อมใช้งาน',
+          style: TextStyle(color: Colors.white),
+        ),
+      ),
     );
   }
   
