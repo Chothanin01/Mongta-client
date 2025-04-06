@@ -4,7 +4,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:go_router/go_router.dart';
+import 'package:client/services/http_client.dart';
+import 'package:client/services/user_service.dart';
 
 class HospitalMapScreen extends StatefulWidget {
   const HospitalMapScreen({super.key});
@@ -12,7 +14,8 @@ class HospitalMapScreen extends StatefulWidget {
   @override
   State<HospitalMapScreen> createState() => _HospitalMapScreenState();
 }
-// Set map defult Bangkok
+
+// Set map default Bangkok
 class _HospitalMapScreenState extends State<HospitalMapScreen> {
   GoogleMapController? _mapController;
   final Map<MarkerId, Marker> _hospitalMarkers = {};
@@ -29,6 +32,26 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
   @override
   void initState() {
     super.initState();
+    _checkAuthentication();
+  }
+
+  Future<void> _checkAuthentication() async {
+    final token = await UserService.getToken();
+    if (token == null || token.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showErrorDialog(
+          'Authentication Required',
+          'Please log in to use the map features.',
+        );
+        
+        Future.delayed(Duration(seconds: 2), () {
+          context.go('/login');
+        });
+      });
+      return;
+    }
+    
+    // User is authenticated, proceed to check location permissions
     _checkLocationPermission();
   }
 
@@ -37,6 +60,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
     _mapController?.dispose();
     super.dispose();
   }
+
   // Check LocationPermission
   Future<void> _checkLocationPermission() async {
     bool serviceEnabled;
@@ -73,6 +97,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
 
     await _getCurrentLocation();
   }
+
   // Get LocationPermission
   Future<void> _getCurrentLocation() async {
     try {
@@ -103,12 +128,17 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
       );
     }
   }
+
   //backend NearbyHospitals
   Future<void> _fetchNearbyHospitals(LatLng currentLocation) async {
-    const String backendUrl = 'http://10.0.2.2:5000/nearby-hospitals';
     try {
-      final response = await http.get(Uri.parse(
-          '$backendUrl?lat=${currentLocation.latitude}&lng=${currentLocation.longitude}'));
+      // Replace direct http call with HttpClient.get
+      final response = await HttpClient.get(
+        '/nearby-hospitals?lat=${currentLocation.latitude}&lng=${currentLocation.longitude}',
+      );
+
+      print('Fetching hospitals from: ${HttpClient.baseUrl}/nearby-hospitals');
+
       if (response.statusCode == 200) {
         final List hospitals = json.decode(response.body);
         setState(() {
@@ -123,11 +153,16 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
             );
           }
         });
+      } else if (response.statusCode == 401) {
+        // Handle authentication errors
+        _showErrorDialog(
+            'Authentication Error', 'Please log in to use this feature');
       } else {
-        _showErrorDialog('Error', 'Failed to fetch hospitals');
+        _showErrorDialog(
+            'Error', 'Failed to fetch hospitals: ${response.statusCode}');
       }
     } catch (e) {
-      _showErrorDialog('Error', 'Could not connect to the server');
+      _showErrorDialog('Error', 'Could not connect to the server: $e');
     }
   }
 
@@ -187,12 +222,11 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
       return;
     }
 
-    const String backendUrl = 'http://10.0.2.2:5000/search-hospitals';
     try {
-      // Log Backend
-      print('Sending request to: $backendUrl?query=$query');
+      // Replace with HttpClient.get
+      print('Sending request to: /search-hospitals?query=$query');
 
-      final response = await http.get(Uri.parse('$backendUrl?query=$query'));
+      final response = await HttpClient.get('/search-hospitals?query=$query');
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -209,8 +243,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                   hospital['name'] != null && hospital['location'] != null)
               .map((hospital) {
             return {
-              'name': hospital['name'] ??
-                  'Unknown Hospital', // Default to 'Unknown Hospital'
+              'name': hospital['name'] ?? 'Unknown Hospital',
               'location': hospital['location'] ?? {'lat': 0.0, 'lng': 0.0},
               'address': hospital['address'] ?? 'Unknown Address',
               'rating': hospital['rating'] ?? 'No Rating',
@@ -226,20 +259,23 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
             );
           }
         });
+      } else if (response.statusCode == 401) {
+        _showErrorDialog(
+            'Authentication Error', 'Please log in to use this feature');
       } else {
         _showErrorDialog('Error', 'No hospitals found matching your search');
         print('No hospitals found matching the search query');
       }
     } catch (e) {
       print('Error occurred: $e');
+      _showErrorDialog('Error', 'Could not connect to the server: $e');
     }
   }
 
   // SearchBar
   void _onSearchChanged(String query) {
     if (query.isEmpty) {
-      _fetchNearbyHospitals(
-          _currentPosition.target); 
+      _fetchNearbyHospitals(_currentPosition.target);
     } else {
       _searchHospitals(query);
     }
@@ -255,9 +291,10 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
     final position = LatLng(lat, lng);
 
     _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(position, 16.0), 
+      CameraUpdate.newLatLngZoom(position, 16.0),
     );
   }
+
   // UX UI Design
   Widget build(BuildContext context) {
     return Scaffold(
@@ -275,15 +312,19 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
             top: 40,
             left: 20,
             child: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
                 setState(() {
-                  _selectedHospital = null; 
-                  _searchController.clear(); 
+                  _selectedHospital = null;
+                  _searchController.clear();
                 });
+
+                // Reset camera position
                 _mapController?.animateCamera(
                   CameraUpdate.newCameraPosition(_currentPosition),
                 );
+
+                context.pop();
               },
             ),
           ),
@@ -307,8 +348,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                         child: CircleAvatar(
                           backgroundColor: _selectedHospital == null
                               ? Color(0xFF12358F)
-                              : Colors
-                                  .red, 
+                              : Colors.red,
                           radius: 16,
                           child: Icon(
                             _selectedHospital == null
@@ -321,8 +361,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                       ),
                       filled: true,
                       fillColor: Colors.white,
-                      enabled: _selectedHospital ==
-                          null,
+                      enabled: _selectedHospital == null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25.0),
                         borderSide: BorderSide.none,
@@ -377,8 +416,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                     leading: Icon(Icons.local_hospital,
                                         color: Colors.red),
                                     onTap: () {
-                                      _onHospitalSelected(
-                                          hospital);
+                                      _onHospitalSelected(hospital);
                                     },
                                   );
                                 },
