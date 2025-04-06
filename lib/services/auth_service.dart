@@ -1,186 +1,248 @@
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:client/services/user_service.dart';
 import 'package:client/services/http_client.dart';
+import 'package:client/services/user_api_service.dart'; 
+import 'package:go_router/go_router.dart'; 
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  // Update your GoogleSignIn initialization
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
 
-  final String _baseUrl = 'http://10.0.2.2:5000';
-
-  // Google Sign-In
+  // Update the signInWithGoogle method with more error details
   Future<Map<String, dynamic>?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        return null; // User canceled the sign-in
+      // Clear previous sign-in state
+      try {
+        await _googleSignIn.signOut();
+        print('Successfully signed out from previous Google session');
+      } catch (e) {
+        print('Error signing out from Google: $e');
+        // Continue anyway
+      }
+      
+      print('Starting Google Sign In...');
+      
+      // Start the Google sign-in process with more detailed error handling
+      GoogleSignInAccount? googleUser;
+      try {
+        googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) {
+          print('Sign in aborted by user');
+          return null;
+        }
+      } catch (signInError) {
+        print('Detailed Google Sign-In error: $signInError');
+        
+        // Check if it's a common error
+        if (signInError.toString().contains('10:')) {
+          print('Error 10 usually means the OAuth client ID or SHA-1 is misconfigured');
+        }
+        
+        rethrow; // Let the UI handle the error
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      print("Google Auth Token: ${googleAuth.idToken}");
-
-      // Check if the ID token is present
+      print('Signed in as: ${googleUser.email}');
+      print('Display name: ${googleUser.displayName}');
+      print('Photo URL: ${googleUser.photoUrl}');
+      print('Server auth code: ${googleUser.serverAuthCode}');
+      
+      // Get authentication details from Google
+      GoogleSignInAuthentication? googleAuth;
+      try {
+        googleAuth = await googleUser.authentication;
+        print('Successfully obtained Google authentication tokens');
+      } catch (authError) {
+        print('Error getting Google authentication tokens: $authError');
+        rethrow;
+      }
+      
+      print('ID token length: ${googleAuth.idToken?.length ?? 0}');
+      print('Access token length: ${googleAuth.accessToken?.length ?? 0}');
+      
       if (googleAuth.idToken == null) {
         throw Exception("Google authentication token is null");
       }
 
-      // Send the ID token to the backend for verification and registration check
+      try {
+        if (googleAuth.idToken != null) {
+          final parts = googleAuth.idToken!.split('.');
+          if (parts.length >= 2) {
+            // Decode the payload (middle part)
+            final normalizedPayload = base64Url.normalize(parts[1]);
+            final payloadJson = utf8.decode(base64Url.decode(normalizedPayload));
+            final payload = json.decode(payloadJson);
+            print('Token payload: $payload');
+            print('TOKEN AUDIENCE: ${payload['aud']}');
+          }
+        }
+      } catch (e) {
+        print('Error decoding token: $e');
+      }
+      
+      // Send the Google token to your backend
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/googlelogin'),
+        Uri.parse('${HttpClient.baseUrl}/api/googlelogin'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode({'idtoken': googleAuth.idToken}),
+        body: json.encode({
+          'idtoken': googleAuth.idToken,
+        }),
       );
-
+      
+      debugPrint('Response status: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
+      
       final data = json.decode(response.body);
-
+      
       if (response.statusCode == 200) {
-
-        // Check if the user is registered
-        if (data['isRegister']) {
-
-          // User is already registered, navigate to home
+        if (data['isRegister'] == true) {
+          // User exists, save JWT token and return success
           await UserService.saveToken(data['token']);
+          final userId = data['user']['id'].toString();
+          await UserService.saveUserId(userId);
+          
           return {
-            'userData': googleUser,
-            'idToken': googleAuth.idToken,
             'isRegister': true,
+            'user': data['user'],
+            'token': data['token'],
           };
         } else {
-
-          // User is not registered, proceed to registration
+          // User not registered, return data for registration
           return {
-            'userData': googleUser,
-            'idToken': googleAuth.idToken,
             'isRegister': false,
+            'userData': {
+              'email': googleUser.email,
+              'picture': googleUser.photoUrl,
+              'first_name': googleUser.displayName?.split(' ').first ?? '',
+              'last_name': googleUser.displayName?.split(' ').skip(1).join(' ') ?? '',
+            },
+            'idToken': googleAuth.idToken,
+            'provider': 'google',
           };
         }
       } else {
-        throw Exception('Failed to authenticate with backend');
+        throw Exception('Backend error: ${response.body}');
       }
-    } catch (error) {
-      print("Error signing in with Google: $error");
-      return null;
-    }
-  }
-
-  // Facebook Sign In
-  Future<Map<String, dynamic>?> signInWithFacebook() async {
-    try {
-      final LoginResult loginResult = await FacebookAuth.instance.login();
-      if (loginResult.status != LoginStatus.success) return null;
-
-      final accessToken = loginResult.accessToken!.tokenString;
-
-      // Use the accessToken to authenticate with Firebase
-      final AuthCredential credential = FacebookAuthProvider.credential(accessToken);
-
-      // Sign in with Firebase using Facebook credentials
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
-      
-      final User? user = userCredential.user;
-
-      if (user != null) {
-        print("User signed in: ${user.displayName}");
-        await UserService.saveToken(accessToken);
-        return {
-          'userData': user,
-          'idToken': accessToken,
-          'provider': 'facebook',
-        };
-      }
-      throw Exception("User authentication failed with Facebook");
     } catch (e) {
-      print('Error signing in with Facebook: $e');
+      debugPrint("Error signing in with Google: $e");
       rethrow;
     }
   }
 
-  // Complete Registration for Google or Facebook Login
+  // Complete Registration for Google Login
   Future<Map<String, dynamic>?> completeRegistration(Map<String, dynamic> registrationData) async {
     try {
-      final String endpoint = registrationData['provider'] == 'google'
-          ? '/api/googleregister'
-          : '/api/facebookregister';
-
+      // Make sure we're sending all the data needed by your backend
+      final completeData = {
+        ...registrationData,
+        'email': registrationData['userData']?['email'],
+        'picture': registrationData['userData']?['picture'],
+        'username': registrationData['userData']?['username'],
+      };
+      
+      debugPrint('Sending registration data: ${json.encode(completeData)}');
+      
       final response = await http.post(
-        Uri.parse('$_baseUrl$endpoint'),
+        Uri.parse('${HttpClient.baseUrl}/api/googleregister'),
         headers: {'Content-Type': 'application/json'},
-        body: json.encode(registrationData),
+        body: json.encode(completeData),
       );
 
       final data = json.decode(response.body);
-      if (response.statusCode == 201 && data['success']) {
-        if (data['token'] != null) {
-          await _auth.signInWithCustomToken(data['token']);
-        }
-        return data; // Returning the user data and token if registration was successful
+      debugPrint('Registration response: ${response.statusCode}, ${response.body}');
+      
+      if (response.statusCode == 201 && data['success'] == true) {
+        await UserService.saveToken(data['token']);
+        await UserService.saveUserId(data['user']['id']);
+        
+        return {
+          'success': true,
+          'message': 'Registration successful',
+          'user': data['user'],
+        };
+      } else {
+        throw Exception('Registration failed: ${data['message']}');
       }
-      throw Exception('Registration failed: ${response.body}');
     } catch (e) {
-      print('Error completing registration: $e');
-      rethrow;
+      debugPrint('Error completing registration: $e');
+      return {
+        'success': false,
+        'message': 'Registration failed: $e',
+      };
+    }
+  }
+
+  // Complete Google Registration
+  Future<Map<String, dynamic>> completeGoogleRegistration(
+      Map<String, dynamic> userData, 
+      String idToken, 
+      String phoneNumber, 
+      String gender, 
+      DateTime? birthDate) async {
+    try {
+      final requestData = {
+        'id_token': idToken,
+        'phonenumber': phoneNumber,
+        'first_name': userData['first_name'],
+        'last_name': userData['last_name'],
+        'sex': gender,
+        'dob': birthDate?.toIso8601String() ?? DateTime.now().toIso8601String(),
+        'email': userData['email'],
+        'profile_picture': userData['picture'],
+      };
+      
+      print('Complete request data details:');
+      print('- First name: ${userData['first_name']}');
+      print('- Last name: ${userData['last_name']}');
+      print('- Phone: $phoneNumber');
+      print('- Gender: $gender');
+      print('- DOB: ${birthDate?.toIso8601String() ?? "null"}');
+      print('- Picture URL: ${userData['picture']}');
+      
+      debugPrint('Sending Google registration data: ${json.encode(requestData)}');
+      
+      final response = await http.post(
+        Uri.parse('${HttpClient.baseUrl}/api/googleregister'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(requestData),
+      );
+      
+      debugPrint('Registration response: ${response.statusCode}, ${response.body}');
+      final data = json.decode(response.body);
+      
+      if (response.statusCode == 201) {
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Registration successful',
+          'user': data['user']
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Registration failed'
+        };
+      }
+    } catch (e) {
+      debugPrint('Google registration error: $e');
+      return {
+        'success': false,
+        'message': 'Connection error: $e'
+      };
     }
   }
 
   // Sign Out
   Future<void> signOut() async {
     try {
-      await _auth.signOut();
       await _googleSignIn.signOut();
-      await FacebookAuth.instance.logOut();
+      await UserService.logout();
     } catch (e) {
       print('Error signing out: $e');
       rethrow;
-    }
-  }
-
-  // Get current user
-  User? get currentUser => _auth.currentUser;
-
-  // Auth state changes
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
-
-  // Login with username and password
-  Future<Map<String, dynamic>> login(String username, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse('${HttpClient.baseUrl}/api/login'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "username": username,
-          "password": password,
-        }),
-      );
-
-      final data = jsonDecode(response.body);
-      
-      if (response.statusCode == 200) {
-        // Save user ID and token
-        await UserService.saveUserId(data['user']['id'].toString());
-        await UserService.saveToken(data['token']);
-        
-        return {
-          'success': true,
-          'message': data['message'],
-          'user': data['user']
-        };
-      } else {
-        return {
-          'success': false,
-          'message': data['message'] ?? 'Login failed'
-        };
-      }
-    } catch (e) {
-      debugPrint('Login error: $e');
-      return {
-        'success': false,
-        'message': 'Connection error: $e'
-      };
     }
   }
 
@@ -193,5 +255,78 @@ class AuthService {
   // Logout
   Future<void> logout() async {
     await UserService.logout();
+  }
+
+  // Navigate after login
+  Future<void> navigateAfterLogin(BuildContext context, String userId) async {
+    try {
+      if (userId.isEmpty) {
+        print('Empty user ID in navigateAfterLogin, going to login page');
+        if (context.mounted) context.go('/login');
+        return;
+      }
+      
+      // Create instance of ApiService
+      final apiService = ApiService();
+      final userData = await apiService.getUser(userId);
+      final isOphthalmologist = userData['is_opthamologist'] ?? false;
+      
+      print('Role check - User is ophthalmologist: $isOphthalmologist');
+      
+      if (context.mounted) {
+        if (isOphthalmologist) {
+          context.go('/home-opht');
+        } else {
+          context.go('/home');
+        }
+      }
+    } catch (e) {
+      print('Error navigating after login: $e');
+      if (context.mounted) {
+        context.go('/home'); // Default to regular home on error
+      }
+    }
+  }
+
+  // Login
+  Future<Map<String, dynamic>> login(String username, String password) async {
+    try {
+      print('Auth service: Preparing login request for user $username');
+      
+      final response = await http.post(
+        Uri.parse('${HttpClient.baseUrl}/api/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'username': username,
+          'password': password,
+        }),
+      );
+      
+      print('Auth service: Login response status code: ${response.statusCode}');
+      print('Auth service: Response body: ${response.body}');
+      
+      final data = json.decode(response.body);
+      
+      if (response.statusCode == 200) {
+        print('Auth service: Login successful with status 200');
+        
+        // Make sure success=true in the returned data
+        return {
+          'success': true,
+          'message': data['message'] ?? 'Login successful',
+          'user': data['user'] ?? {},
+          'token': data['token'] ?? '',
+        };
+      } else {
+        print('Auth service: Login failed with message: ${data['message']}');
+        return {
+          'success': false,
+          'message': data['message'] ?? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+        };
+      }
+    } catch (e) {
+      print('Auth service: Exception during login: ${e.toString()}');
+      rethrow;
+    }
   }
 }
