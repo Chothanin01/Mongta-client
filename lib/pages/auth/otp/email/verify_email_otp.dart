@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/services/api_service.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pin_code_fields/pin_code_fields.dart'; // Add this dependency
+import 'package:pin_code_fields/pin_code_fields.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   final Map<String, dynamic> params;
@@ -168,10 +168,6 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
     }
   }
 
-  void _skip() {
-    context.go('/login');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -330,20 +326,6 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-            
-            const SizedBox(height: 20),
-            
-            TextButton(
-              onPressed: _skip,
-              child: const Text(
-                '-',
-                style: TextStyle(
-                  color: MainTheme.blueText,
-                  fontSize: 14,
-                  fontFamily: 'BaiJamjuree',
-                ),
-              ),
-            ),
           ],
         ),
       ),

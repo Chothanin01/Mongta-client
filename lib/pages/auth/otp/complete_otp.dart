@@ -3,22 +3,8 @@ import 'package:client/core/theme/theme.dart';
 import 'package:client/core/components/entryForm/entry_button.dart';
 import 'package:go_router/go_router.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: OtpPage(),
-    );
-  }
-}
-
-class OtpPage extends StatelessWidget {
-  const OtpPage({super.key});
+class CompleteOtpPage extends StatelessWidget {
+  const CompleteOtpPage({super.key});
 
   // Changed: Navigate to login page instead of home
   void goToLogin(BuildContext context) {
@@ -71,7 +57,7 @@ class OtpPage extends StatelessWidget {
                         const Padding(
                           padding: EdgeInsets.symmetric(horizontal: 20.0),
                           child: Text(
-                            'ตอนนี้บัญชีของคุณทำการสมัครเสร็จสิ้นเเล้วว\nสามารถเข้าสู่ระบบเพื่อทำการใช้งาน',
+                            'ตอนนี้บัญชีของคุณทำการสมัครเสร็จสิ้นเเล้ว\nสามารถเข้าสู่ระบบเพื่อทำการใช้งาน',
                             style: TextStyle(
                               color: MainTheme.mainText,
                               fontSize: 14,
@@ -82,21 +68,22 @@ class OtpPage extends StatelessWidget {
                             textAlign: TextAlign.center,
                           ),
                         ),
-                        
-                        const SizedBox(height: 100),
-                        
-                        EntryButton(
-                          onTap: () => goToLogin(context),
-                          buttonText: "เสร็จสิ้น", 
-                        ),
-                        
-                        const SizedBox(height: 30),
                       ],
                     ),
                   ),
                 ),
               ),
             ),
+            
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 36.0),
+              child: EntryButton(
+                onTap: () => goToLogin(context),
+                buttonText: "เสร็จสิ้น", 
+              ),
+            ),
+
+            const SizedBox(height: 64),
           ],
         ),
       ),
