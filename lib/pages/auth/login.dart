@@ -7,8 +7,8 @@ import 'package:client/core/components/entryForm/entry_textfield.dart';
 import 'package:iconify_flutter/icons/bxs.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client/services/auth_service.dart';
+import 'package:client/services/user_service.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -39,50 +39,122 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
+      print('Attempting login with username: $username');
+      
       final result = await _authService.login(username, password);
+      
+      print('Login response: ${result.toString()}');
       
       if (!context.mounted) return;
       
-      if (result['success']) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("เข้าสู่ระบบสำเร็จ!")),
-        );
-        context.go('/home'); // Navigate on success
+      if (result['success'] == true) {
+        print('Login successful, extracting user data...');
+        print('Full response: $result');
+        
+        // Check if user object exists and has an ID
+        final user = result['user'] ?? {};
+        final userId = user['id']?.toString() ?? ''; // Convert ID to string
+        
+        print('Extracted user ID: $userId');
+        
+        // Save user data properly
+        await UserService.saveUserId(userId);
+        await UserService.saveToken(result['token'] ?? '');
+        
+        // Navigate based on role
+        await _authService.navigateAfterLogin(context, userId);
       } else {
+        print('Login failed with message: ${result['message']}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'])),
         );
       }
     } catch (e) {
+      print('Login error details: ${e.toString()}');
+      
+      // Show more informative error message based on error type
+      String errorMessage = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+      
+      if (e is http.ClientException) {
+        errorMessage = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต";
+        print('HTTP client error: ${e.message}');
+      } else if (e.toString().contains('SocketException')) {
+        errorMessage = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต";
+        print('Socket connection error');
+      } else if (e.toString().contains('TimeoutException')) {
+        errorMessage = "การเชื่อมต่อใช้เวลานานเกินไป โปรดลองอีกครั้ง";
+        print('Connection timeout');
+      } else if (e.toString().contains('FormatException')) {
+        errorMessage = "เกิดข้อผิดพลาดในการประมวลผลข้อมูล";
+        print('Response format error');
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("เกิดข้อผิดพลาดในการเชื่อมต่อ")),
+        SnackBar(content: Text(errorMessage)),
       );
     }
   }
 
   Future<void> socialSignIn(BuildContext context, String provider) async {
     try {
-      final result = provider == 'google'
-          ? await _authService.signInWithGoogle()
-          : await _authService.signInWithFacebook();
-      if (!context.mounted) return;
+      print('Starting $provider sign-in process');
+      
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: MainTheme.blueText,
+            ),
+          );
+        },
+      );
+      
+      print('Calling _authService.signInWithGoogle()');
+      final result = await _authService.signInWithGoogle();
+      print('Google sign-in result: ${result?.toString() ?? "null"}');
+      
+      // Hide loading indicator
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+      
+      if (!context.mounted || result == null) {
+        print('Context not mounted or result is null');
+        return;
+      }
 
-      if (result != null) {
-        if (!result['isRegister']) {
-          // Navigate to registration page if the user is not registered
-          context.push('/ggfb_register', extra: {
-            'userData': result['userData'],
-            'idToken': result['idToken'],
-            'provider': provider,
-          });
-        } else {
-          // User is registered, navigate to home page
-          context.go('/home');
-        }
+      if (result['isRegister'] == true) {
+        // User exists, token already saved in authService
+        print('User exists, navigating to appropriate home page');
+        final userId = result['user']['id'].toString();
+        await UserService.saveUserId(userId);
+        
+        // Use the role-based navigation method
+        await _authService.navigateAfterLogin(context, userId);
+      } else {
+        // User is not registered, navigate to registration page
+        print('User not registered, navigating to registration page');
+        context.push('/ggfb_register', extra: {
+          'userData': result['userData'],
+          'idToken': result['idToken'],
+          'provider': 'google', // Only Google is supported now
+        });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Google/Facebook เข้าสู่ระบบล้มเหลว')));
+      print('Google sign-in error: ${e.toString()}');
+      
+      if (context.mounted) {
+        // Hide loading indicator if still showing
+        Navigator.of(context, rootNavigator: true).pop();
+        
+        // Show appropriate error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('เข้าสู่ระบบด้วย Google ล้มเหลว: ${e.toString()}')),
+        );
+      }
     }
   }
 
@@ -127,19 +199,22 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 19), // Spacer
 
                   // Link for "ลืมรหัสผ่าน?"
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 40.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(
-                          'ลืมรหัสผ่าน?',
-                          style: TextStyle(
-                            color: MainTheme.mainText,
-                            fontSize: 16,
-                            fontFamily: 'BaiJamjuree',
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: -0.5,
+                        GestureDetector(
+                          onTap: () => context.push('/forgot-password-mail'),
+                          child: const Text(
+                            'ลืมรหัสผ่าน?',
+                            style: TextStyle(
+                              color: MainTheme.mainText,
+                              fontSize: 16,
+                              fontFamily: 'BaiJamjuree',
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: -0.5,
+                            ),
                           ),
                         ),
                       ],
@@ -192,7 +267,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 17), // Spacer
 
-                  // Sign-in buttons for Google & Facebook
+                  // Sign-in buttons for Google
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
