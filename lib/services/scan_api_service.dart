@@ -32,7 +32,6 @@ class ScanApiService {
         Uri.parse('${HttpClient.baseUrl}/api/savescanlog'),
       );
       
-      // Add required fields
       request.fields['user_id'] = userId;
       request.fields['line_right'] = lineRightValue;
       request.fields['line_left'] = lineLeftValue;
@@ -44,7 +43,6 @@ class ScanApiService {
       request.fields['status'] = 'pending';
       request.fields['require_processing'] = 'true';
       
-      // Add ONLY the original images
       final rightEyeStream = http.ByteStream(rightEyeImage.openRead());
       final rightEyeLength = await rightEyeImage.length();
       final rightEyeMultipart = http.MultipartFile(
@@ -95,7 +93,6 @@ class ScanApiService {
     }
   }
   
-  // Add this method to provide mock scan results
   static Map<String, dynamic> _generateMockScanResult() {
     return {
       'success': true,
@@ -163,8 +160,6 @@ class ScanApiService {
           orElse: () => throw Exception('Scan not found with ID: $scanId'),
         );
         
-        // Add description fields directly to the scan object if they're missing
-        // These fields come from the savescanlog API but might not be included in scanlog API
         if (!targetScan.containsKey('description_left') || !targetScan.containsKey('description_right')) {
           targetScan['description_left'] = targetScan['photo']?['description_left'] ?? 
               "ไม่พบข้อมูลการวิเคราะห์ดวงตาซ้าย";
@@ -183,7 +178,6 @@ class ScanApiService {
     }
   }
   
-  // Add this method to cache scan results from savescanlog API
   static Future<void> cacheScanResult(Map<String, dynamic> scanResult) async {
     try {
       // Extract scan data - either directly or from scanlog object
