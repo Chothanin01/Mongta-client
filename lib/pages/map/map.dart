@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:client/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -7,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client/services/http_client.dart';
 import 'package:client/services/user_service.dart';
+import 'dart:io' show Platform;
+import 'package:client/main.dart';
 
 class HospitalMapScreen extends StatefulWidget {
   const HospitalMapScreen({super.key});
@@ -43,14 +46,14 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
           'Authentication Required',
           'Please log in to use the map features.',
         );
-        
+
         Future.delayed(Duration(seconds: 2), () {
           context.go('/login');
         });
       });
       return;
     }
-    
+
     // User is authenticated, proceed to check location permissions
     _checkLocationPermission();
   }
@@ -63,56 +66,72 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
 
   // Check LocationPermission
   Future<void> _checkLocationPermission() async {
+    // Flag location services as media picker to prevent lifecycle issues
+    lifecycleObserver.setMediaPickerActive();
+
     bool serviceEnabled;
     LocationPermission permission;
 
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      _showErrorDialog(
-        'Location Services Disabled',
-        'Please enable location services to use this feature.',
-      );
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+    try {
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        lifecycleObserver.setMediaPickerInactive();
         _showErrorDialog(
-          'Permission Denied',
-          'Location permission is required to use this feature.',
+          'Location Services Disabled',
+          'Please enable location services to use this feature.',
         );
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      _showErrorDialog(
-        'Permission Denied Forever',
-        'Location permissions are permanently denied. Please enable permissions from settings.',
-      );
-      return;
-    }
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          lifecycleObserver.setMediaPickerInactive();
+          _showErrorDialog(
+            'Permission Denied',
+            'Location permissions are denied. Please grant permissions to use this feature.',
+          );
+          return;
+        }
+      }
 
-    await _getCurrentLocation();
+      if (permission == LocationPermission.deniedForever) {
+        lifecycleObserver.setMediaPickerInactive();
+        _showErrorDialog(
+          'Permission Denied Forever',
+          'Location permissions are permanently denied. Please enable permissions from settings.',
+        );
+        return;
+      }
+
+      await _getCurrentLocation();
+    } finally {
+      // Reset flag regardless of outcome
+      lifecycleObserver.setMediaPickerInactive();
+    }
   }
 
   // Get LocationPermission
   Future<void> _getCurrentLocation() async {
     try {
+      lifecycleObserver.setMediaPickerActive();
+
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+
+      lifecycleObserver.setMediaPickerInactive();
+
       final LatLng currentLatLng =
           LatLng(position.latitude, position.longitude);
       setState(() {
         _currentPosition = CameraPosition(target: currentLatLng, zoom: 15);
         _addMarker(
-          'current_location',
+          'Your Location',
           currentLatLng,
-          'Your Current Location',
-          BitmapDescriptor.hueBlue,
+          'Your current location',
+          BitmapDescriptor.hueAzure,
         );
       });
       _mapController?.animateCamera(
@@ -122,6 +141,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
       );
       await _fetchNearbyHospitals(currentLatLng);
     } catch (e) {
+      lifecycleObserver.setMediaPickerInactive();
       _showErrorDialog(
         'Location Error',
         'Could not determine your current location. Please try again.',
@@ -203,12 +223,21 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        title: Text(
+          title,
+          style: TextStyle(fontFamily: 'BaiJamjuree'),
+        ),
+        content: Text(
+          message,
+          style: TextStyle(fontFamily: 'BaiJamjuree'),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(
+              'ตกลง',
+              style: TextStyle(fontFamily: 'BaiJamjuree'),
+            ),
           ),
         ],
       ),
@@ -295,6 +324,113 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
     );
   }
 
+  Widget _buildNavigationButton() {
+    return GestureDetector(
+      onTap: () async {
+        if (_selectedHospital == null) {
+          return;
+        }
+
+        final lat = _selectedHospital!['location']['lat'];
+        final lng = _selectedHospital!['location']['lng'];
+
+        // Create platform-appropriate URL
+        String url;
+        if (Platform.isAndroid) {
+          // For Android, use geo URI
+          url =
+              'geo:$lat,$lng?q=$lat,$lng(${Uri.encodeComponent(_selectedHospital!['name'])})';
+        } else if (Platform.isIOS) {
+          // For iOS, use comgooglemaps://
+          url = 'comgooglemaps://?q=$lat,$lng';
+        } else {
+          // Fallback for other platforms (like Web)
+          url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+        }
+
+        // Check and launch URL
+        if (await canLaunch(url)) {
+          await launch(url);
+        } else {
+          // Fallback to web if app launching fails
+          final fallbackUrl =
+              'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+          if (await canLaunch(fallbackUrl)) {
+            await launch(fallbackUrl);
+          } else {
+            _showErrorDialog('Error', 'ไม่สามารถเปิด Google Maps ได้');
+          }
+        }
+      },
+      child: CircleAvatar(
+        backgroundColor: Colors.blue,
+        radius: 16,
+        child: Icon(
+          Icons.directions,
+          color: Colors.white,
+          size: 24,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBackButtons() {
+    return Positioned(
+      top: 40,
+      left: 20,
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.home, color: MainTheme.white),
+            onPressed: () {
+              context.go('/home');
+            },
+            style: IconButton.styleFrom(
+              backgroundColor: MainTheme.navbarFocusText,
+              padding: EdgeInsets.all(8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+                side: BorderSide(color: Colors.grey.shade300),
+              ),
+            ),
+          ),
+
+          // Only show back button when a hospital is selected
+          if (_selectedHospital != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: IconButton(
+                // **  อันนี้ใช้ Icons.arrow_back แทนนะ เพราะไม่ได้เป็นปุ่มกลับปุ่มเดียวนะ
+                icon: const Icon(Icons.arrow_back, color: MainTheme.white),
+                onPressed: () {
+                  setState(() {
+                    _selectedHospital = null;
+                    _searchController.clear();
+                  });
+
+                  // Reset camera position to user's location or default location
+                  final target = _currentPosition.target;
+                  _mapController?.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                      CameraPosition(target: target, zoom: 15),
+                    ),
+                  );
+                },
+                style: IconButton.styleFrom(
+                  backgroundColor: MainTheme.navbarFocusText,
+                  padding: EdgeInsets.all(8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   // UX UI Design
   Widget build(BuildContext context) {
     return Scaffold(
@@ -308,26 +444,19 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
               _setMapStyle();
             },
           ),
-          Positioned(
-            top: 40,
-            left: 20,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () {
-                setState(() {
-                  _selectedHospital = null;
-                  _searchController.clear();
-                });
 
-                // Reset camera position
-                _mapController?.animateCamera(
-                  CameraUpdate.newCameraPosition(_currentPosition),
-                );
+          // Replace the old back button with our new back buttons component
+          _buildBackButtons(),
 
-                context.pop();
-              },
+          // Rest of your UI components...
+          // When you have the hospital detail panel showing, add the navigation button
+          if (_selectedHospital != null)
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: _buildNavigationButton(),
             ),
-          ),
+
           Positioned(
             bottom: 0,
             left: 0,
@@ -435,7 +564,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                           fontWeight: FontWeight.w500,
                                           fontFamily: 'BaiJamjuree',
                                           color: Colors.black,
-                                          letterSpacing: 0,
+                                          letterSpacing: -0.5,
                                         ),
                                       ),
                                     ),
@@ -541,33 +670,14 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                                         'ไม่พบเบอร์โทร',
                                                     style: TextStyle(
                                                       fontSize: 14,
+                                                      fontFamily:
+                                                          'BaiJamjuree',
                                                       fontWeight:
                                                           FontWeight.w400,
-                                                      fontFamily: 'BaiJamjuree',
-                                                      letterSpacing: 0,
                                                     ),
                                                   ),
                                                   Spacer(),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      final lat =
-                                                          _selectedHospital![
-                                                                  'location']
-                                                              ['lat'];
-                                                      final lng =
-                                                          _selectedHospital![
-                                                                  'location']
-                                                              ['lng'];
-                                                      final url =
-                                                          'https://www.google.com/maps/search/?q=$lat,$lng';
-                                                      launch(url);
-                                                    },
-                                                    child: Image.asset(
-                                                      'assets/images/Group 25.png',
-                                                      width: 80,
-                                                      height: 80,
-                                                    ),
-                                                  ),
+                                                  _buildNavigationButton(),
                                                 ],
                                               ),
                                             ],

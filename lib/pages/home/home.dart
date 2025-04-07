@@ -7,7 +7,6 @@ import 'package:iconify_flutter/icons/mdi.dart';
 import '/services/user_service.dart'; 
 import 'package:go_router/go_router.dart'; 
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -144,23 +143,30 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    
     return Scaffold(
       backgroundColor: MainTheme.mainBackground,
       appBar: AppBar(
-        toolbarHeight: 60,
+        toolbarHeight: screenHeight * 0.075, 
         elevation: 0,
         backgroundColor: MainTheme.mainBackground,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 20.0),
+          padding: EdgeInsets.only(
+            left: screenWidth * 0.04,  
+            top: screenHeight * 0.025  
+          ),
           child: Container(
-            width: 40, // กำหนดขนาดที่แน่นอน
-            height: 40,
+            width: screenWidth * 0.1,  
+            height: screenWidth * 0.1,  
             decoration: BoxDecoration(
               color: MainTheme.mainBackground,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(screenWidth * 0.04), 
               border: Border.all(
                 color: MainTheme.black,
-                width: 0.5,
+                width: 0.5, // Kept as is, very small value
               ),
               boxShadow: [
                 BoxShadow(
@@ -171,50 +177,34 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(screenWidth * 0.04), 
               child: profilePicture != null && profilePicture!.isNotEmpty
                   ? Image.network(
                       profilePicture!,
                       fit: BoxFit.cover,
-                      width: 40,
-                      height: 40,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Center(
-                          child: Text(
-                            'กฟ', // fallback ถ้ารูปโหลดไม่ได้
-                            style: TextStyle(
-                              color: MainTheme.blueText,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      },
-                    )
-                  : Center(
-                      child: Text(
-                        'กฟ', // default ถ้าไม่มี profile picture
-                        style: TextStyle(
-                          color: MainTheme.blueText,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.person,
+                        size: screenWidth * 0.06, 
+                        color: Colors.grey,
                       ),
+                    )
+                  : Icon(
+                      Icons.person,
+                      size: screenWidth * 0.06, 
+                      color: Colors.grey,
                     ),
             ),
           ),
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0, top: 8.0),
+            padding: EdgeInsets.only(
+              right: screenWidth * 0.04,  
+              top: screenHeight * 0.01    
+            ),
             child: Image.asset(
               'assets/images/SE_logo 3.png',
-              width: 60,
-              height: 60,
+              width: screenWidth * 0.15,  
               fit: BoxFit.contain,
             ),
           ),
@@ -222,7 +212,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(screenWidth * 0.04),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
