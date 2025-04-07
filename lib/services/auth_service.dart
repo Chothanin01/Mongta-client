@@ -6,6 +6,9 @@ import 'package:client/services/user_service.dart';
 import 'package:client/services/http_client.dart';
 import 'package:client/services/user_api_service.dart'; 
 import 'package:go_router/go_router.dart'; 
+import 'package:client/services/status_service.dart';
+import 'package:client/services/socket_service.dart';
+
 
 class AuthService {
   // Update your GoogleSignIn initialization
@@ -104,6 +107,12 @@ class AuthService {
           await UserService.saveToken(data['token']);
           final userId = data['user']['id'].toString();
           await UserService.saveUserId(userId);
+          
+          // Set user status to online
+          await StatusService.setOnline();
+          
+          // Initialize socket connection
+          await SocketService.initSocket();
           
           return {
             'isRegister': true,
@@ -215,6 +224,16 @@ class AuthService {
       final data = json.decode(response.body);
       
       if (response.statusCode == 201) {
+        // Save credentials
+        await UserService.saveToken(data['token'] ?? '');
+        await UserService.saveUserId(data['user']['id'].toString());
+        
+        // Set user as online after registration
+        await StatusService.setOnline();
+        
+        // Initialize socket connection
+        await SocketService.initSocket();
+        
         return {
           'success': true,
           'message': data['message'] ?? 'Registration successful',
@@ -254,7 +273,17 @@ class AuthService {
 
   // Logout
   Future<void> logout() async {
-    await UserService.logout();
+    try {
+      // First, disconnect socket
+      SocketService.disconnect();
+      
+      // Then clear credentials and make HTTP call to update status
+      await UserService.logout();
+    } catch (e) {
+      print('Error during logout: $e');
+      // Use the public method instead
+      await UserService.clearUserDataOnly();
+    }
   }
 
   // Navigate after login
@@ -309,6 +338,17 @@ class AuthService {
       
       if (response.statusCode == 200) {
         print('Auth service: Login successful with status 200');
+        
+        // Save credentials
+        await UserService.saveToken(data['token'] ?? '');
+        final userId = data['user']?['id']?.toString() ?? '';
+        await UserService.saveUserId(userId);
+        
+        // Set user status to online
+        await StatusService.setOnline();
+        
+        // Initialize socket connection
+        await SocketService.initSocket();
         
         // Make sure success=true in the returned data
         return {

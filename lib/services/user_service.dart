@@ -1,7 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:client/services/http_client.dart';
-
+import 'package:client/services/status_service.dart';
+import 'package:client/services/socket_service.dart';
 
 class UserService {
   static final _storage = FlutterSecureStorage();
@@ -37,16 +38,18 @@ class UserService {
   // Logout with backend call
   static Future<bool> logout() async {
     try {
-      // Get token for authorization
+      // Get token for authorization - do this first before clearing anything
       final token = await getToken();
       
-      // If no token, just clear local data
+      // Clear user data immediately to prevent repeated calls
+      await _clearUserData();
+      
+      // Skip API call if no token
       if (token == null || token.isEmpty) {
-        await _clearUserData();
         return true;
       }
       
-      // Call backend signout API
+      // Call backend signout API as a final step
       print('Calling backend signout API...');
       final response = await http.post(
         Uri.parse('${HttpClient.baseUrl}/api/signout'),
@@ -57,16 +60,9 @@ class UserService {
       );
       
       print('Signout response status: ${response.statusCode}');
-      
-      // Even if backend call fails, clear local data
-      await _clearUserData();
-      
       return response.statusCode == 200;
     } catch (e) {
       print('Error during logout: $e');
-      
-      // Clear local data anyway on error
-      await _clearUserData();
       return false;
     }
   }
@@ -80,5 +76,10 @@ class UserService {
     } catch (e) {
       print('Error clearing user data: $e');
     }
+  }
+
+  // Add this public method to UserService
+  static Future<void> clearUserDataOnly() async {
+    await _clearUserData();
   }
 }
