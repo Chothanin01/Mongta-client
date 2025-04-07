@@ -471,7 +471,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
-                      Icons.insert_chart_outlined,
+                      Icons.insert_chart,
                       color: Colors.white,
                       size: 24,
                     ),
