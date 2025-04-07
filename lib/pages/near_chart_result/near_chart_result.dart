@@ -343,7 +343,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
           ),
         ),
         child: const Text(
-          'เสร็จสิ้น',
+          'ดำเนินการต่อ',
           style: TextStyle(
             fontSize: 18,
             fontFamily: 'BaiJamjuree',
