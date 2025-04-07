@@ -1,8 +1,9 @@
+import 'package:client/pages/chat/user/chat_user_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/pages/chat/user/chat_empty_view.dart';
-import 'package:client/pages/chat/user/chat_user_screen.dart';
 import 'package:client/services/chat_service.dart';
+import 'package:client/services/user_service.dart';
 
 class ChatSearch extends StatefulWidget {
   const ChatSearch({super.key});
@@ -14,8 +15,35 @@ class ChatSearch extends StatefulWidget {
 class _ChatSearchState extends State<ChatSearch> {
   bool _isMaleSelected = false;
   bool _isFemaleSelected = false;
-  bool _isLoading = false;
-  final _chatService = ChatService();
+  bool _isLoading = true;
+  String? profilePicture;
+  String userName = '';
+  final ChatService _chatService = ChatService();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    try {
+      setState(() => _isLoading = true);
+      final chatData = await _chatService.getChatHistory();
+      
+      if (chatData.containsKey('user')) {
+        final user = chatData['user'];
+        setState(() {
+          profilePicture = user['profile_picture'];
+          userName = '${user['first_name']} ${user['last_name']}';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('API Error: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   String get _selectedGender {
     if (_isMaleSelected && _isFemaleSelected) {
@@ -31,38 +59,37 @@ class _ChatSearchState extends State<ChatSearch> {
 
   void _searchOphth() async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      final response = await _chatService.findOphthalmologist(_selectedGender);
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (response['success'] == true) {
-        final chatSession = response['create'];
-        print("ChatSession: $chatSession");
-
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatUserScreen(
-                conversationId: chatSession['id'],
-              ),
-            ),
-          );
-        }
+      final userId = await UserService.getCurrentUserId();
+      if (userId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('กรุณาเข้าสู่ระบบก่อนใช้งาน')),
+        );
+        return;
+      }
+      
+      final chatService = ChatService();
+      final result = await chatService.findOphthalmologist(_selectedGender);
+      
+      if (result['success'] == true && result['create'] != null) {
+        final chatSession = result['create'];
+        final conversationId = chatSession['id'];
+        
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatUserScreen(conversationId: conversationId),
+          ),
+        );
       } else {
-        print("Error: ${response['message']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'ไม่สามารถค้นหาจักษุแพทย์ได้ในขณะนี้')),
+        );
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       print('Error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')),
+      );
     }
   }
 
@@ -70,11 +97,13 @@ class _ChatSearchState extends State<ChatSearch> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-
+    
     return Scaffold(
-        backgroundColor: MainTheme.white,
-        body: SafeArea(
-          child: Padding(
+      backgroundColor: MainTheme.white,
+      body: SafeArea(
+        child: _isLoading 
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
             padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
             child: SingleChildScrollView(
               child: Column(
@@ -84,9 +113,15 @@ class _ChatSearchState extends State<ChatSearch> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildRoundedBox(context, 'กฟ'),
+                      profilePicture != null
+                          ? _buildRoundedBox(context, profilePicture!)
+                          : CircleAvatar(
+                              radius: MediaQuery.of(context).size.width * 0.09,
+                              backgroundColor: Colors.grey[300],
+                              child: Icon(Icons.person, size: 40, color: Colors.grey[700]),
+                            ),
                       SizedBox(width: screenWidth * 0.05),
-                      _buildBlueBox(context, 'คุณแก้วตา ฟ้าประทานพร'),
+                      _buildBlueBox(context, userName),
                     ],
                   ),
                   SizedBox(height: screenHeight * 0.03),
@@ -159,36 +194,26 @@ class _ChatSearchState extends State<ChatSearch> {
                   
                   // Start Search Button
                   GestureDetector(
-                    onTap: _isLoading ? null : () {
-                      print('Selected gender: $_selectedGender');
-                      _searchOphth();   
-                    },
-                      child: _buildSearchButton(context),
+                    onTap: _searchOphth,
+                    child: _buildSearchButton(context),
                   ),
-                  
-                  if (_isLoading)
-                    const Center(child: CircularProgressIndicator()),
                   
                   SizedBox(height: screenHeight * 0.02),
                   
                   // Back Button - Responsive
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => ChatEmptyView()),
-                      );
+                      Navigator.pop(context);
                     },
                     child: Text(
                       'ย้อนกลับ',
                       style: TextStyle(
-                        color: Color(0xFF12358F),
-                        fontSize: screenWidth * 0.04, 
-                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth * 0.04,
+                        color: MainTheme.navbarFocusText,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
-                  
                   SizedBox(height: screenHeight * 0.03),
                 ],
               ),
@@ -197,42 +222,34 @@ class _ChatSearchState extends State<ChatSearch> {
         ),
       );
   }
-  
 
-  Widget _buildRoundedBox(BuildContext context, String text) {
-    double screenWidth = MediaQuery.of(context).size.width;
+  Widget _buildRoundedBox(BuildContext context, String imageUrl) {
+    double boxSize = MediaQuery.of(context).size.width * 0.18;
 
-    return Container(
-      width: screenWidth * 0.2,
-      padding: EdgeInsets.all(screenWidth * 0.05),
-      decoration: BoxDecoration(
-        color: MainTheme.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: MainTheme.chatGrey,
-          width: 1,
-        )
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: screenWidth * 0.05,
-            fontWeight: FontWeight.bold,
-            color: MainTheme.chatBlue,
-            fontFamily: 'BaiJamjuree',
-          ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: Image.network(
+        imageUrl,
+        width: boxSize,
+        height: boxSize,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: boxSize,
+          height: boxSize,
+          color: Colors.grey[300],
+          child: Icon(Icons.person, size: boxSize * 0.6, color: Colors.grey[700]),
         ),
       ),
     );
   }
 
   Widget _buildBlueBox(BuildContext context, String text) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    double boxWidth = MediaQuery.of(context).size.width * 0.55;
+    double boxHeight = MediaQuery.of(context).size.width * 0.18;
 
     return Container(
-      width: screenWidth * 0.6,
-      padding: EdgeInsets.all(screenWidth * 0.05),
+      width: boxWidth,
+      height: boxHeight,
       decoration: BoxDecoration(
         color: MainTheme.chatBlue,
         borderRadius: BorderRadius.circular(20),
@@ -241,9 +258,10 @@ class _ChatSearchState extends State<ChatSearch> {
         child: Text(
           text,
           style: TextStyle(
-            fontSize: screenWidth * 0.045,
+            fontSize: 16,
             color: MainTheme.white,
           ),
+          textAlign: TextAlign.center,
         ),
       ),
     );
@@ -266,7 +284,7 @@ class _ChatSearchState extends State<ChatSearch> {
         border: Border.all(
           color: MainTheme.chatGrey,
           width: 1,
-      ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -293,21 +311,19 @@ class _ChatSearchState extends State<ChatSearch> {
   Widget _buildSearchButton(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
 
-    return GestureDetector(
-      child: Container(
-        width: screenWidth * 0.7,
-        height: screenWidth * 0.14,
-        decoration: BoxDecoration(
-          color: MainTheme.chatBlue,
-          borderRadius: BorderRadius.circular(30),
-        ),
-        child: Center(
-          child: Text(
-            'เริ่มค้นหาจักษุแพทย์',
-            style: TextStyle(
-              color: MainTheme.chatWhite,
-              fontSize: screenWidth * 0.045,
-            ),
+    return Container(
+      width: screenWidth * 0.7,
+      height: screenWidth * 0.14,
+      decoration: BoxDecoration(
+        color: MainTheme.chatBlue,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Center(
+        child: Text(
+          'เริ่มค้นหาจักษุแพทย์',
+          style: TextStyle(
+            color: MainTheme.chatWhite,
+            fontSize: screenWidth * 0.045,
           ),
         ),
       ),
