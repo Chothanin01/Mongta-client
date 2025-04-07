@@ -289,83 +289,118 @@ class _RegisterPageState extends State<RegisterPage> {
     context.go('/login'); // Navigate to HomePage
   }
 
-  // Function to show Terms of Service popup
-  void _showTermsOfService(BuildContext context) {
+  // Function to show Terms of Service popup with checkbox
+  void _showTermsOfService(BuildContext context, Function(bool) onAgreed) {
+    bool isAgreed = false; // Track checkbox state
+    
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      Text(
-                        'เงื่อนไขการใช้บริการ',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'BaiJamjuree',
-                        ),
-                      ),
-                      Spacer(),
-                      IconButton(
-                        icon: Icon(Icons.close),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
+        return StatefulBuilder( // Use StatefulBuilder to update checkbox state within dialog
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
                 ),
-                Divider(height: 1),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(16),
-                    child: Text(
-                      _termsOfServiceText,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'BaiJamjuree',
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            'เงื่อนไขการใช้บริการ',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'BaiJamjuree',
+                            ),
+                          ),
+                          Spacer(),
+                          IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: MainTheme.buttonBackground,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'ปิด',
-                        style: TextStyle(
-                          fontFamily: 'BaiJamjuree',
-                          fontWeight: FontWeight.bold,
+                    Divider(height: 1),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.all(16),
+                        child: Text(
+                          _termsOfServiceText,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'BaiJamjuree',
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    // Add checkbox for agreement
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: isAgreed,
+                            onChanged: (value) {
+                              setState(() {
+                                isAgreed = value!;
+                              });
+                            },
+                            activeColor: MainTheme.buttonBackground,
+                          ),
+                          Expanded(
+                            child: Text(
+                              'ฉันได้อ่านและยอมรับเงื่อนไขการใช้บริการ',
+                              style: TextStyle(
+                                fontFamily: 'BaiJamjuree',
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: MainTheme.buttonBackground,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            onAgreed(isAgreed);
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'ตกลง', // Changed from "ปิด" to "ตกลง"
+                            style: TextStyle(
+                              fontFamily: 'BaiJamjuree',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          }
         );
       },
     );
@@ -722,7 +757,12 @@ class _RegisterPageState extends State<RegisterPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   GestureDetector(
-                                    onTap: () => _showTermsOfService(context),
+                                    onTap: () => _showTermsOfService(context, (agreed) {
+                                      setState(() {
+                                        isChecked = agreed;
+                                        if (isChecked) showWarning = false;
+                                      });
+                                    }),
                                     child: Text(
                                       'เงื่อนไขเเละข้อตกลงการให้บริการ Term of Service',
                                       style: TextStyle(
