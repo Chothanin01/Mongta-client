@@ -84,8 +84,9 @@ GoRouter createRouter({String initialLocation = '/login'}) {
       // Chat Page Route
       GoRoute(
         path: Path.chatEntryPage,
-        redirect: AuthGuard.requireAuth,
-        builder: (context, state) => const ChatNavigator(),
+        builder: (context, state) => BottomNavBar(
+          child: const ChatNavigator(),
+        ),
       ),
 
       GoRoute(
