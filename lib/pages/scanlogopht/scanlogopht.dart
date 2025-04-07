@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:client/services/http_client.dart';
 import 'package:client/services/user_service.dart';
+import 'package:client/pages/chat/ophth/chat_ophth_screen.dart';
 import 'package:go_router/go_router.dart';
 
 class ScanHistoryScreen extends StatefulWidget {
@@ -326,16 +327,28 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: const Text(
-            'ประวัติการสแกน',
-            style: TextStyle(color: Colors.black),
-          ),
+          title: const Text('ประวัติการสแกน'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => context.pop(),
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              final conversationId = prefs.getInt('conversation_id');
+
+              if (conversationId != null) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatOphthScreen(
+                      conversationId: conversationId,
+                    ),
+                  ),
+                );
+              } else {
+                Navigator.pop(context);
+              }
+            },
           ),
+          centerTitle: true,
         ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -346,9 +359,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),
                         itemCount: scanHistory.length,
-                        itemBuilder: (context, index) {
-                          return _buildScanHistoryItem(index);
-                        },
+                        itemBuilder: (context, index) => _buildScanHistoryItem(index),
                       ),
       ),
     );
