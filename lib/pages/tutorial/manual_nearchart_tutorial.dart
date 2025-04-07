@@ -101,7 +101,7 @@ class _ManualNearChartTutorialState extends State<ManualNearChartTutorial> {
             left: 16,
             child: _currentIndex > 0
               ? IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new),
+                  icon: Icon(Icons.arrow_back_ios),
                   onPressed: _previousPage,
                 )
               : SizedBox(width: 48),
