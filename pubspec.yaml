@@ -61,6 +61,8 @@ dependencies:
   cached_network_image: ^3.4.1
   intl: ^0.20.2
   socket_io_client: ^3.1.1
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -71,10 +73,15 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  # flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/LogoApp.png"
 
 # The following section is specific to Flutter packages.
 flutter:

@@ -9,7 +9,7 @@
     <uses-feature android:name="android.hardware.location.gps"/>
 
     <application
-        android:label="client"
+        android:label="MongTa"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
