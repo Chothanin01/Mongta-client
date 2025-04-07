@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:client/pages/chat/user/chat_user_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatCardItem extends StatelessWidget {
   final dynamic chatData;
@@ -40,12 +41,8 @@ class ChatCardItem extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (conversationId != 0) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatUserScreen(conversationId: conversationId),
-            ),
-          );
+          // Use the router for navigation instead
+          context.push('/chat-user-screen/$conversationId');
         } else {
           debugPrint("Invalid conversation_id: $conversationIdRaw");
         }

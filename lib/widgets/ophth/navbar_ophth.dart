@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:client/services/chat_service.dart';
 import 'package:client/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatAppBarOphth extends StatefulWidget implements PreferredSizeWidget {
   final int conversationId;
@@ -103,12 +104,9 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
             title: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back, color: MainTheme.black),
+                  icon: Icon(Icons.arrow_back_ios, color: MainTheme.black),
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => ChatOphthHistory()),
-                    );
+                    context.go('/chat-ophth-history');
                   },
                 ),
                 CircleAvatar(

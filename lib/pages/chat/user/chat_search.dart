@@ -4,6 +4,8 @@ import 'package:client/core/theme/theme.dart';
 import 'package:client/pages/chat/user/chat_empty_view.dart';
 import 'package:client/services/chat_service.dart';
 import 'package:client/services/user_service.dart';
+import 'package:client/services/user_api_service.dart';
+
 
 class ChatSearch extends StatefulWidget {
   const ChatSearch({super.key});
@@ -29,19 +31,50 @@ class _ChatSearchState extends State<ChatSearch> {
   Future<void> fetchUserData() async {
     try {
       setState(() => _isLoading = true);
-      final chatData = await _chatService.getChatHistory();
       
-      if (chatData.containsKey('user')) {
-        final user = chatData['user'];
+      // Try to get user data from chat history first
+      try {
+        final chatData = await _chatService.getChatHistory();
+        
+        if (chatData.containsKey('user') && chatData['user'] != null) {
+          final user = chatData['user'];
+          setState(() {
+            profilePicture = user['profile_picture'];
+            userName = '${user['first_name']} ${user['last_name']}';
+            _isLoading = false;
+          });
+          return;
+        }
+      } catch (chatError) {
+        print('Chat history error: $chatError');
+        // Continue to fallback method
+      }
+      
+      // Fallback: Get user data directly through user API
+      final userId = await UserService.getCurrentUserId();
+      if (userId.isNotEmpty) {
+        final apiService = ApiService();
+        final userData = await apiService.getUser(userId);
+        
         setState(() {
-          profilePicture = user['profile_picture'];
-          userName = '${user['first_name']} ${user['last_name']}';
+          profilePicture = userData['profile_picture'];
+          userName = '${userData['first_name']} ${userData['last_name']}';
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          profilePicture = null;
+          userName = 'ไม่พบข้อมูลผู้ใช้';
           _isLoading = false;
         });
       }
     } catch (e) {
       print('API Error: $e');
-      setState(() => _isLoading = false);
+      setState(() {
+        profilePicture = null;
+        userName = 'เกิดข้อผิดพลาด';
+        _isLoading = false; 
+      });
     }
   }
 
@@ -67,28 +100,80 @@ class _ChatSearchState extends State<ChatSearch> {
         return;
       }
       
-      final chatService = ChatService();
-      final result = await chatService.findOphthalmologist(_selectedGender);
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(child: CircularProgressIndicator());
+        },
+      );
       
-      if (result['success'] == true && result['create'] != null) {
-        final chatSession = result['create'];
-        final conversationId = chatSession['id'];
+      final chatService = ChatService();
+      
+      try {
+        final result = await chatService.findOphthalmologist(_selectedGender);
         
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatUserScreen(conversationId: conversationId),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'ไม่สามารถค้นหาจักษุแพทย์ได้ในขณะนี้')),
-        );
+        // Hide loading indicator if context is still mounted
+        if (context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+        
+        if (result['success'] == true && result['create'] != null) {
+          final chatSession = result['create'];
+          final conversationId = chatSession['id'];
+          
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatUserScreen(conversationId: conversationId),
+            ),
+          );
+        } else {
+          // Show error from the result
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                result['message'] == "No ophthamologist available." 
+                  ? 'ไม่พบจักษุแพทย์ที่ว่างในขณะนี้ กรุณาลองใหม่อีกครั้งในภายหลัง'
+                  : (result['message'] ?? 'ไม่สามารถค้นหาจักษุแพทย์ได้ในขณะนี้')
+              ),
+              backgroundColor: MainTheme.redWarning,
+            ),
+          );
+        }
+      } catch (e) {
+        // Make sure loading dialog is dismissed on error
+        if (context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+        
+        // Then show the error message
+        String errorMsg = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+        
+        // Handle the specific error message case
+        String errorStr = e.toString();
+        if (errorStr.contains('No ophthamologist available')) {
+          errorMsg = 'ไม่พบจักษุแพทย์ที่ว่างในขณะนี้ กรุณาลองใหม่อีกครั้งในภายหลัง';
+        }
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMsg),
+              backgroundColor: MainTheme.redWarning,
+            ),
+          );
+        }
       }
     } catch (e) {
-      print('Error: $e');
+      // This is for errors before the loading dialog appears
+      print('Pre-dialog error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง')),
+        SnackBar(
+          content: Text('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'),
+          backgroundColor: MainTheme.redWarning,
+        ),
       );
     }
   }

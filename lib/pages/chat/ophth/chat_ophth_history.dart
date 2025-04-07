@@ -49,7 +49,7 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
             context.go('/home-opht');
           },

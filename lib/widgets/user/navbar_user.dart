@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:client/services/chat_service.dart';
 import 'package:client/services/user_service.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatAppBarUser extends StatefulWidget implements PreferredSizeWidget {
   final int conversationId;
@@ -131,12 +132,9 @@ class _ChatAppBarUserState extends State<ChatAppBarUser> {
             title: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back, color: MainTheme.black),
+                  icon: Icon(Icons.arrow_back_ios, color: MainTheme.black),
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => ChatUserHistory()),
-                    );
+                    context.go('/chat'); // Use go_router instead of Navigator.push
                   },
                 ),
                 CircleAvatar(
