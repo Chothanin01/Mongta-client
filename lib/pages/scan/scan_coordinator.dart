@@ -122,6 +122,15 @@ class _ScanCoordinatorPageState extends State<ScanCoordinatorPage> {
         _isRightEyeSelected = false; // Switch to left eye after right is confirmed
         _currentImage = null;
         _currentStage = ScanStage.capture; // Go back to capture with left eye selected
+        
+        // Add a notification that right eye was captured and we're now scanning left eye
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('บันทึกภาพตาขวาสำเร็จ กรุณาถ่ายภาพตาซ้าย'),
+            backgroundColor: MainTheme.blueText,
+            duration: Duration(seconds: 2),
+          ),
+        );
       } else {
         _leftEyeImage = _currentImage;
         _currentImage = null;

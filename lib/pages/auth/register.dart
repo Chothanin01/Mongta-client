@@ -289,6 +289,141 @@ class _RegisterPageState extends State<RegisterPage> {
     context.go('/login'); // Navigate to HomePage
   }
 
+  // Function to show Terms of Service popup
+  void _showTermsOfService(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        'เงื่อนไขการใช้บริการ',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'BaiJamjuree',
+                        ),
+                      ),
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(height: 1),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(16),
+                    child: Text(
+                      _termsOfServiceText,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'BaiJamjuree',
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: MainTheme.buttonBackground,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'ปิด',
+                        style: TextStyle(
+                          fontFamily: 'BaiJamjuree',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Mock Terms of Service text for MongTa eye scanning app
+  final String _termsOfServiceText = '''
+เงื่อนไขการใช้บริการแอปพลิเคชัน MongTa (มองตา)
+
+1. บทนำ
+   แอปพลิเคชัน MongTa ("แอปพลิเคชัน") เป็นแพลตฟอร์มที่ให้บริการสแกนและวิเคราะห์ดวงตาเบื้องต้น ดำเนินการโดย [ชื่อบริษัท] ("เรา", "ของเรา") เงื่อนไขการใช้บริการนี้กำหนดกฎและข้อบังคับสำหรับการใช้แอปพลิเคชัน MongTa
+
+2. การยอมรับเงื่อนไข
+   โดยการเข้าถึงหรือใช้แอปพลิเคชัน MongTa คุณยืนยันว่าคุณเข้าใจ ยอมรับ และตกลงที่จะปฏิบัติตามเงื่อนไขการใช้บริการทั้งหมดที่ระบุไว้ในเอกสารนี้ หากคุณไม่ยอมรับเงื่อนไขเหล่านี้ คุณไม่ควรใช้แอปพลิเคชันของเรา
+
+3. ข้อจำกัดอายุ
+   แอปพลิเคชัน MongTa มีไว้สำหรับผู้ใช้ที่มีอายุ 18 ปีขึ้นไป หากคุณมีอายุต่ำกว่า 18 ปี คุณจำเป็นต้องได้รับความยินยอมจากผู้ปกครองหรือผู้ดูแลตามกฎหมายก่อนใช้แอปพลิเคชัน
+
+4. คำเตือนทางการแพทย์
+   4.1 แอปพลิเคชัน MongTa ไม่ได้มีวัตถุประสงค์เพื่อทดแทนการปรึกษาหรือการรักษาทางการแพทย์โดยผู้เชี่ยวชาญ
+   4.2 ผลการสแกนและการวิเคราะห์ที่ให้โดยแอปพลิเคชันเป็นเพียงข้อมูลเบื้องต้นเท่านั้น ไม่ถือเป็นการวินิจฉัยทางการแพทย์อย่างเป็นทางการ
+   4.3 หากคุณมีอาการทางสายตาหรือดวงตา โปรดปรึกษาจักษุแพทย์หรือผู้เชี่ยวชาญทางการแพทย์โดยเร็วที่สุด
+
+5. การเก็บรวบรวมข้อมูลและความเป็นส่วนตัว
+   5.1 เราเก็บรวบรวมข้อมูลส่วนบุคคลและข้อมูลทางการแพทย์ตามที่ระบุไว้ในนโยบายความเป็นส่วนตัวของเรา
+   5.2 ข้อมูลที่เก็บรวบรวมจะถูกใช้เพื่อการให้บริการ การวิเคราะห์ และการปรับปรุงแอปพลิเคชัน
+   5.3 เราใช้มาตรการรักษาความปลอดภัยที่เหมาะสมเพื่อปกป้องข้อมูลของคุณ แต่ไม่สามารถรับประกันความปลอดภัยอย่างสมบูรณ์ได้
+
+6. ความรับผิดชอบของผู้ใช้
+   6.1 คุณต้องให้ข้อมูลที่ถูกต้องและเป็นปัจจุบันเมื่อใช้แอปพลิเคชัน
+   6.2 คุณต้องไม่ใช้แอปพลิเคชันในทางที่ผิดกฎหมายหรือสร้างความเสียหาย
+   6.3 คุณไม่สามารถพยายามเข้าถึงส่วนใดของแอปพลิเคชันที่ไม่ได้รับอนุญาต
+   6.4 คุณไม่ควรแชร์บัญชีหรือรหัสผ่านกับผู้อื่น
+
+7. การเชื่อมต่อกับจักษุแพทย์
+   7.1 แอปพลิเคชัน MongTa อาจเสนอการเชื่อมต่อกับจักษุแพทย์ผ่านระบบแชท
+   7.2 การให้คำแนะนำของจักษุแพทย์ผ่านแอปพลิเคชันไม่ถือเป็นการรักษาที่สมบูรณ์ และอาจต้องมีการนัดพบแพทย์ในสถานพยาบาลตามความเหมาะสม
+
+8. ข้อจำกัดความรับผิด
+   8.1 แอปพลิเคชัน MongTa จัดเตรียมให้ตาม "สภาพที่เป็นอยู่" และ "ตามที่มีให้บริการ" โดยไม่มีการรับประกันใด ๆ
+   8.2 เราจะไม่รับผิดต่อความเสียหายทางตรง ทางอ้อม อุบัติเหตุ หรือเป็นผลสืบเนื่องที่เกิดจากการใช้แอปพลิเคชัน
+   8.3 การตัดสินใจทางการแพทย์ใด ๆ ที่คุณทำตามข้อมูลจากแอปพลิเคชันเป็นความรับผิดชอบของคุณเองทั้งสิ้น
+
+9. ทรัพย์สินทางปัญญา
+   แอปพลิเคชัน MongTa รวมถึงเนื้อหา กราฟิก โลโก้ และซอฟต์แวร์ทั้งหมดเป็นทรัพย์สินของเราและได้รับการคุ้มครองโดยกฎหมายทรัพย์สินทางปัญญา
+
+10. การยกเลิกการใช้บริการ
+    เราขอสงวนสิทธิ์ในการระงับหรือยกเลิกการเข้าถึงแอปพลิเคชันของคุณได้ทุกเมื่อ โดยมีหรือไม่มีการแจ้งให้ทราบล่วงหน้า หากคุณละเมิดเงื่อนไขการใช้บริการ
+
+11. การเปลี่ยนแปลงเงื่อนไข
+    เราอาจปรับปรุงเงื่อนไขการใช้บริการเป็นครั้งคราว การเปลี่ยนแปลงจะมีผลทันทีเมื่อประกาศบนแอปพลิเคชัน การใช้แอปพลิเคชันอย่างต่อเนื่องหลังจากการเปลี่ยนแปลงถือเป็นการยอมรับเงื่อนไขใหม่
+
+12. กฎหมายที่ใช้บังคับ
+    เงื่อนไขการใช้บริการนี้อยู่ภายใต้และตีความตามกฎหมายของประเทศไทย
+
+วันที่ปรับปรุงล่าสุด: 8 เมษายน 2025
+''';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -298,7 +433,7 @@ class _RegisterPageState extends State<RegisterPage> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: MainTheme.mainText),
+                icon: Icon(Icons.arrow_back_ios, color: MainTheme.mainText),
                 onPressed: () {
                   previousPage(context);
                 },
@@ -586,13 +721,16 @@ class _RegisterPageState extends State<RegisterPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'เงื่อนไขเเละข้อตกลงการให้บริการ Term of Service',
-                                    style: TextStyle(
-                                      color: MainTheme.mainText,
-                                      fontSize: 12,
-                                      fontFamily: 'BaiJamjuree',
-                                      fontWeight: FontWeight.w500,
+                                  GestureDetector(
+                                    onTap: () => _showTermsOfService(context),
+                                    child: Text(
+                                      'เงื่อนไขเเละข้อตกลงการให้บริการ Term of Service',
+                                      style: TextStyle(
+                                        color: MainTheme.mainText,
+                                        fontSize: 12,
+                                        fontFamily: 'BaiJamjuree',
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                   if (showWarning)

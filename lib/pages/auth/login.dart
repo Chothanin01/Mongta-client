@@ -285,7 +285,7 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
 
-                  const SizedBox(height: 150), // Spacer
+                  const SizedBox(height: 30), // Spacer
 
                   // div "หากยังไม่มีบัญชี" และ "สมัครสมาชิก" to merge in
                   RichText(

@@ -282,7 +282,7 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: MainTheme.mainText),
+          icon: Icon(Icons.arrow_back_ios, color: MainTheme.mainText),
           onPressed: () {
             // Cancel Google registration and go back to login
             context.go('/login');
