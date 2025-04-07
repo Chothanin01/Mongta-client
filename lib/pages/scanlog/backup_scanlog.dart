@@ -48,7 +48,9 @@ class _ScanlogPageState extends State<ScanlogPage> {
     }
   }
 
+  // Original functions that you have...
   double vaToPercentage(String va) {
+    // Keep existing implementation
     final Map<String, double> vaPercentages = {
       '20/200': 0.1, // 10%
       '20/100': 0.2, // 20%
@@ -63,7 +65,9 @@ class _ScanlogPageState extends State<ScanlogPage> {
     return vaPercentages[va] ?? 0.0;
   }
 
+  // Function to get color based on percentage
   Color getColorForPercentage(double percentage) {
+    // Keep existing implementation
     if (percentage <= 0.3) {
       return Colors.red; // Poor vision
     } else if (percentage <= 0.6) {
@@ -80,6 +84,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
     });
 
     try {
+      // Use HttpClient instead of direct http call
       final response = await HttpClient.get('/api/scanlog/$_userId');
       
       if (response.statusCode == 200) {
@@ -92,20 +97,26 @@ class _ScanlogPageState extends State<ScanlogPage> {
 
           setState(() {
             scanHistory = scanLogs.map<Map<String, dynamic>>((scan) {
+              // Keep your existing data processing logic
               print('Processing scan: ${json.encode(scan)}'); // Debug each scan
 
+              // Parse the scan data from API to match our UI format
               final Map<String, dynamic> scanData = {
                 'id': scan['id'],
                 'title': 'ประวัติการสแกน',
                 'date': _formatDate(scan['date'] ?? scan['created_at'] ?? DateTime.now().toIso8601String()),
-                'isExpanded': true,
+                'isExpanded': true, // Set to true to show expanded by default
                 'description': scan['description'] ?? '',
               };
 
+              // Keep your existing VA data processing logic
               if (scan['va'] != null) {
                 try {
                   final va = scan['va'];
+                  // Rest of your existing VA processing code
+                  // ...
                   
+                  // Convert string JSON to Map if needed
                   Map<String, dynamic> vaMap;
                   if (va is String) {
                     try {
@@ -115,13 +126,16 @@ class _ScanlogPageState extends State<ScanlogPage> {
                       vaMap = {};
                     }
                   } else if (va is Map) {
+                    // Cast Map<dynamic, dynamic> to Map<String, dynamic>
                     vaMap = Map<String, dynamic>.from(va);
                   } else {
                     print('VA is neither string nor map: ${va.runtimeType}');
                     vaMap = {};
                   }
 
+                  // Now process the VA map based on the actual API structure
                   if (vaMap.isNotEmpty) {
+                    // Extract values from the API response
                     final vaLeft = vaMap['va_left'] ?? '0/0';
                     final vaRight = vaMap['va_right'] ?? '0/0';
                     final lineLeft = vaMap['line_left'] ?? '0';
@@ -129,9 +143,11 @@ class _ScanlogPageState extends State<ScanlogPage> {
                     final description =
                         vaMap['description'] ?? 'ไม่มีข้อมูลผลการวัดสายตา';
 
+                    // Convert VA values to percentages
                     double percentageLeft = _convertVAToPercentage(vaLeft);
                     double percentageRight = _convertVAToPercentage(vaRight);
 
+                    // Create eye data objects with the correct structure
                     final leftEye = {
                       'line': lineLeft,
                       'value': vaLeft,
@@ -166,9 +182,13 @@ class _ScanlogPageState extends State<ScanlogPage> {
                 };
               }
 
+              // Keep your existing photo data processing logic
               try {
                 var photos = scan['photo'];
+                // Rest of your existing photo processing code
+                // ...
                 
+                // Convert string JSON to Map if needed
                 Map<String, dynamic> photoMap;
                 if (photos is String) {
                   try {
@@ -184,6 +204,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                   photoMap = {};
                 }
 
+                // Map the API photo structure to our UI structure
                 final mappedPhotos = {
                   'leftEye': photoMap['left_eye'],
                   'rightEye': photoMap['right_eye'],
@@ -204,6 +225,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                 };
               }
 
+              // Add conclusion
               scanData['conclusion'] = scan['description'] ?? 'ไม่มีข้อมูลสรุปผล';
 
               return scanData;
@@ -217,6 +239,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
           });
         }
       } else if (response.statusCode == 401) {
+        // Unauthorized - handle token expiration
         await UserService.logout();
         setState(() {
           errorMessage = 'กรุณาเข้าสู่ระบบใหม่';
@@ -237,6 +260,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
     }
   }
 
+  // Helper method to get default eye data
   Map<String, dynamic> _getDefaultEyeData() {
     return {
       'line': 0,
@@ -245,33 +269,45 @@ class _ScanlogPageState extends State<ScanlogPage> {
     };
   }
 
+  // Helper method to convert VA value like "20/20" to percentage
   double _convertVAToPercentage(String vaValue) {
     try {
+      // For format like "20/20"
       final parts = vaValue.split('/');
       if (parts.length == 2) {
+        // Try to convert to numeric values
         final numerator = double.parse(parts[0]);
         final denominator = double.parse(parts[1]);
 
-        if (denominator == 0) return 0.0;
+        if (denominator == 0) return 0.0; // Avoid division by zero
 
+        // Calculate percentage based on VA ratio
+        // 20/20 is considered perfect vision (100%)
+        // Lower values like 20/40 indicate worse vision
         if (numerator == 20) {
-          return 20 / denominator;
+          // Standard Snellen notation
+          return 20 / denominator; // 20/20 = 1.0, 20/40 = 0.5, etc.
         } else {
+          // Generic ratio
           return numerator / denominator;
         }
       }
 
+      // If it's just a number (like "10"), convert to percentage based on scale
+      // Assuming 10 is max (perfect vision)
       final lineNumber = double.parse(vaValue);
-      return lineNumber / 10.0;
+      return lineNumber / 10.0; // Scale to 0.0-1.0
     } catch (e) {
       print('Error converting VA to percentage: $e');
-      return 0.5;
+      return 0.5; // Default to 50% if parsing fails
     }
   }
 
+  // Helper method to format date from API
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
+      // Format date in Thai Buddhist calendar (BE = CE + 543)
       final thaiYear = date.year + 543;
       const thaiMonths = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -279,8 +315,8 @@ class _ScanlogPageState extends State<ScanlogPage> {
       ];
       final day = date.day;
       final month = thaiMonths[date.month - 1];
-      final hour = date.hour.toString().padLeft(2, '0');
-      final minute = date.minute.toString().padLeft(2, '0');
+      final hour = date.hour.toString().padLeft(2, '0'); // ทำให้เป็น 2 หลัก
+      final minute = date.minute.toString().padLeft(2, '0'); // ทำให้เป็น 2 หลัก
 
       return 'วันที่ $day $month พ.ศ. $thaiYear เวลา $hour:$minute น.';
     } catch (e) {
@@ -310,7 +346,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
               icon: const Icon(Icons.arrow_back_ios,
                   color: Colors.black, size: 20),
               onPressed: () {
-                context.go('/home');
+                context.go('/home'); // Navigate directly to home
               },
             ),
             title: const Text(
@@ -487,8 +523,13 @@ class _ScanlogPageState extends State<ScanlogPage> {
       padding: const EdgeInsets.symmetric(horizontal: 23.0),
       child: Column(
         children: [
+          // Eye Test Section (Pink Background)
           _buildEyeTestSection(item),
+
+          // Eye Scan Section (Blue Background)
           _buildEyeScanSection(item),
+
+          // Conclusion
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -511,12 +552,11 @@ class _ScanlogPageState extends State<ScanlogPage> {
     final eyeTest = item['eyeTest'];
     final leftEye = eyeTest['leftEye'];
     final rightEye = eyeTest['rightEye'];
-    final screenWidth = MediaQuery.of(context).size.width;
-    final eyeSize = screenWidth * 0.2;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Text moved outside the container
         const Text(
           'วัดค่าสายตา (Near Chart)',
           style: TextStyle(
@@ -526,33 +566,47 @@ class _ScanlogPageState extends State<ScanlogPage> {
             fontFamily: 'BaiJamjuree',
           ),
         ),
+        // 2px gap between the text and container
         const SizedBox(height: 2),
+        // Pink container without the title
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(12.0), // Reduced padding
           decoration: BoxDecoration(
-            color: const Color(0xFFFBD6E3),
+            color: const Color(0xFFFBD6E3), // Light pink
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildEyeResult(
-                    'ตาข้างซ้าย อยู่บรรทัดที่ ${leftEye['line']}',
-                    leftEye['value'],
-                    eyeSize,
-                  ),
-                  _buildEyeResult(
-                    'ตาข้างขวา อยู่บรรทัดที่ ${rightEye['line']}',
-                    rightEye['value'],
-                    eyeSize,
-                  ),
-                ],
+              // Wrap the Row in a LayoutBuilder to control sizing
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemWidth = constraints.maxWidth / 2 - 8;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        width: itemWidth,
+                        child: _buildEyeResult(
+                          'ตาข้างซ้าย อยู่บรรทัดที่ ${leftEye['line']}',
+                          leftEye['value'], 
+                          leftEye['percentage']
+                        ),
+                      ),
+                      SizedBox(
+                        width: itemWidth,
+                        child: _buildEyeResult(
+                          'ตาข้างขวา อยู่บรรทัดที่ ${rightEye['line']}',
+                          rightEye['value'], 
+                          rightEye['percentage']
+                        ),
+                      ),
+                    ],
+                  );
+                }
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 12), // Reduced space
               Text(
                 eyeTest['result'],
                 style: const TextStyle(
@@ -569,7 +623,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
     );
   }
 
-  Widget _buildEyeResult(String title, String value, double eyeSize) {
+  Widget _buildEyeResult(String title, String value, double percentage) {
     final parts = value.split('/');
     final percentage = vaToPercentage(value);
     final progressColor = getColorForPercentage(percentage);
@@ -588,13 +642,13 @@ class _ScanlogPageState extends State<ScanlogPage> {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          width: eyeSize,
-          height: eyeSize,
+          width: 80,
+          height: 80,
           child: Stack(
             children: [
               SizedBox(
-                width: eyeSize,
-                height: eyeSize,
+                width: 80,
+                height: 80,
                 child: CircularProgressIndicator(
                   value: percentage,
                   strokeWidth: 8,
@@ -644,6 +698,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 16),
+        // Text moved outside the container
         const Text(
           'สแกนดวงตา',
           style: TextStyle(
@@ -654,12 +709,14 @@ class _ScanlogPageState extends State<ScanlogPage> {
             fontFamily: 'BaiJamjuree',
           ),
         ),
+        // 2px gap between the text and container
         const SizedBox(height: 2),
+        // Blue container without the title
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: const Color(0xFF3B5998),
+            color: const Color(0xFF3B5998), // Dark blue
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -684,6 +741,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
   }
 
   Widget _buildEyeScanGrid(Map<String, dynamic> photos) {
+    // Extract photo URLs from the photos object if available
     final leftEyePhoto = photos['leftEye'];
     final rightEyePhoto = photos['rightEye'];
     final leftEyeAI = photos['leftEyeAI'];
@@ -691,11 +749,14 @@ class _ScanlogPageState extends State<ScanlogPage> {
 
     return Column(
       children: [
+        // Header row with "ตาซ้าย" and "ตาขวา" labels
         Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Row(
             children: [
+              // Empty space for left column label alignment
               const SizedBox(width: 70),
+              // Left eye label
               Expanded(
                 child: Center(
                   child: Text(
@@ -710,6 +771,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                   ),
                 ),
               ),
+              // Right eye label
               Expanded(
                 child: Center(
                   child: Text(
@@ -727,9 +789,12 @@ class _ScanlogPageState extends State<ScanlogPage> {
             ],
           ),
         ),
+
+        // First row: Photos
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Left label "ภาพถ่าย"
             SizedBox(
               width: 70,
               child: Padding(
@@ -746,12 +811,14 @@ class _ScanlogPageState extends State<ScanlogPage> {
                 ),
               ),
             ),
+            // Left eye photo
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: _buildEyeImage(leftEyePhoto),
               ),
             ),
+            // Right eye photo
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
@@ -760,10 +827,14 @@ class _ScanlogPageState extends State<ScanlogPage> {
             ),
           ],
         ),
+
         const SizedBox(height: 10),
+
+        // Second row: AI Images
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Left label "ภาพจาก AI"
             SizedBox(
               width: 70,
               child: Padding(
@@ -780,12 +851,14 @@ class _ScanlogPageState extends State<ScanlogPage> {
                 ),
               ),
             ),
+            // Left eye AI image
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: _buildEyeImage(leftEyeAI),
               ),
             ),
+            // Right eye AI image
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
@@ -799,6 +872,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
   }
 
   Widget _buildEyeImage(String? fileName) {
+    // If fileName is null or empty, show placeholder
     if (fileName == null || fileName.isEmpty) {
       return Center(
         child: Icon(Icons.remove_red_eye,
@@ -806,6 +880,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
       );
     }
     
+    // Check if fileName is already a URL (starts with http)
     final bool isUrl = fileName.startsWith('http');
     final String imageUrl = isUrl ? fileName : '';
 
@@ -819,6 +894,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
         child: isUrl
             ? GestureDetector(
                 onTap: () {
+                  // Show fullscreen image when tapped
                   Navigator.push(
                     context,
                     MaterialPageRoute(
