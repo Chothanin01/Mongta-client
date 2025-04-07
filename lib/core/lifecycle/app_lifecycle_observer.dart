@@ -5,23 +5,43 @@ import 'package:client/services/status_service.dart';
 
 class AppLifecycleObserver with WidgetsBindingObserver {
   final AuthService _authService = AuthService();
-  bool _isPickingMedia = false; // Add flag to track media picking
+  bool _isPickingMedia = false;
+  // Track the last known state to better handle resuming
+  AppLifecycleState? _lastKnownState;
   
   AppLifecycleObserver() {
     WidgetsBinding.instance.addObserver(this);
     _initializeSocket();
   }
 
-  // Call this before opening image picker
+  // Call this before opening image picker or camera
   void setMediaPickerActive() {
     _isPickingMedia = true;
     debugPrint('Media picker active, pausing lifecycle events');
   }
 
-  // Call this after image picker completes
+  // Call this after image picker or camera completes
   void setMediaPickerInactive() {
     _isPickingMedia = false;
     debugPrint('Media picker inactive, resuming lifecycle events');
+    
+    // If the app was in resumed state before picking media, ensure we're properly connected
+    if (_lastKnownState == AppLifecycleState.resumed) {
+      _ensureOnlineStatus();
+    }
+  }
+  
+  // Helper method to ensure online status without changing state variables
+  Future<void> _ensureOnlineStatus() async {
+    final isAuthenticated = await _authService.isAuthenticated();
+    if (isAuthenticated) {
+      // Initialize socket if needed
+      if (!SocketService.isConnected) {
+        await SocketService.initSocket();
+      }
+      // Set online status via HTTP
+      await StatusService.setOnline();
+    }
   }
 
   Future<void> _initializeSocket() async {
@@ -42,6 +62,9 @@ class AppLifecycleObserver with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
+    // Store the last known state regardless of media picking
+    _lastKnownState = state;
+    
     // Skip lifecycle events during media picking
     if (_isPickingMedia) {
       debugPrint('Ignoring lifecycle event during media picking: $state');
@@ -64,11 +87,15 @@ class AppLifecycleObserver with WidgetsBindingObserver {
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
+
         // Use HTTP for more reliable status update when going to background
+
         // But DON'T log out or disconnect socket permanently
         await StatusService.setOffline();
         // Don't disconnect socket here - let it timeout naturally
+        
         break;
+
       default:
         break;
     }

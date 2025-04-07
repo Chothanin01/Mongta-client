@@ -269,7 +269,7 @@ class MessageCardState extends State<MessageCard> {
               : Text(
                   text,
                   style: TextStyle(
-                    color: MainTheme.white,
+                    color: MainTheme.black,
                     fontSize: 16,
                     fontFamily: 'BaiJamjuree',
                   ),

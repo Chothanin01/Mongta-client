@@ -207,7 +207,7 @@ class _ManualTutorialSelectionScreenState extends State<ManualTutorialSelection>
                   ),
                 ),
                 child: const Text(
-                  'เริ่มต้นการสอนใช้งาน',
+                  'เริ่มต้น',
                   style: TextStyle(
                     color: MainTheme.white,
                     fontSize: 18,

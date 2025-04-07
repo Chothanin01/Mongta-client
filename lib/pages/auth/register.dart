@@ -124,115 +124,123 @@ class _RegisterPageState extends State<RegisterPage> {
         duration: Duration(milliseconds: 300), curve: Curves.ease);
   }
 
-  // Update the signUp method in your _RegisterPageState class
-
-void signUp(BuildContext context) async {
-  final phoneNumber = numberController.text.replaceAll(RegExp(r'\D'), '');
-  bool isValidPhone = false;
-  
-  if (phoneNumber.length == 10 && 
-      (phoneNumber.startsWith('06') || 
-       phoneNumber.startsWith('08') || 
-       phoneNumber.startsWith('09'))) {
-    isValidPhone = true;
-  }
-  
-  if (!isValidPhone) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอกเบอร์โทรศัพท์ที่ขึ้นต้นด้วย 06, 08 หรือ 09 และมี 10 หลัก'),
-        backgroundColor: MainTheme.redWarning,
-      ),
-    );
-    return;
-  }
-  
-  // Input validation
-  if (passwordController.text != passwordConfirmController.text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง'),
-        backgroundColor: MainTheme.redWarning,
-      ),
-    );
-    return;
-  }
-
-  if (!isChecked) {
-    setState(() {
-      showWarning = true;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('กรุณายอมรับเงื่อนไขและข้อตกลงการให้บริการก่อนดำเนินการต่อ'),
-        backgroundColor: MainTheme.redWarning,
-      ),
-    );
-    return;
-  }
-
-  // Show loading state
-  setState(() {
-    _isLoading = true;
-    showWarning = false;
-    _errorMessage = null;
-  });
-
-  try {
-    // Step 1: Collect user data for registration
-    final Map<String, String> userData = {
-      'username': usernameController.text,
-      'password': passwordController.text,
-      'phonenumber': numberController.text,
-      'email': emailController.text,
-      'first_name': firstNameController.text,
-      'last_name': lastNameController.text,
-      'sex': genderController.text,
-      'dob': dateController.text,
-    };
+  void signUp(BuildContext context) async {
+    final phoneNumber = numberController.text.replaceAll(RegExp(r'\D'), '');
+    bool isValidPhone = false;
     
-    // Step 2: Request OTP
-    final otpResponse = await ApiService.requestEmailOTP(emailController.text);
+    if (phoneNumber.length == 10 && 
+        (phoneNumber.startsWith('06') || 
+         phoneNumber.startsWith('08') || 
+         phoneNumber.startsWith('09'))) {
+      isValidPhone = true;
+    }
     
-    setState(() {
-      _isLoading = false;
-    });
+    if (!isValidPhone) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: MainTheme.redWarning,
+          content: Text("เบอร์โทรศัพท์ไม่ถูกต้อง โปรดกรอกเบอร์โทรศัพท์ที่ขึ้นต้นด้วย 06, 08 หรือ 09 และมี 10 หลัก"),
+        ),
+      );
+      return;
+    }
     
-    if (otpResponse['success'] == true) {
-      // Navigate to OTP verification using consistent GoRouter navigation
-      if (context.mounted) {
-        context.push('/verify_otp', extra: {
-          'email': emailController.text,
-          'ref': otpResponse['Ref'],
-          'userData': userData,
-        });
-      }
-    } else {
+    // Input validation
+    if (passwordController.text != passwordConfirmController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: MainTheme.redWarning,
+          content: Text("รหัสผ่านไม่ตรงกัน โปรดตรวจสอบอีกครั้ง"),
+        ),
+      );
+      return;
+    }
+
+    if (!isChecked) {
       setState(() {
-        _errorMessage = otpResponse['message'] ?? 'ไม่สามารถส่ง OTP ได้';
+        showWarning = true;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: MainTheme.redWarning,
+          content: Text("โปรดยอมรับเงื่อนไขและข้อตกลงการใช้งานก่อนดำเนินการต่อ"),
+        ),
+      );
+      return;
+    }
+
+    // Show loading state
+    setState(() {
+      _isLoading = true;
+      showWarning = false;
+      _errorMessage = null;
+    });
+
+    try {
+      // Step 1: Collect user data for registration
+      final Map<String, String> userData = {
+        'username': usernameController.text,
+        'password': passwordController.text,
+        'phonenumber': numberController.text,
+        'email': emailController.text,
+        'first_name': firstNameController.text,
+        'last_name': lastNameController.text,
+        'sex': genderController.text,
+        'dob': dateController.text,
+      };
+      
+      // Step 2: Request OTP
+      final otpResponse = await ApiService.requestEmailOTP(emailController.text);
+      
+      setState(() {
+        _isLoading = false;
+      });
+      
+      if (otpResponse['success'] == true) {
+        // Navigate to OTP verification using consistent GoRouter navigation
+        if (context.mounted) {
+          context.push('/verify_otp', extra: {
+            'email': emailController.text,
+            'ref': otpResponse['Ref'],
+            'userData': userData,
+          });
+        }
+      } else {
+        setState(() {
+          _errorMessage = otpResponse['message'] ?? 'ไม่สามารถส่ง OTP ได้ โปรดลองใหม่อีกครั้ง';
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text(_errorMessage ?? 'เกิดข้อผิดพลาดในการส่ง OTP โปรดลองใหม่อีกครั้ง'),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'เกิดข้อผิดพลาด: $e';
+      });
+      
+      String errorMsg = 'เกิดข้อผิดพลาดในการลงทะเบียน โปรดลองใหม่อีกครั้ง';
+      
+      if (e.toString().contains('email already exists')) {
+        errorMsg = 'อีเมลนี้ถูกใช้งานแล้ว โปรดใช้อีเมลอื่น';
+      } else if (e.toString().contains('username already exists')) {
+        errorMsg = 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว โปรดใช้ชื่อผู้ใช้อื่น';
+      } else if (e.toString().contains('connection')) {
+        errorMsg = 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+      }
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_errorMessage!),
           backgroundColor: MainTheme.redWarning,
+          content: Text(errorMsg),
         ),
       );
     }
-  } catch (e) {
-    setState(() {
-      _isLoading = false;
-      _errorMessage = 'เกิดข้อผิดพลาด: $e';
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('เกิดข้อผิดพลาด: $e'),
-        backgroundColor: MainTheme.redWarning,
-      ),
-    );
   }
-}
 
   void _showVerificationPrompt(BuildContext context) {
     showDialog(
@@ -278,8 +286,6 @@ void signUp(BuildContext context) async {
   }
 
   void backToLogin(BuildContext context) {
-    // Placeholder for sign-in logic
-    // TODO: Add authentication implementation
     context.go('/login'); // Navigate to HomePage
   }
 

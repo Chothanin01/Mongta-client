@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/services/camera_service.dart';
 import 'package:client/services/image_capture_service.dart';
+import 'package:client/main.dart'; // Add this import for lifecycleObserver
+
 
 class EyeScanPage extends StatefulWidget {
   final Function(File, bool) onImageCaptured;
@@ -34,6 +36,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    lifecycleObserver.setMediaPickerActive();
     _initializeCamera();
   }
   
@@ -70,6 +73,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
   
   @override
   void dispose() {
+    lifecycleObserver.setMediaPickerInactive();
     WidgetsBinding.instance.removeObserver(this);
     _cameraService.dispose();
     super.dispose();

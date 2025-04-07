@@ -47,9 +47,28 @@ class _EntryDatePickerState extends State<EntryDatePicker> {
       initialDate: DateTime.now(),
       firstDate: DateTime(1900),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: MainTheme.textfieldFocus,
+              onPrimary: Colors.white,
+              onSurface: MainTheme.mainText,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: MainTheme.textfieldFocus, 
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
+    
     if (picked != null) {
-      widget.controller.text = picked.toString().split(' ')[0]; // Format as YYYY-MM-DD
+      // Format date as YYYY-MM-DD and update the controller
+      widget.controller.text = picked.toString().split(' ')[0];
     }
   }
 
