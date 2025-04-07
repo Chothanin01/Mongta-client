@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:client/pages/chat/user/chat_search.dart';
 import 'package:client/widgets/user/chat_user_card.dart';
-import 'package:client/core/theme/theme.dart';
+import 'package:flutter/material.dart';
 import 'package:client/services/chat_service.dart';
-import 'package:client/pages/chat/user/chat_user_screen.dart';
+import 'package:client/core/theme/theme.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatUserHistory extends StatefulWidget {
   const ChatUserHistory({super.key});
@@ -13,10 +14,9 @@ class ChatUserHistory extends StatefulWidget {
 
 class _ChatUserHistoryState extends State<ChatUserHistory> {
   String? profilePicture;
-  String userName = '';  
-  List<dynamic> chatHistory = [];
-  bool isLoading = true;  
-  final _chatService = ChatService();
+  String userName = '';
+  final ChatService _chatService = ChatService();
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -26,25 +26,20 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
 
   Future<void> fetchChatData() async {
     try {
-      setState(() => isLoading = true);
+      setState(() => _isLoading = true);
+      final chatData = await _chatService.getChatHistory();
       
-      final data = await _chatService.getChatHistory();
-      
-      if (data['success'] == true) {
-        final user = data['user'];
-        
+      if (chatData.containsKey('user')) {
+        final user = chatData['user'];
         setState(() {
           profilePicture = user['profile_picture'];
           userName = '${user['first_name']} ${user['last_name']}';
-          chatHistory = data['latest_chat'] ?? [];
-          isLoading = false;
+          _isLoading = false;
         });
-      } else {
-        setState(() => isLoading = false);
       }
     } catch (e) {
       print('API Error: $e');
-      setState(() => isLoading = false);
+      setState(() => _isLoading = false);
     }
   }
 
@@ -55,59 +50,40 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 40),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    profilePicture != null
-                        ? _buildRoundedBox(context, profilePicture!)
-                        : Center(child: CircularProgressIndicator()),
-
-                    const SizedBox(width: 20),
-                    _buildBlueBox(context, userName),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-
-              Expanded(
-                child: isLoading 
-                ? Center(child: CircularProgressIndicator())
-                : chatHistory.isEmpty
-                  ? Center(child: Text('No chat history found'))
-                  : ListView.builder(
-                      itemCount: chatHistory.length,
-                      physics: const BouncingScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        final chat = chatHistory[index];
-                        return ChatUserCard(
-                          chatData: chat,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatUserScreen(
-                                  conversationId: chat['conversation_id'],
-                                ),
+          child: _isLoading 
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 40),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        profilePicture != null
+                            ? _buildRoundedBox(context, profilePicture!)
+                            : CircleAvatar(
+                                radius: MediaQuery.of(context).size.width * 0.09,
+                                backgroundColor: Colors.grey[300],
+                                child: Icon(Icons.person, size: 40, color: Colors.grey[700]),
                               ),
-                            );
-                          },
-                        );
-                      }, 
-                    )
-              )
-            ],
+                        const SizedBox(width: 20),
+                        _buildBlueBox(context, userName),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  _buildSearchRow(context),
+                  SizedBox(height: 20),
+                  Expanded(child: ChatUserCard()),
+                ],
+              ),
           ),
         ),
-      ),
-    );
+      );
   }
-
+  
   Widget _buildRoundedBox(BuildContext context, String imageUrl) {
     double boxSize = MediaQuery.of(context).size.width * 0.18;
 
@@ -118,6 +94,12 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
         width: boxSize,
         height: boxSize,
         fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: boxSize,
+          height: boxSize,
+          color: Colors.grey[300],
+          child: Icon(Icons.person, size: boxSize * 0.6, color: Colors.grey[700]),
+        ),
       ),
     );
   }
@@ -138,11 +120,43 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
           text,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white,
+            color: MainTheme.white,
+            fontFamily: 'BaiJamjuree',
           ),
           textAlign: TextAlign.center,
         ),
       ),
+    );
+  }
+
+  Widget _buildSearchRow(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          'ค้นหาจักษุแพทย์ ',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: MainTheme.black,
+            fontFamily: 'BaiJamjuree',
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            context.push('/chat-search');
+          },
+          child: Text(
+            'กดตรงนี้เลย',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: MainTheme.chatBlue,
+              fontFamily: 'BaiJamjuree',
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

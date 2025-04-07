@@ -1,9 +1,8 @@
 import 'package:client/widgets/ophth/chat_ophth_card.dart';
 import 'package:flutter/material.dart';
 import 'package:client/services/chat_service.dart';
-import 'package:client/pages/chat/ophth/chat_ophth_screen.dart';
+import 'package:client/core/theme/theme.dart';
 import 'package:go_router/go_router.dart';
-import 'package:client/core/router/path.dart';
 
 class ChatOphthHistory extends StatefulWidget {
   const ChatOphthHistory({super.key});
@@ -15,9 +14,8 @@ class ChatOphthHistory extends StatefulWidget {
 class _ChatOphthHistoryState extends State<ChatOphthHistory> {
   String? profilePicture;
   String userName = '';
-  List<dynamic> chatHistory = [];
-  bool isLoading = true;
-  final _chatService = ChatService();
+  final ChatService _chatService = ChatService();
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -27,25 +25,20 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
 
   Future<void> fetchChatData() async {
     try {
-      setState(() => isLoading = true);
+      setState(() => _isLoading = true);
+      final chatData = await _chatService.getChatHistory();
       
-      final data = await _chatService.getChatHistory();
-      
-      if (data['success'] == true) {
-        final user = data['user'];
-        
+      if (chatData.containsKey('user')) {
+        final user = chatData['user'];
         setState(() {
           profilePicture = user['profile_picture'];
           userName = '${user['first_name']} ${user['last_name']}';
-          chatHistory = data['latest_chat'] ?? [];
-          isLoading = false;
+          _isLoading = false;
         });
-      } else {
-        setState(() => isLoading = false);
       }
     } catch (e) {
       print('API Error: $e');
-      setState(() => isLoading = false);
+      setState(() => _isLoading = false);
     }
   }
 
@@ -54,7 +47,6 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -62,72 +54,42 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
             context.go('/home-opht');
           },
         ),
-        title: Text(
-          "แชท",
-          style: TextStyle(
-            color: Colors.black,
-            fontFamily: 'BaiJamjuree',
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 40),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    profilePicture != null
-                        ? _buildRoundedBox(context, profilePicture!)
-                        : Center(child: CircularProgressIndicator()),
-
-                    const SizedBox(width: 20),
-                    _buildBlueBox(context, userName),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-
-              Expanded(
-                child: isLoading 
-                ? Center(child: CircularProgressIndicator())
-                : chatHistory.isEmpty
-                  ? Center(child: Text('ไม่พบประวัติการแชท'))
-                  : ListView.builder(
-                      itemCount: chatHistory.length,
-                      physics: const BouncingScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        final chat = chatHistory[index];
-                        return ChatOphthCard(
-                          chatData: chat,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatOphthScreen(
-                                  conversationId: chat['conversation_id'],
-                                ),
+          child: _isLoading 
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 20),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        profilePicture != null
+                            ? _buildRoundedBox(context, profilePicture!)
+                            : CircleAvatar(
+                                radius: MediaQuery.of(context).size.width * 0.09,
+                                backgroundColor: Colors.grey[300],
+                                child: Icon(Icons.person, size: 40, color: Colors.grey[700]),
                               ),
-                            );
-                          },
-                        );
-                      }, 
-                    )
-              )
-            ],
+                        const SizedBox(width: 20),
+                        _buildBlueBox(context, userName),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Expanded(child: ChatOphthCard()),
+                ],
+              ),
           ),
         ),
-      ),
-    );
+      );
   }
-
+  
   Widget _buildRoundedBox(BuildContext context, String imageUrl) {
     double boxSize = MediaQuery.of(context).size.width * 0.18;
 
@@ -138,6 +100,12 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
         width: boxSize,
         height: boxSize,
         fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: boxSize,
+          height: boxSize,
+          color: Colors.grey[300],
+          child: Icon(Icons.person, size: boxSize * 0.6, color: Colors.grey[700]),
+        ),
       ),
     );
   }
@@ -150,7 +118,7 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
       width: boxWidth,
       height: boxHeight,
       decoration: BoxDecoration(
-        color: Colors.blue,
+        color: MainTheme.chatBlue,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Center(
@@ -159,6 +127,7 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
           style: TextStyle(
             fontSize: 16,
             color: Colors.white,
+            fontFamily: 'BaiJamjuree',
           ),
           textAlign: TextAlign.center,
         ),
