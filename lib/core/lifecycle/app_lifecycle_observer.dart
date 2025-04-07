@@ -83,17 +83,19 @@ class AppLifecycleObserver with WidgetsBindingObserver {
         // Then initialize socket for real-time updates
         await SocketService.initSocket();
         break;
-      case AppLifecycleState.paused:
-      case AppLifecycleState.detached:
-      case AppLifecycleState.inactive:
-      case AppLifecycleState.hidden:
-
-        // Use HTTP for more reliable status update when going to background
-
-        // But DON'T log out or disconnect socket permanently
-        await StatusService.setOffline();
-        // Don't disconnect socket here - let it timeout naturally
         
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+        // For these temporary states, do nothing - keep connection alive
+        // This prevents unnecessary disconnect/reconnect cycles
+        debugPrint('App temporarily inactive or paused, maintaining connection');
+        break;
+        
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        // App is fully in background - safer to update status
+        // But don't disconnect socket - let it timeout naturally
+        await StatusService.setOffline();
         break;
 
       default:
