@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
+import 'package:iconify_flutter/icons/mdi.dart'; // For visibility icons
 
 /// A *reusable* custom text field widget for user input.
 class EntryTextField extends StatefulWidget {
@@ -18,7 +19,7 @@ class EntryTextField extends StatefulWidget {
   final bool obscureText; 
 
   /// Icon to display inside the text field
-  final String icon;
+  final dynamic icon;
 
   /// Optional helper text displayed below the text field
   final String? helperText;
@@ -46,6 +47,8 @@ class EntryTextField extends StatefulWidget {
 }
 
 class _EntryTextFieldState extends State<EntryTextField> {
+  // Add this variable to control password visibility
+  bool _showPassword = false;
 
   // FocusNode to track focus state of the text field
   final FocusNode _focusNode = FocusNode();
@@ -109,7 +112,8 @@ class _EntryTextFieldState extends State<EntryTextField> {
             child: TextField(
               controller: widget.controller,
               focusNode: _focusNode,
-              obscureText: widget.obscureText,
+              // Use _showPassword to control password visibility
+              obscureText: widget.obscureText && !_showPassword,
               decoration: InputDecoration(
                 // Default border
                 enabledBorder: const OutlineInputBorder(
@@ -149,6 +153,24 @@ class _EntryTextFieldState extends State<EntryTextField> {
                     size: 20,
                   ),
                 ),
+
+                // Add suffix icon for password toggle
+                suffixIcon: widget.obscureText ? 
+                  IconButton(
+                    splashRadius: 20,
+                    icon: Iconify(
+                      _showPassword ? Mdi.eye : Mdi.eye_off,
+                      color: _isFocused 
+                          ? MainTheme.textfieldFocus 
+                          : MainTheme.placeholderText,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _showPassword = !_showPassword;
+                      });
+                    },
+                  ) : null,
               ),
             ),
           ),
