@@ -91,13 +91,13 @@ GoRouter createRouter({String initialLocation = '/login'}) {
       GoRoute(
         path: Path.chatHistoryPage,
         redirect: AuthGuard.requireAuth,
-        builder: (context, state) => const ChatUserHistory(),
+        builder: (context, state) => BottomNavBar(child: const ChatUserHistory()),
       ),
 
       GoRoute(
         path: Path.chatEmptyPage,
         redirect: AuthGuard.requireAuth,
-        builder: (context, state) => const ChatEmptyView(),
+        builder: (context, state) => BottomNavBar(child: const ChatEmptyView()),
       ),
 
       GoRoute(
@@ -240,6 +240,24 @@ GoRouter createRouter({String initialLocation = '/login'}) {
           GoRoute(
             path: Path.settingPage,
             builder: (context, state) => SettingsPage(),
+          ),
+
+          GoRoute(
+            path: Path.chatHistoryPage,
+            redirect: AuthGuard.requireAuth,
+            builder: (context, state) => BottomNavBar(child: const ChatUserHistory()),
+          ),
+
+          GoRoute(
+            path: Path.chatEmptyPage,
+            redirect: AuthGuard.requireAuth,
+            builder: (context, state) => BottomNavBar(child: const ChatEmptyView()),
+          ),
+
+          GoRoute(
+            path: Path.chatSearchPage,
+            redirect: AuthGuard.requireAuth,
+            builder: (context, state) => const ChatSearch(),
           ),
         ],
       ),
