@@ -7,7 +7,6 @@ import 'package:client/services/http_client.dart';
 import 'package:client/services/user_api_service.dart'; 
 import 'package:go_router/go_router.dart'; 
 import 'package:client/services/status_service.dart';
-import 'package:client/services/socket_service.dart';
 
 class AuthService {
   // Update your GoogleSignIn initialization
@@ -110,8 +109,6 @@ class AuthService {
           // Set user status to online
           await StatusService.setOnline();
           
-          // Initialize socket connection
-          await SocketService.initSocket();
           
           return {
             'isRegister': true,
@@ -242,10 +239,7 @@ class AuthService {
         
         // Set user as online after registration
         await StatusService.setOnline();
-        
-        // Initialize socket connection
-        await SocketService.initSocket();
-        
+                
         return {
           'success': true,
           'message': data['message'] ?? 'Registration successful',
@@ -286,8 +280,6 @@ class AuthService {
   // Logout
   Future<void> logout() async {
     try {
-      // First, disconnect socket
-      SocketService.disconnect();
       
       // Then clear credentials and make HTTP call to update status
       await UserService.logout();
@@ -358,10 +350,7 @@ class AuthService {
         
         // Set user status to online
         await StatusService.setOnline();
-        
-        // Initialize socket connection
-        await SocketService.initSocket();
-        
+                
         return {
           'success': true,
           'user': data['user'],

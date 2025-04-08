@@ -93,8 +93,6 @@ class _ChatInputState extends State<ChatInput> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      // Notify lifecycle observer that we're picking media
-      lifecycleObserver.setMediaPickerActive();
       
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
@@ -102,8 +100,6 @@ class _ChatInputState extends State<ChatInput> {
         imageQuality: 70,
       );
       
-      // Re-enable lifecycle events
-      lifecycleObserver.setMediaPickerInactive();
       
       if (image != null) {
         setState(() {
@@ -114,7 +110,6 @@ class _ChatInputState extends State<ChatInput> {
     } catch (e) {
       debugPrint('Error picking image: $e');
       // Make sure to reset the flag even on error
-      lifecycleObserver.setMediaPickerInactive();
     }
   }
 
@@ -209,7 +204,6 @@ class _ChatInputState extends State<ChatInput> {
                   ],
                 ),
 
-              // Add this to the build method, after the selected image preview
               if (_selectedImage != null && _textController.text.isNotEmpty) 
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),

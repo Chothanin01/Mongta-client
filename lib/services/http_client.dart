@@ -13,15 +13,6 @@ class HttpClient {
     return url;
   }
 
-  // Add this getter for socket URL specifically
-  static String get socketUrl {
-    final url = kReleaseMode 
-      ? 'https://mongta-server.vercel.app'
-      : 'http://10.0.2.2:5000'; // Same as HTTP in this case
-    
-    return url;
-  }
-
   // GET request with authentication
   static Future<http.Response> get(String endpoint, {Map<String, String>? headers}) async {
     final token = await UserService.getToken();

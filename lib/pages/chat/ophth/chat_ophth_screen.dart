@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:client/widgets/chat_input.dart';
 import 'package:client/widgets/message_card.dart';
 import 'package:client/services/chat_service.dart';
-import 'package:client/services/socket_service.dart';
-import 'package:client/services/user_service.dart';
+import 'package:client/services/chat_polling_service.dart';
 
 class ChatOphthScreen extends StatefulWidget {
   final int conversationId;
@@ -26,19 +25,14 @@ class _ChatOphthScreenState extends State<ChatOphthScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeChat();
+    ChatPollingService.startPollingForChat(widget.conversationId);
   }
-  
-  Future<void> _initializeChat() async {
-    // Ensure socket is connected
-    await SocketService.initSocket();
-    
-    // Get user ID and join the room
-    final userId = await UserService.getCurrentUserId();
-    SocketService.joinRoom(
-      widget.conversationId.toString(), 
-      userId
-    );
+
+  @override
+  void dispose() {
+    // Stop polling when screen is closed
+    ChatPollingService.stopPolling();
+    super.dispose();
   }
 
   @override
