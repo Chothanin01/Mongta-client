@@ -156,7 +156,7 @@ class _ManualNearChartTutorialState extends State<ManualNearChartTutorial> {
                           height: 48, 
                           child: _currentIndex == 0
                               ? TextButton(
-                                  onPressed: () => context.go('/'),
+                                  onPressed: () => context.go('/manual-tutorial-selection'),
                                   child: Text(
                                     'ข้ามการสอนใช้งาน',
                                     style: TextStyle(
