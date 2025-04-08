@@ -12,7 +12,11 @@ class ChatOphthItem extends StatelessWidget {
     final userData = chatData["Conversation"]["User_Conversation_user_idToUser"] ?? {};
     final userName = "${userData["first_name"] ?? "Unknown"} ${userData["last_name"] ?? ""}";
     final profilePicture = userData["profile_picture"] ?? "";
-    final lastMessage = chatData["chat"] ?? "ไม่มีข้อความ";
+    
+    // Get raw message and check if it's an image
+    final rawMessage = chatData["chat"] ?? "ไม่มีข้อความ";
+    final lastMessage = isImageUrl(rawMessage) ? "รูปภาพ" : rawMessage;
+    
     final timestamp = chatData["timestamp"] ?? "";
 
     final notreadRaw = chatData["notread"];
@@ -122,5 +126,15 @@ class ChatOphthItem extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  // Helper method to detect if a message is an image URL
+  bool isImageUrl(String message) {
+    return message.startsWith('https://') && 
+           (message.contains('firebasestorage.googleapis.com') || 
+            message.contains('.jpg') || 
+            message.contains('.jpeg') || 
+            message.contains('.png') || 
+            message.contains('.gif'));
   }
 }

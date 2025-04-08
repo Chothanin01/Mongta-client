@@ -124,115 +124,123 @@ class _RegisterPageState extends State<RegisterPage> {
         duration: Duration(milliseconds: 300), curve: Curves.ease);
   }
 
-  // Update the signUp method in your _RegisterPageState class
-
-void signUp(BuildContext context) async {
-  final phoneNumber = numberController.text.replaceAll(RegExp(r'\D'), '');
-  bool isValidPhone = false;
-  
-  if (phoneNumber.length == 10 && 
-      (phoneNumber.startsWith('06') || 
-       phoneNumber.startsWith('08') || 
-       phoneNumber.startsWith('09'))) {
-    isValidPhone = true;
-  }
-  
-  if (!isValidPhone) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอกเบอร์โทรศัพท์ที่ขึ้นต้นด้วย 06, 08 หรือ 09 และมี 10 หลัก'),
-        backgroundColor: MainTheme.redWarning,
-      ),
-    );
-    return;
-  }
-  
-  // Input validation
-  if (passwordController.text != passwordConfirmController.text) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('รหัสผ่านไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง'),
-        backgroundColor: MainTheme.redWarning,
-      ),
-    );
-    return;
-  }
-
-  if (!isChecked) {
-    setState(() {
-      showWarning = true;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('กรุณายอมรับเงื่อนไขและข้อตกลงการให้บริการก่อนดำเนินการต่อ'),
-        backgroundColor: MainTheme.redWarning,
-      ),
-    );
-    return;
-  }
-
-  // Show loading state
-  setState(() {
-    _isLoading = true;
-    showWarning = false;
-    _errorMessage = null;
-  });
-
-  try {
-    // Step 1: Collect user data for registration
-    final Map<String, String> userData = {
-      'username': usernameController.text,
-      'password': passwordController.text,
-      'phonenumber': numberController.text,
-      'email': emailController.text,
-      'first_name': firstNameController.text,
-      'last_name': lastNameController.text,
-      'sex': genderController.text,
-      'dob': dateController.text,
-    };
+  void signUp(BuildContext context) async {
+    final phoneNumber = numberController.text.replaceAll(RegExp(r'\D'), '');
+    bool isValidPhone = false;
     
-    // Step 2: Request OTP
-    final otpResponse = await ApiService.requestEmailOTP(emailController.text);
+    if (phoneNumber.length == 10 && 
+        (phoneNumber.startsWith('06') || 
+         phoneNumber.startsWith('08') || 
+         phoneNumber.startsWith('09'))) {
+      isValidPhone = true;
+    }
     
-    setState(() {
-      _isLoading = false;
-    });
+    if (!isValidPhone) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: MainTheme.redWarning,
+          content: Text("เบอร์โทรศัพท์ไม่ถูกต้อง โปรดกรอกเบอร์โทรศัพท์ที่ขึ้นต้นด้วย 06, 08 หรือ 09 และมี 10 หลัก"),
+        ),
+      );
+      return;
+    }
     
-    if (otpResponse['success'] == true) {
-      // Navigate to OTP verification using consistent GoRouter navigation
-      if (context.mounted) {
-        context.push('/verify_otp', extra: {
-          'email': emailController.text,
-          'ref': otpResponse['Ref'],
-          'userData': userData,
-        });
-      }
-    } else {
+    // Input validation
+    if (passwordController.text != passwordConfirmController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: MainTheme.redWarning,
+          content: Text("รหัสผ่านไม่ตรงกัน โปรดตรวจสอบอีกครั้ง"),
+        ),
+      );
+      return;
+    }
+
+    if (!isChecked) {
       setState(() {
-        _errorMessage = otpResponse['message'] ?? 'ไม่สามารถส่ง OTP ได้';
+        showWarning = true;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: MainTheme.redWarning,
+          content: Text("โปรดยอมรับเงื่อนไขและข้อตกลงการใช้งานก่อนดำเนินการต่อ"),
+        ),
+      );
+      return;
+    }
+
+    // Show loading state
+    setState(() {
+      _isLoading = true;
+      showWarning = false;
+      _errorMessage = null;
+    });
+
+    try {
+      // Step 1: Collect user data for registration
+      final Map<String, String> userData = {
+        'username': usernameController.text,
+        'password': passwordController.text,
+        'phonenumber': numberController.text,
+        'email': emailController.text,
+        'first_name': firstNameController.text,
+        'last_name': lastNameController.text,
+        'sex': genderController.text,
+        'dob': dateController.text,
+      };
+      
+      // Step 2: Request OTP
+      final otpResponse = await ApiService.requestEmailOTP(emailController.text);
+      
+      setState(() {
+        _isLoading = false;
+      });
+      
+      if (otpResponse['success'] == true) {
+        // Navigate to OTP verification using consistent GoRouter navigation
+        if (context.mounted) {
+          context.push('/verify_otp', extra: {
+            'email': emailController.text,
+            'ref': otpResponse['Ref'],
+            'userData': userData,
+          });
+        }
+      } else {
+        setState(() {
+          _errorMessage = otpResponse['message'] ?? 'ไม่สามารถส่ง OTP ได้ โปรดลองใหม่อีกครั้ง';
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text(_errorMessage ?? 'เกิดข้อผิดพลาดในการส่ง OTP โปรดลองใหม่อีกครั้ง'),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'เกิดข้อผิดพลาด: $e';
+      });
+      
+      String errorMsg = 'เกิดข้อผิดพลาดในการลงทะเบียน โปรดลองใหม่อีกครั้ง';
+      
+      if (e.toString().contains('email already exists')) {
+        errorMsg = 'อีเมลนี้ถูกใช้งานแล้ว โปรดใช้อีเมลอื่น';
+      } else if (e.toString().contains('username already exists')) {
+        errorMsg = 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว โปรดใช้ชื่อผู้ใช้อื่น';
+      } else if (e.toString().contains('connection')) {
+        errorMsg = 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+      }
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_errorMessage!),
           backgroundColor: MainTheme.redWarning,
+          content: Text(errorMsg),
         ),
       );
     }
-  } catch (e) {
-    setState(() {
-      _isLoading = false;
-      _errorMessage = 'เกิดข้อผิดพลาด: $e';
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('เกิดข้อผิดพลาด: $e'),
-        backgroundColor: MainTheme.redWarning,
-      ),
-    );
   }
-}
 
   void _showVerificationPrompt(BuildContext context) {
     showDialog(
@@ -278,10 +286,178 @@ void signUp(BuildContext context) async {
   }
 
   void backToLogin(BuildContext context) {
-    // Placeholder for sign-in logic
-    // TODO: Add authentication implementation
     context.go('/login'); // Navigate to HomePage
   }
+
+  // Function to show Terms of Service popup with checkbox
+  void _showTermsOfService(BuildContext context, Function(bool) onAgreed) {
+    bool isAgreed = false; // Track checkbox state
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder( // Use StatefulBuilder to update checkbox state within dialog
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.8,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          Text(
+                            'เงื่อนไขการใช้บริการ',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'BaiJamjuree',
+                            ),
+                          ),
+                          Spacer(),
+                          IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Divider(height: 1),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.all(16),
+                        child: Text(
+                          _termsOfServiceText,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'BaiJamjuree',
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Add checkbox for agreement
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: isAgreed,
+                            onChanged: (value) {
+                              setState(() {
+                                isAgreed = value!;
+                              });
+                            },
+                            activeColor: MainTheme.buttonBackground,
+                          ),
+                          Expanded(
+                            child: Text(
+                              'ฉันได้อ่านและยอมรับเงื่อนไขการใช้บริการ',
+                              style: TextStyle(
+                                fontFamily: 'BaiJamjuree',
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: MainTheme.buttonBackground,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            onAgreed(isAgreed);
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            'ตกลง', // Changed from "ปิด" to "ตกลง"
+                            style: TextStyle(
+                              fontFamily: 'BaiJamjuree',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        );
+      },
+    );
+  }
+
+  // Mock Terms of Service text for MongTa eye scanning app
+  final String _termsOfServiceText = '''
+เงื่อนไขการใช้บริการแอปพลิเคชัน MongTa (มองตา)
+
+1. บทนำ
+   แอปพลิเคชัน MongTa ("แอปพลิเคชัน") เป็นแพลตฟอร์มที่ให้บริการสแกนและวิเคราะห์ดวงตาเบื้องต้น ดำเนินการโดย [ชื่อบริษัท] ("เรา", "ของเรา") เงื่อนไขการใช้บริการนี้กำหนดกฎและข้อบังคับสำหรับการใช้แอปพลิเคชัน MongTa
+
+2. การยอมรับเงื่อนไข
+   โดยการเข้าถึงหรือใช้แอปพลิเคชัน MongTa คุณยืนยันว่าคุณเข้าใจ ยอมรับ และตกลงที่จะปฏิบัติตามเงื่อนไขการใช้บริการทั้งหมดที่ระบุไว้ในเอกสารนี้ หากคุณไม่ยอมรับเงื่อนไขเหล่านี้ คุณไม่ควรใช้แอปพลิเคชันของเรา
+
+3. ข้อจำกัดอายุ
+   แอปพลิเคชัน MongTa มีไว้สำหรับผู้ใช้ที่มีอายุ 18 ปีขึ้นไป หากคุณมีอายุต่ำกว่า 18 ปี คุณจำเป็นต้องได้รับความยินยอมจากผู้ปกครองหรือผู้ดูแลตามกฎหมายก่อนใช้แอปพลิเคชัน
+
+4. คำเตือนทางการแพทย์
+   4.1 แอปพลิเคชัน MongTa ไม่ได้มีวัตถุประสงค์เพื่อทดแทนการปรึกษาหรือการรักษาทางการแพทย์โดยผู้เชี่ยวชาญ
+   4.2 ผลการสแกนและการวิเคราะห์ที่ให้โดยแอปพลิเคชันเป็นเพียงข้อมูลเบื้องต้นเท่านั้น ไม่ถือเป็นการวินิจฉัยทางการแพทย์อย่างเป็นทางการ
+   4.3 หากคุณมีอาการทางสายตาหรือดวงตา โปรดปรึกษาจักษุแพทย์หรือผู้เชี่ยวชาญทางการแพทย์โดยเร็วที่สุด
+
+5. การเก็บรวบรวมข้อมูลและความเป็นส่วนตัว
+   5.1 เราเก็บรวบรวมข้อมูลส่วนบุคคลและข้อมูลทางการแพทย์ตามที่ระบุไว้ในนโยบายความเป็นส่วนตัวของเรา
+   5.2 ข้อมูลที่เก็บรวบรวมจะถูกใช้เพื่อการให้บริการ การวิเคราะห์ และการปรับปรุงแอปพลิเคชัน
+   5.3 เราใช้มาตรการรักษาความปลอดภัยที่เหมาะสมเพื่อปกป้องข้อมูลของคุณ แต่ไม่สามารถรับประกันความปลอดภัยอย่างสมบูรณ์ได้
+
+6. ความรับผิดชอบของผู้ใช้
+   6.1 คุณต้องให้ข้อมูลที่ถูกต้องและเป็นปัจจุบันเมื่อใช้แอปพลิเคชัน
+   6.2 คุณต้องไม่ใช้แอปพลิเคชันในทางที่ผิดกฎหมายหรือสร้างความเสียหาย
+   6.3 คุณไม่สามารถพยายามเข้าถึงส่วนใดของแอปพลิเคชันที่ไม่ได้รับอนุญาต
+   6.4 คุณไม่ควรแชร์บัญชีหรือรหัสผ่านกับผู้อื่น
+
+7. การเชื่อมต่อกับจักษุแพทย์
+   7.1 แอปพลิเคชัน MongTa อาจเสนอการเชื่อมต่อกับจักษุแพทย์ผ่านระบบแชท
+   7.2 การให้คำแนะนำของจักษุแพทย์ผ่านแอปพลิเคชันไม่ถือเป็นการรักษาที่สมบูรณ์ และอาจต้องมีการนัดพบแพทย์ในสถานพยาบาลตามความเหมาะสม
+
+8. ข้อจำกัดความรับผิด
+   8.1 แอปพลิเคชัน MongTa จัดเตรียมให้ตาม "สภาพที่เป็นอยู่" และ "ตามที่มีให้บริการ" โดยไม่มีการรับประกันใด ๆ
+   8.2 เราจะไม่รับผิดต่อความเสียหายทางตรง ทางอ้อม อุบัติเหตุ หรือเป็นผลสืบเนื่องที่เกิดจากการใช้แอปพลิเคชัน
+   8.3 การตัดสินใจทางการแพทย์ใด ๆ ที่คุณทำตามข้อมูลจากแอปพลิเคชันเป็นความรับผิดชอบของคุณเองทั้งสิ้น
+
+9. ทรัพย์สินทางปัญญา
+   แอปพลิเคชัน MongTa รวมถึงเนื้อหา กราฟิก โลโก้ และซอฟต์แวร์ทั้งหมดเป็นทรัพย์สินของเราและได้รับการคุ้มครองโดยกฎหมายทรัพย์สินทางปัญญา
+
+10. การยกเลิกการใช้บริการ
+    เราขอสงวนสิทธิ์ในการระงับหรือยกเลิกการเข้าถึงแอปพลิเคชันของคุณได้ทุกเมื่อ โดยมีหรือไม่มีการแจ้งให้ทราบล่วงหน้า หากคุณละเมิดเงื่อนไขการใช้บริการ
+
+11. การเปลี่ยนแปลงเงื่อนไข
+    เราอาจปรับปรุงเงื่อนไขการใช้บริการเป็นครั้งคราว การเปลี่ยนแปลงจะมีผลทันทีเมื่อประกาศบนแอปพลิเคชัน การใช้แอปพลิเคชันอย่างต่อเนื่องหลังจากการเปลี่ยนแปลงถือเป็นการยอมรับเงื่อนไขใหม่
+
+12. กฎหมายที่ใช้บังคับ
+    เงื่อนไขการใช้บริการนี้อยู่ภายใต้และตีความตามกฎหมายของประเทศไทย
+
+วันที่ปรับปรุงล่าสุด: 8 เมษายน 2025
+''';
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +468,7 @@ void signUp(BuildContext context) async {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: MainTheme.mainText),
+                icon: Icon(Icons.arrow_back_ios, color: MainTheme.mainText),
                 onPressed: () {
                   previousPage(context);
                 },
@@ -580,13 +756,21 @@ void signUp(BuildContext context) async {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    'เงื่อนไขเเละข้อตกลงการให้บริการ Term of Service',
-                                    style: TextStyle(
-                                      color: MainTheme.mainText,
-                                      fontSize: 12,
-                                      fontFamily: 'BaiJamjuree',
-                                      fontWeight: FontWeight.w500,
+                                  GestureDetector(
+                                    onTap: () => _showTermsOfService(context, (agreed) {
+                                      setState(() {
+                                        isChecked = agreed;
+                                        if (isChecked) showWarning = false;
+                                      });
+                                    }),
+                                    child: Text(
+                                      'เงื่อนไขเเละข้อตกลงการให้บริการ Term of Service',
+                                      style: TextStyle(
+                                        color: MainTheme.mainText,
+                                        fontSize: 12,
+                                        fontFamily: 'BaiJamjuree',
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                   if (showWarning)

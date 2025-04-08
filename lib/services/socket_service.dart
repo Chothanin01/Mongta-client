@@ -45,6 +45,8 @@ class SocketService {
           .disableAutoConnect()
           .setExtraHeaders({'userId': userId})
           .enableForceNew()
+          .setReconnectionAttempts(5)     // Try to reconnect 5 times
+          .setReconnectionDelay(3000)     // Wait 3 seconds between attempts
           .build()
       );
 
@@ -59,6 +61,16 @@ class SocketService {
       _socket!.on('newMessage', (data) {
         debugPrint('Received new message: $data');
         _newMessageController.add(data);
+      });
+
+      _socket!.on('joinRoom', (data) {
+        debugPrint('Room joined notification: $data');
+        // Handle room joining if needed
+      });
+
+      _socket!.on('newChat', (data) {
+        debugPrint('New chat created: $data');
+        // Handle new chat creation if needed
       });
 
       _socket!.onConnectError((error) {
@@ -78,6 +90,14 @@ class SocketService {
       debugPrint('Socket initialization exception: $e');
       _connecting = false;
       _initialized = false;
+    }
+  }
+
+  // Add a method to reconnect without changing state variables
+  static Future<void> reconnect() async {
+    if (_socket != null && !_socket!.connected) {
+      debugPrint('Attempting to reconnect socket');
+      _socket!.connect();
     }
   }
 

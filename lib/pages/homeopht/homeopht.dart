@@ -111,17 +111,24 @@ class _OphtHomePageState extends State<OphtHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    
     return Scaffold(
       backgroundColor: MainTheme.mainBackground,
       appBar: AppBar(
-        toolbarHeight: 60,
+        toolbarHeight: screenHeight * 0.075,
         elevation: 0,
         backgroundColor: MainTheme.mainBackground,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0, top: 20.0),
+         padding: EdgeInsets.only(
+            left: screenWidth * 0.04,  
+            top: screenHeight * 0.025  
+          ),
           child: Container(
-            width: 40, // กำหนดขนาดที่แน่นอน
-            height: 40,
+            width: screenWidth * 0.1,  
+            height: screenWidth * 0.1, 
             decoration: BoxDecoration(
               color: MainTheme.mainBackground,
               borderRadius: BorderRadius.circular(16),
@@ -189,7 +196,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(screenWidth * 0.04),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

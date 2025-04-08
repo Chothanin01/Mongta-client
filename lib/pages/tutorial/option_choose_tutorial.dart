@@ -11,7 +11,7 @@ class TutorialBackButton extends StatelessWidget {
       top: 8,
       left: 16,
       child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new),
+        icon: const Icon(Icons.arrow_back_ios),
         onPressed: () => context.go('/settings'),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:client/pages/chat/user/chat_user_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class ChatCardItem extends StatelessWidget {
   final dynamic chatData;
@@ -12,7 +13,11 @@ class ChatCardItem extends StatelessWidget {
     final userData = chatData["Conversation"]["User_Conversation_ophthalmologist_idToUser"] ?? {};
     final userName = "${userData["first_name"] ?? "Unknown"} ${userData["last_name"] ?? ""}";
     final profilePicture = userData["profile_picture"] ?? "";
-    final lastMessage = chatData["chat"] ?? "ไม่มีข้อความ";
+    
+    // Get raw message and check if it's an image
+    final rawMessage = chatData["chat"] ?? "ไม่มีข้อความ";
+    final lastMessage = isImageUrl(rawMessage) ? "รูปภาพ" : rawMessage;
+    
     final timestamp = chatData["timestamp"] ?? "";
 
     final notreadRaw = chatData["notread"];
@@ -36,12 +41,8 @@ class ChatCardItem extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (conversationId != 0) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatUserScreen(conversationId: conversationId),
-            ),
-          );
+          // Use the router for navigation instead
+          context.push('/chat-user-screen/$conversationId');
         } else {
           debugPrint("Invalid conversation_id: $conversationIdRaw");
         }
@@ -122,5 +123,15 @@ class ChatCardItem extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  // Helper method to detect if a message is an image URL
+  bool isImageUrl(String message) {
+    return message.startsWith('https://') && 
+           (message.contains('firebasestorage.googleapis.com') || 
+            message.contains('.jpg') || 
+            message.contains('.jpeg') || 
+            message.contains('.png') || 
+            message.contains('.gif'));
   }
 }

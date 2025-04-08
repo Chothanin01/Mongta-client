@@ -489,14 +489,14 @@ class ScanResultPage extends StatelessWidget {
                 if (icon != null)
                   Icon(
                     icon,
-                    size: 24,
+                    size: 20,
                     color: isBlueButton ? Colors.white : MainTheme.blueText,
                   )
                 else if (imagePath != null)
                   Image.asset(
                     imagePath,
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                   ),
                   
                 const SizedBox(width: 12),
@@ -511,7 +511,7 @@ class ScanResultPage extends StatelessWidget {
                         title,
                         style: TextStyle(
                           color: isBlueButton ? MainTheme.white : MainTheme.mainText,
-                          fontSize: 16,
+                          fontSize: 12,
                           fontFamily: 'BaiJamjuree',
                           fontWeight: FontWeight.w500,
                         ),
@@ -525,7 +525,7 @@ class ScanResultPage extends StatelessWidget {
                           color: isBlueButton 
                               ? MainTheme.white
                               : MainTheme.mainText,
-                          fontSize: 12,
+                          fontSize: 8,
                           fontFamily: 'BaiJamjuree',
                           fontWeight: FontWeight.w400,
                         ),

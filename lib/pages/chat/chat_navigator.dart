@@ -57,14 +57,26 @@ class _ChatNavigatorState extends State<ChatNavigator> {
       );
     }
     
-    // If ophthalmologist, always show their chat history screen
-    if (_isOphthalmologist) {
-      return const ChatOphthHistory();
+    try {
+      // If ophthalmologist, always show their chat history screen
+      if (_isOphthalmologist) {
+        return const ChatOphthHistory();
+      }
+      
+      // For regular users, check if they have chat history
+      return _hasHistory 
+          ? const ChatUserHistory() 
+          : const ChatEmptyView();
+    } catch (e) {
+      // Safety fallback if something fails
+      debugPrint('Error in ChatNavigator: $e');
+      return Scaffold(
+        body: Center(
+          child: Text('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง',
+            style: TextStyle(fontFamily: 'BaiJamjuree')
+          ),
+        ),
+      );
     }
-    
-    // For regular users, check if they have chat history
-    return _hasHistory 
-        ? const ChatUserHistory() 
-        : const ChatEmptyView();
   }
 }

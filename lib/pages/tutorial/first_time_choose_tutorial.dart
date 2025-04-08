@@ -11,7 +11,7 @@ class TutorialBackButton extends StatelessWidget {
       top: 8,
       left: 16,
       child: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new),
+        icon: const Icon(Icons.arrow_back_ios),
         onPressed: () => context.go('/home'),
       ),
     );
@@ -179,7 +179,7 @@ class _TutorialSelectionScreenState extends State<TutorialSelection> {
                   ),
                 ),
                 child: const Text(
-                  'เริ่มต้นการสอนใช้งาน',
+                  'เริ่มต้น',
                   style: TextStyle(
                     color: MainTheme.white,
                     fontSize: 18,

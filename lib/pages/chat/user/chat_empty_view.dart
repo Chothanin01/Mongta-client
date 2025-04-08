@@ -3,6 +3,9 @@ import 'package:client/core/theme/theme.dart';
 import 'package:client/pages/chat/user/chat_search.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client/services/chat_service.dart';
+import 'package:client/services/user_api_service.dart'; 
+import 'package:client/services/user_service.dart';  
+
 
 class ChatEmptyView extends StatefulWidget {
   const ChatEmptyView({super.key});
@@ -26,19 +29,44 @@ class _ChatEmptyViewState extends State<ChatEmptyView> {
   Future<void> fetchUserData() async {
     try {
       setState(() => _isLoading = true);
+      
+      // First attempt - get from chat history API
       final chatData = await _chatService.getChatHistory();
       
-      if (chatData.containsKey('user')) {
+      if (chatData.containsKey('user') && chatData['user'] != null) {
         final user = chatData['user'];
         setState(() {
           profilePicture = user['profile_picture'];
           userName = '${user['first_name']} ${user['last_name']}';
           _isLoading = false;
         });
+      } else {
+        // Fallback method - get user data directly from user API
+        final userId = await UserService.getCurrentUserId();
+        if (userId.isNotEmpty) {
+          final apiService = ApiService();
+          final userData = await apiService.getUser(userId);
+          
+          setState(() {
+            profilePicture = userData['profile_picture'];
+            userName = '${userData['first_name']} ${userData['last_name']}';
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            profilePicture = null;
+            userName = 'ไม่พบข้อมูลผู้ใช้';
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       print('API Error: $e');
-      setState(() => _isLoading = false);
+      setState(() {
+        profilePicture = null;
+        userName = 'เกิดข้อผิดพลาด';
+        _isLoading = false;
+      });
     }
   }
   
@@ -47,14 +75,15 @@ class _ChatEmptyViewState extends State<ChatEmptyView> {
     return Scaffold(
       backgroundColor: MainTheme.white,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-          child: _isLoading 
-            ? Center(child: CircularProgressIndicator())
-            : Column(
+        child: _isLoading 
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 40),
+                  SizedBox(height: 80), // Add top spacing
+                  // Profile picture and name row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -65,7 +94,7 @@ class _ChatEmptyViewState extends State<ChatEmptyView> {
                               backgroundColor: Colors.grey[300],
                               child: Icon(Icons.person, size: 40, color: Colors.grey[700]),
                             ),
-                      SizedBox(width: 20),
+                      const SizedBox(width: 20),
                       _buildBlueBox(context, userName),
                     ],
                   ),
@@ -73,9 +102,9 @@ class _ChatEmptyViewState extends State<ChatEmptyView> {
                   _buildWhiteBox(context),
                 ],
               ),
-          ),
-        ),
-      );
+            ),
+      ),
+    );
   }
 
   Widget _buildRoundedBox(BuildContext context, String imageUrl) {

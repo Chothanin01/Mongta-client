@@ -137,8 +137,8 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
     if (!isValidPhone) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอกเบอร์โทรศัพท์ที่ขึ้นต้นด้วย 06, 08 หรือ 09 และมี 10 หลัก'),
           backgroundColor: MainTheme.redWarning,
+          content: Text("เบอร์โทรศัพท์ไม่ถูกต้อง โปรดกรอกเบอร์โทรศัพท์ที่ขึ้นต้นด้วย 06, 08 หรือ 09 และมี 10 หลัก"),
         ),
       );
       return;
@@ -150,8 +150,8 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('กรุณายอมรับเงื่อนไขและข้อตกลงการให้บริการก่อนดำเนินการต่อ'),
           backgroundColor: MainTheme.redWarning,
+          content: Text("โปรดยอมรับเงื่อนไขและข้อตกลงการใช้งานก่อนดำเนินการต่อ"),
         ),
       );
       return;
@@ -217,23 +217,37 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
           // Navigate to success page
           context.go('/complete-otp');
         } else {
-          // Show error message
+          String errorMsg = result['message'] ?? 'เกิดข้อผิดพลาดในการลงทะเบียน โปรดลองใหม่อีกครั้ง';
+          
+          // Specific error translations
+          if (errorMsg.contains("User already exists")) {
+            errorMsg = "ผู้ใช้นี้มีอยู่ในระบบแล้ว";
+          } else if (errorMsg.contains("Invalid token")) {
+            errorMsg = "โทเค็นไม่ถูกต้อง โปรดเข้าสู่ระบบด้วย Google อีกครั้ง";
+          } else if (errorMsg.contains("Missing required inputs")) {
+            errorMsg = "กรุณากรอกข้อมูลให้ครบถ้วน";
+          }
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message'] ?? 'การลงทะเบียนล้มเหลว กรุณาลองใหม่อีกครั้ง'),
               backgroundColor: MainTheme.redWarning,
+              content: Text(errorMsg),
             ),
           );
         }
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('เกิดข้อผิดพลาดในการลงทะเบียน: ${e.toString()}'),
-              backgroundColor: MainTheme.redWarning,
-            ),
-          );
+        String errorMsg = 'เกิดข้อผิดพลาดในการลงทะเบียน โปรดลองใหม่อีกครั้ง';
+        
+        if (e.toString().contains('network')) {
+          errorMsg = 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
         }
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text(errorMsg),
+          ),
+        );
       }
     }
   }
@@ -268,7 +282,7 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: MainTheme.mainText),
+          icon: Icon(Icons.arrow_back_ios, color: MainTheme.mainText),
           onPressed: () {
             // Cancel Google registration and go back to login
             context.go('/login');

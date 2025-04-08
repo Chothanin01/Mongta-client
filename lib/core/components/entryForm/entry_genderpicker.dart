@@ -89,7 +89,7 @@ class _EntryGenderPickerState extends State<EntryGenderPicker> {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 6),
               Expanded(
                 child: GestureDetector(
                   onTap: () => _selectGender('female'),

@@ -72,21 +72,17 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       print('Login error details: ${e.toString()}');
       
-      // Show more informative error message based on error type
-      String errorMessage = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+      // Show Thai error messages based on error type
+      String errorMessage = "เกิดข้อผิดพลาดในการเข้าสู่ระบบ โปรดลองอีกครั้ง";
       
       if (e is http.ClientException) {
         errorMessage = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต";
-        print('HTTP client error: ${e.message}');
       } else if (e.toString().contains('SocketException')) {
         errorMessage = "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต";
-        print('Socket connection error');
       } else if (e.toString().contains('TimeoutException')) {
-        errorMessage = "การเชื่อมต่อใช้เวลานานเกินไป โปรดลองอีกครั้ง";
-        print('Connection timeout');
+        errorMessage = "การเชื่อมต่อใช้เวลานานเกินไป โปรดลองใหม่อีกครั้ง";
       } else if (e.toString().contains('FormatException')) {
-        errorMessage = "เกิดข้อผิดพลาดในการประมวลผลข้อมูล";
-        print('Response format error');
+        errorMessage = "เกิดข้อผิดพลาดในการประมวลผลข้อมูล โปรดติดต่อผู้ดูแลระบบ";
       }
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -150,9 +146,19 @@ class _LoginPageState extends State<LoginPage> {
         // Hide loading indicator if still showing
         Navigator.of(context, rootNavigator: true).pop();
         
-        // Show appropriate error message
+        // Show appropriate Thai error message
+        String errorMessage = "เข้าสู่ระบบด้วย Google ไม่สำเร็จ โปรดลองอีกครั้ง";
+        
+        if (e.toString().contains('network_error')) {
+          errorMessage = "ไม่สามารถเชื่อมต่อกับ Google ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต";
+        } else if (e.toString().contains('popup_closed')) {
+          errorMessage = "หน้าต่างเข้าสู่ระบบถูกปิดก่อนเสร็จสิ้น โปรดลองใหม่อีกครั้ง";
+        } else if (e.toString().contains('popup_blocked')) {
+          errorMessage = "หน้าต่าง Google Sign In ถูกบล็อค โปรดอนุญาตป๊อปอัปจากแอปนี้";
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('เข้าสู่ระบบด้วย Google ล้มเหลว: ${e.toString()}')),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     }
@@ -279,7 +285,7 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
 
-                  const SizedBox(height: 150), // Spacer
+                  const SizedBox(height: 30), // Spacer
 
                   // div "หากยังไม่มีบัญชี" และ "สมัครสมาชิก" to merge in
                   RichText(

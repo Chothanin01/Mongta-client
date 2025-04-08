@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:client/services/status_service.dart';
 import 'package:client/services/socket_service.dart';
 
-
 class AuthService {
   // Update your GoogleSignIn initialization
   final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -68,7 +67,7 @@ class AuthService {
       print('Access token length: ${googleAuth.accessToken?.length ?? 0}');
       
       if (googleAuth.idToken == null) {
-        throw Exception("Google authentication token is null");
+        throw Exception("ไม่สามารถรับโทเค็นการยืนยันตัวตนจาก Google ได้");
       }
 
       try {
@@ -134,10 +133,23 @@ class AuthService {
           };
         }
       } else {
-        throw Exception('Backend error: ${response.body}');
+        String errorMsg = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย Google';
+        return {
+          'success': false,
+          'message': errorMsg,
+        };
       }
     } catch (e) {
       debugPrint("Error signing in with Google: $e");
+      
+      if (e.toString().contains('MissingPluginException')) {
+        throw Exception("ไม่พบปลั๊กอิน Google Sign In โปรดติดต่อผู้พัฒนา");
+      } else if (e.toString().contains('network_error')) {
+        throw Exception("ไม่สามารถเชื่อมต่อกับ Google ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต");
+      } else if (e.toString().contains('sign_in_canceled')) {
+        throw Exception("การเข้าสู่ระบบถูกยกเลิก");
+      }
+      
       rethrow;
     }
   }
@@ -350,18 +362,19 @@ class AuthService {
         // Initialize socket connection
         await SocketService.initSocket();
         
-        // Make sure success=true in the returned data
         return {
           'success': true,
-          'message': data['message'] ?? 'Login successful',
-          'user': data['user'] ?? {},
-          'token': data['token'] ?? '',
+          'user': data['user'],
+          'token': data['token'],
+          'message': 'เข้าสู่ระบบสำเร็จ'
         };
       } else {
-        print('Auth service: Login failed with message: ${data['message']}');
+        // Translate error messages to Thai
+        String errorMsg = translateBackendError(data['message'] ?? '');
+        
         return {
           'success': false,
-          'message': data['message'] ?? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
+          'message': errorMsg
         };
       }
     } catch (e) {
@@ -369,4 +382,23 @@ class AuthService {
       rethrow;
     }
   }
+}
+
+
+Map<String, String> backendErrorTranslations = {
+  "User not found.": "ไม่พบบัญชีผู้ใช้นี้ในระบบ",
+  "Password invalid.": "รหัสผ่านไม่ถูกต้อง",
+  "Missing required inputs.": "กรุณากรอกข้อมูลให้ครบถ้วน",
+  "User already exists.": "ผู้ใช้นี้มีอยู่ในระบบแล้ว",
+  "Invalid token.": "โทเค็นไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่อีกครั้ง",
+  "Token not found.": "ไม่พบโทเค็น กรุณาเข้าสู่ระบบใหม่อีกครั้ง",
+  "Invalid token format.": "รูปแบบโทเค็นไม่ถูกต้อง กรุณาเข้าสู่ระบบใหม่อีกครั้ง",
+  "User offline.": "บัญชีผู้ใช้ออฟไลน์ กรุณาเข้าสู่ระบบใหม่อีกครั้ง",
+  "OTP incorrect.": "รหัส OTP ไม่ถูกต้อง กรุณาตรวจสอบและลองใหม่อีกครั้ง",
+  "OTP expired.": "รหัส OTP หมดอายุ กรุณาขอรหัสใหม่อีกครั้ง",
+  "An error occurred.": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
+};
+
+String translateBackendError(String englishError) {
+  return backendErrorTranslations[englishError] ?? "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง";
 }

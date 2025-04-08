@@ -327,13 +327,24 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text('ประวัติการสแกน'),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: const Text(
+            'ประวัติการสแกน',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'BaiJamjuree',
+            ),
+          ),
+          centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () async {
               final prefs = await SharedPreferences.getInstance();
               final conversationId = prefs.getInt('conversation_id');
-
+              
               if (conversationId != null) {
                 Navigator.pushReplacement(
                   context,
@@ -348,18 +359,52 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
               }
             },
           ),
-          centerTitle: true,
         ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
             : errorMessage.isNotEmpty
                 ? Center(child: Text(errorMessage))
                 : scanHistory.isEmpty
-                    ? const Center(child: Text('ไม่พบประวัติการสแกน'))
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: scanHistory.length,
-                        itemBuilder: (context, index) => _buildScanHistoryItem(index),
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'ไม่พบประวัติการสแกน',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontFamily: 'BaiJamjuree',
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: () {
+                                fetchScanHistory();
+                              },
+                              child: const Text('รีเฟรช',
+                                  style: TextStyle(
+                                    letterSpacing: -0.5,
+                                    fontFamily: 'BaiJamjuree',
+                                  )),
+                            ),
+                          ],
+                        ),
+                      )
+                    : SafeArea(
+                        child: RefreshIndicator(
+                          onRefresh: fetchScanHistory,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            child: ListView.builder(
+                              itemCount: scanHistory.length,
+                              itemBuilder: (context, index) {
+                                return _buildScanHistoryItem(index);
+                              },
+                            ),
+                          ),
+                        ),
                       ),
       ),
     );

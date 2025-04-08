@@ -89,7 +89,7 @@ class _ScanTutorialState extends State<ScanTutorial> {
             left: 16,
             child: _currentIndex > 0
               ? IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new),
+                  icon: Icon(Icons.arrow_back_ios),
                   onPressed: _previousPage,
                 )
               : SizedBox(width: 48),
