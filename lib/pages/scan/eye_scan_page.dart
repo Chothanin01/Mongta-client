@@ -31,7 +31,6 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
   final CameraService _cameraService = CameraService();
   bool _isRightEyeSelected = true;
   bool _isInitializing = true;
-  bool _useNativeCamera = false;
   
   @override
   void initState() {
@@ -197,12 +196,13 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
             bottom: 40,
             left: 32,
             child: CameraModeButton(
-              useNativeCamera: _useNativeCamera,
               isDisabled: _isInitializing,
-              onTap: () {
-                setState(() {
-                  _useNativeCamera = !_useNativeCamera;
-                });
+              onTap: () async {
+                // Directly use the native camera when this button is tapped
+                final image = await _imageService.captureImageFromCamera();
+                if (image != null) {
+                  widget.onImageCaptured(image, _isRightEyeSelected);
+                }
               },
             ),
           ),
@@ -234,9 +234,32 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
     // Error state
     if (_cameraService.errorMessage != null) {
       return Center(
-        child: Text(
-          'Camera error: ${_cameraService.errorMessage}',
-          style: const TextStyle(color: Colors.white),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: MainTheme.redWarning, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Camera error: ${_cameraService.errorMessage}',
+              style: const TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('กรุณาลองอีกครั้ง'),
+                    backgroundColor: MainTheme.redWarning,
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MainTheme.blueText,
+              ),
+              child: const Text('ลองอีกครั้ง'),
+            ),
+          ],
         ),
       );
     }
@@ -247,15 +270,62 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
         child: CircularProgressIndicator(color: MainTheme.blueText),
       );
     }
-    
-    // Camera preview with focus frame
+
+    // In-app camera preview with focus frame
     if (_cameraService.controller?.value.isInitialized ?? false) {
-      return Stack(
+      return _buildOptimizedCameraPreview();
+    }
+    
+    // Fallback
+    return const Center(
+      child: Text(
+        'กล้องไม่พร้อมใช้งาน',
+        style: TextStyle(color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildOptimizedCameraPreview() {
+    final size = MediaQuery.of(context).size;
+    final controller = _cameraService.controller!;
+    
+    // Calculate the best display approach based on device
+    return Container(
+      color: Colors.black,
+      child: Stack(
         fit: StackFit.expand,
         children: [
-          CameraPreview(_cameraService.controller!),
+          // Camera preview optimized for full screen
+          Center(
+            child: AspectRatio(
+              aspectRatio: size.aspectRatio,
+              child: SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: controller.value.previewSize!.height,
+                    height: controller.value.previewSize!.width,
+                    child: Stack(
+                      children: [
+                        // Rotate camera preview if needed
+                        Transform.rotate(
+                          angle: 0, // Adjust if needed based on device orientation
+                          child: CameraPreview(controller),
+                        ),
+                        
+                        // Optional contrast enhancement layer
+                        Container(
+                          color: Colors.black.withOpacity(0.05), 
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
           
-          // Centered focus frame
+          // Focus frame
           const Center(
             child: FocusFrame(),
           ),
@@ -282,37 +352,40 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
             ),
           ),
         ],
-      );
-    }
-    
-    // Fallback
-    return const Center(
-      child: Text(
-        'กล้องไม่พร้อมใช้งาน',
-        style: TextStyle(color: Colors.white),
       ),
     );
   }
   
   Future<void> _captureImage() async {
-    if (_cameraService.controller == null ||
-        !_cameraService.controller!.value.isInitialized) {
+    try {
+      // Only use in-app camera from main capture button
+      if (_cameraService.controller == null ||
+          !_cameraService.controller!.value.isInitialized) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('กล้องไม่พร้อมใช้งาน'),
+            backgroundColor: MainTheme.redWarning,
+          ),
+        );
+        return;
+      }
+      
+      final image = await _cameraService.takePicture();
+      
+      if (image != null) {
+        widget.onImageCaptured(image, _isRightEyeSelected);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('ไม่สามารถถ่ายรูปได้ กรุณาลองอีกครั้ง'),
+            backgroundColor: MainTheme.redWarning,
+          ),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('กล้องไม่พร้อมใช้งาน'),
-          backgroundColor: MainTheme.redWarning,
-        ),
-      );
-      return;
-    }
-
-    final File? image = await _cameraService.takePicture();
-    if (image != null) {
-      widget.onImageCaptured(image, _isRightEyeSelected);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('ไม่สามารถถ่ายรูปได้ กรุณาลองอีกครั้ง'),
+        SnackBar(
+          content: Text('เกิดข้อผิดพลาด: $e'),
           backgroundColor: MainTheme.redWarning,
         ),
       );
@@ -329,4 +402,23 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       widget.onImageCaptured(image, _isRightEyeSelected);
     }
   }
+}
+
+class CameraGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.3)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+    
+    // Draw grid lines
+    canvas.drawLine(Offset(size.width/3, 0), Offset(size.width/3, size.height), paint);
+    canvas.drawLine(Offset(2*size.width/3, 0), Offset(2*size.width/3, size.height), paint);
+    canvas.drawLine(Offset(0, size.height/3), Offset(size.width, size.height/3), paint);
+    canvas.drawLine(Offset(0, 2*size.height/3), Offset(size.width, 2*size.height/3), paint);
+  }
+  
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
