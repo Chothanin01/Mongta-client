@@ -55,20 +55,51 @@ class _ManualNearChartTutorialState extends State<ManualNearChartTutorial> {
       subtitle: "การวัดค่าสายตา (Near Chart)",
       redText: "อ่านภาพโดยเริ่มจากข้างบน \n เเล้วไล่ลงมาที่ข้างล่าง",
       blackText: "ให้บันทึกผลบรรทัดล่างสุดที่ยังอ่านได้",
+      imagePath: 'assets/images/Arrow.png',
     ),
     TutorialPageData(
       step: "4",
       title: "ขั้นตอนการใช้งาน",
       subtitle: "การวัดค่าสายตา (Near Chart)",
       redText: "อ่านตัวอักษรและเลือกคำตอบ",
-      blackText: "ในรอบที่ 1 และ 3 ให้ใช้ตาเปล่าหากมี เเว่นหรือคอนแทคเลนส์ ให้ใช้ในรอบที่ 2 และรอบที่ 4 หากไม่มี ให้ใช้ตาเปล่าในทุกๆรอบ",
+      blackText: "ในรอบที่ 1 ให้ใช้ตาเปล่า",
     ),
     TutorialPageData(
       step: "5",
       title: "ขั้นตอนการใช้งาน",
       subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "อ่านตัวอักษรและเลือกคำตอบ",
+      blackText: "ในรอบที่ 2 \n หากมีเเว่นหรือคอนแทคเลนส์ \nให้ใช้แทนตาเปล่า \nหากไม่มี ให้ใช้ตาเปล่าตามปกติ",
+      imagePath: 'assets/images/eye_glasses.png',
+    ),
+    TutorialPageData(
+      step: "6",
+      title: "ขั้นตอนการใช้งาน",
+      subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "อ่านตัวอักษรและเลือกคำตอบ",
+      blackText: "ในรอบที่ 3 ให้ใช้ตาเปล่า",
+    ),
+    TutorialPageData(
+      step: "7",
+      title: "ขั้นตอนการใช้งาน",
+      subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "อ่านตัวอักษรและเลือกคำตอบ",
+      blackText: "ในรอบที่ 4 \nหากมีเเว่นหรือคอนแทคเลนส์ \nให้ใช้แทนตาเปล่า \nหากไม่มี ให้ใช้ตาเปล่าตามปกติ",
+      imagePath: 'assets/images/eye_glasses.png',
+    ),
+    TutorialPageData(
+      step: "8",
+      title: "ขั้นตอนการใช้งาน",
+      subtitle: "การวัดค่าสายตา (Near Chart)",
       redText: "เมื่อจบตาข้างขวาเเล้วให้ทำตาข้างซ้ายต่อ",
       blackText: "โดยใช้มือขวาปิดตาข้างขวา รวมทั้งสิ้น 4 รอบ",
+    ),
+    TutorialPageData(
+      step: "9",
+      title: "ขั้นตอนการใช้งาน",
+      subtitle: "การวัดค่าสายตา (Near Chart)",
+      redText: "ทำการวัดให้ครบทั้ง 4 รอบเพื่อผลที่แม่นยำ",
+      blackText: "ระบบการวัดนี้อ้างอิงตามมาตรฐานสากล\nทางจักษุวิทยา (Visual Acuity) \n ที่ใช้ในการตรวจวัดสายตาโดยผู้เชี่ยวชาญทั่วโลก",
     ),
   ];
 
@@ -252,11 +283,11 @@ class OnboardingPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-          SizedBox(height: 16),
+          SizedBox(height: 12),
 
           if (pageData.imagePath != null)
             Center(
-              child: Image.asset(pageData.imagePath!, width: 300, height: 300),
+              child: Image.asset(pageData.imagePath!, width: 200, height: 200),
             ),
         ],
       ),

@@ -236,11 +236,11 @@ class OnboardingPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-          SizedBox(height: 16),
+          SizedBox(height: 12),
 
           if (pageData.imagePath != null)
             Center(
-              child: Image.asset(pageData.imagePath!, width: 250, height: 250),
+              child: Image.asset(pageData.imagePath!, width: 200, height: 200),
             ),
         ],
       ),
