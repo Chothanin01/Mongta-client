@@ -8,7 +8,6 @@ class EntryDatePicker extends StatefulWidget {
   final String label;
   final String icon;
 
-
   const EntryDatePicker({
     super.key,
     required this.controller,
@@ -24,21 +23,50 @@ class EntryDatePicker extends StatefulWidget {
 class _EntryDatePickerState extends State<EntryDatePicker> {
   final FocusNode _focusNode = FocusNode();
   bool _isFocused = false;
+  bool _hasText = false;
 
   @override
   void initState() {
     super.initState();
+    
+    // Check initial text
+    _hasText = widget.controller.text.isNotEmpty;
+    
+    // Listen for focus changes
     _focusNode.addListener(() {
       setState(() {
         _isFocused = _focusNode.hasFocus;
       });
     });
+    
+    // Listen for text changes
+    widget.controller.addListener(_updateTextState);
+  }
+  
+  void _updateTextState() {
+    final newHasText = widget.controller.text.isNotEmpty;
+    if (_hasText != newHasText) {
+      setState(() {
+        _hasText = newHasText;
+      });
+    }
   }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_updateTextState);
     _focusNode.dispose();
     super.dispose();
+  }
+  
+  // Get the appropriate color based on focus and text state
+  Color _getIconColor() {
+    // Use focus color if focused OR has text
+    if (_isFocused || _hasText) {
+      return MainTheme.textfieldFocus;
+    }
+    // Otherwise use the placeholder color
+    return MainTheme.placeholderText;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -109,9 +137,12 @@ class _EntryDatePickerState extends State<EntryDatePicker> {
               readOnly: true,
               onTap: () => _selectDate(context),
               decoration: InputDecoration(
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: MainTheme.textfieldBorder),
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    // Change border color when the field has text
+                    color: _hasText ? MainTheme.textfieldFocus : MainTheme.textfieldBorder
+                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(15)),
                 ),
                 focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: MainTheme.textfieldFocus),
@@ -130,18 +161,15 @@ class _EntryDatePickerState extends State<EntryDatePicker> {
                 prefixIcon: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Iconify(
-                    // Display the provided icon
                     widget.icon, 
-                    color: _isFocused
-                        ? MainTheme.textfieldFocus // Icon color when focused
-                        : MainTheme.placeholderText, // Default icon color
+                    color: _getIconColor(), // Use our helper method
                     size: 20,
                   ),
                 ),
-
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.calendar_month, 
-                    color: MainTheme.textfieldFocus, 
+                  icon: Icon(
+                    Icons.calendar_month, 
+                    color: _getIconColor(), // Match the icon color logic
                     size: 20,
                   ),
                   onPressed: () => _selectDate(context),

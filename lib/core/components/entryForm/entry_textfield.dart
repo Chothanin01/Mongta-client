@@ -29,6 +29,9 @@ class EntryTextField extends StatefulWidget {
 
   /// Color for the helper text
   final Color? helperTextColor;
+  
+  /// Whether the field has an error
+  final bool hasError;
 
   const EntryTextField({
     super.key,
@@ -40,6 +43,7 @@ class EntryTextField extends StatefulWidget {
     this.helperText,
     this.showHelper = false,
     this.helperTextColor,
+    this.hasError = false,
   });
 
   @override
@@ -55,22 +59,63 @@ class _EntryTextFieldState extends State<EntryTextField> {
 
   // Tracks whether the text field is focused
   bool _isFocused = false;
+  
+  // Track if the field has text
+  bool _hasText = false;
 
   @override
   void initState() {
     super.initState();
+    
+    // Check initial text
+    _hasText = widget.controller.text.isNotEmpty;
+    
+    // Listen for focus changes
     _focusNode.addListener(() {
       setState(() {
         _isFocused = _focusNode.hasFocus;
       });
     });
+    
+    // Listen for text changes
+    widget.controller.addListener(_updateTextState);
+  }
+  
+  void _updateTextState() {
+    final newHasText = widget.controller.text.isNotEmpty;
+    if (_hasText != newHasText) {
+      setState(() {
+        _hasText = newHasText;
+      });
+    }
   }
 
-  // Clean up the focus node when the widget is removed.
+  // Clean up the focus node and controller listeners when the widget is removed.
   @override
   void dispose() {
+    widget.controller.removeListener(_updateTextState);
     _focusNode.dispose();
     super.dispose();
+  }
+  
+  // Get the appropriate color based on focus, text state, and error state
+  Color _getIconColor() {
+    if (widget.hasError) {
+      return MainTheme.redWarning;
+    } else if (_isFocused || _hasText) {
+      return MainTheme.textfieldFocus;
+    }
+    return MainTheme.placeholderText;
+  }
+  
+  // Get border color based on state
+  Color _getBorderColor() {
+    if (widget.hasError) {
+      return MainTheme.redWarning;
+    } else if (_isFocused || _hasText) {
+      return MainTheme.textfieldFocus;
+    }
+    return MainTheme.textfieldBorder;
   }
 
   @override
@@ -116,15 +161,22 @@ class _EntryTextFieldState extends State<EntryTextField> {
               obscureText: widget.obscureText && !_showPassword,
               decoration: InputDecoration(
                 // Default border
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: MainTheme.textfieldBorder), 
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    // Change border color based on state
+                    color: _getBorderColor(),
+                    width: widget.hasError ? 1.5 : 1.0,
+                  ), 
+                  borderRadius: const BorderRadius.all(Radius.circular(15)),
                 ),
 
                 // Focused border.
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: MainTheme.textfieldFocus),
-                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: widget.hasError ? MainTheme.redWarning : MainTheme.textfieldFocus,
+                    width: widget.hasError ? 1.5 : 1.0,
+                  ),
+                  borderRadius: const BorderRadius.all(Radius.circular(15)),
                 ),
 
                 // color for textfield
@@ -147,9 +199,7 @@ class _EntryTextFieldState extends State<EntryTextField> {
                   child: Iconify(
                     // Display the provided icon
                     widget.icon, 
-                    color: _isFocused
-                        ? MainTheme.textfieldFocus // Icon color when focused
-                        : MainTheme.placeholderText, // Default icon color
+                    color: _getIconColor(), // Use our helper method
                     size: 20,
                   ),
                 ),
@@ -160,9 +210,7 @@ class _EntryTextFieldState extends State<EntryTextField> {
                     splashRadius: 20,
                     icon: Iconify(
                       _showPassword ? Mdi.eye : Mdi.eye_off,
-                      color: _isFocused 
-                          ? MainTheme.textfieldFocus 
-                          : MainTheme.placeholderText,
+                      color: _getIconColor(), // Use our helper method
                       size: 20,
                     ),
                     onPressed: () {
