@@ -156,7 +156,6 @@ GoRouter createRouter({String initialLocation = '/login'}) {
         builder: (context, state) => HospitalMapScreen(),
       ),
 
-      // Add the complete OTP route
       GoRoute(
         path: Path.completeOtpPage,
         builder: (context, state) => const CompleteOtpPage(),
