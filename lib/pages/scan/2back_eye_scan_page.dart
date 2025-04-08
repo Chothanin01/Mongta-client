@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/services/camera_service.dart';
 import 'package:client/services/image_capture_service.dart';
-import 'package:client/main.dart';
+import 'package:client/main.dart'; // Add this import for lifecycleObserver
 
 class EyeScanPage extends StatefulWidget {
   final Function(File, bool) onImageCaptured;
@@ -32,9 +32,6 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
   bool _isCameraInitializing = true;
   String? _errorMessage;
   bool _forceMockCamera = false;
-  
-  // New state variable to track camera mode
-  bool _useNativeCamera = false;
 
   @override
   void initState() {
@@ -73,7 +70,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Handle app lifecycle changes
+    // Handle app lifecycle changes to manage camera resources
     if (state == AppLifecycleState.inactive) {
       _cameraService.dispose();
     } else if (state == AppLifecycleState.resumed) {
@@ -101,12 +98,14 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     // Force the selected eye based on what's already captured
     if (widget.rightEyeImage != null && _isRightEyeSelected) {
+      // Right eye already captured, switch to left
       setState(() {
         _isRightEyeSelected = false;
       });
     }
 
     return Scaffold(
+      // Remove the background color entirely
       backgroundColor: Colors.black,
       body: Stack(
         children: [
@@ -117,23 +116,25 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
           SafeArea(
             child: Column(
               children: [
-                // Top segmented control for eye selection
+                // Top segmented control for eye selection (keep as is)
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   width: double.infinity,
+                  // Make background transparent
                   color: Colors.transparent,
                   child: Center(
                     child: Container(
                       width: 280,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.85),
+                        color: Colors.white.withOpacity(0.85), // Semi-transparent background
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(color: MainTheme.blueText, width: 1),
                       ),
                       child: Row(
+                        // Tab row content stays the same
                         children: [
-                          // Right Eye Tab
+                          // Right Eye Tab - Always enabled
                           Expanded(
                             child: GestureDetector(
                               onTap: () {
@@ -166,9 +167,10 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                             ),
                           ),
 
-                          // Left Eye Tab
+                          // Left Eye Tab - Enabled only if right eye is captured
                           Expanded(
                             child: GestureDetector(
+                              // Only allow selecting left eye if right eye is captured
                               onTap: widget.rightEyeImage != null
                                   ? () {
                                       setState(() {
@@ -206,92 +208,55 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                   ),
                 ),
 
+                // Spacer to push capture button to bottom
                 Spacer(),
 
-                // Bottom section with camera toggle button and capture button
+                // Bottom section with capture button
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 30),
                   color: Colors.transparent,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // New camera mode toggle button
-                      GestureDetector(
-                        onTap: _isCameraInitializing 
-                            ? null 
-                            : () {
-                                setState(() {
-                                  _useNativeCamera = !_useNativeCamera;
-                                });
-                              },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          margin: const EdgeInsets.only(right: 20),
-                          decoration: BoxDecoration(
-                            color: MainTheme.white.withOpacity(0.85),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: _useNativeCamera
-                                ? MainTheme.blueText
-                                : MainTheme.textfieldBorder,
-                              width: 1.5
-                            ),
-                          ),
-                          child: Icon(
-                            _useNativeCamera 
-                                ? Icons.photo_camera 
-                                : Icons.camera_alt,
-                            color: _isCameraInitializing
-                                ? MainTheme.placeholderText
-                                : MainTheme.blueText,
-                            size: 22,
-                          ),
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: _isCameraInitializing
+                          ? null
+                          : (_isRightEyeSelected && widget.rightEyeImage != null) ||
+                                  (!_isRightEyeSelected && widget.leftEyeImage != null)
+                              ? _retakeCurrentImage
+                              : _captureImage,
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: MainTheme.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: (_isRightEyeSelected && widget.rightEyeImage != null) ||
+                                      (!_isRightEyeSelected && widget.leftEyeImage != null)
+                                  ? MainTheme.redWarning
+                                  : MainTheme.blueText,
+                              width: 3),
                         ),
-                      ),
-                      
-                      // Capture button
-                      GestureDetector(
-                        onTap: _isCameraInitializing
-                            ? null
-                            : (_isRightEyeSelected && widget.rightEyeImage != null) ||
-                                    (!_isRightEyeSelected && widget.leftEyeImage != null)
-                                ? _retakeCurrentImage
-                                : _captureImage,
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: MainTheme.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: (_isRightEyeSelected && widget.rightEyeImage != null) ||
-                                        (!_isRightEyeSelected && widget.leftEyeImage != null)
-                                    ? MainTheme.redWarning
-                                    : MainTheme.blueText,
-                                width: 3),
-                          ),
-                          child: Center(
-                            child: _isCameraInitializing
-                                ? const CircularProgressIndicator(color: MainTheme.blueText)
-                                : (_isRightEyeSelected && widget.rightEyeImage != null) ||
-                                        (!_isRightEyeSelected && widget.leftEyeImage != null)
-                                    ? const Icon(
-                                        Icons.refresh,
-                                        color: MainTheme.redWarning,
-                                        size: 28,
-                                      )
-                                    : Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: const BoxDecoration(
-                                          color: MainTheme.blueText,
-                                          shape: BoxShape.circle,
-                                        ),
+                        child: Center(
+                          child: _isCameraInitializing
+                              ? const CircularProgressIndicator(color: MainTheme.blueText)
+                              : (_isRightEyeSelected && widget.rightEyeImage != null) ||
+                                      (!_isRightEyeSelected && widget.leftEyeImage != null)
+                                  ? const Icon(
+                                      Icons.refresh,
+                                      color: MainTheme.redWarning,
+                                      size: 28,
+                                    )
+                                  : Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: const BoxDecoration(
+                                        color: MainTheme.blueText,
+                                        shape: BoxShape.circle,
                                       ),
-                          ),
+                                    ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],
@@ -337,31 +302,6 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
               ),
             ),
           ),
-          
-          // Camera mode tooltip
-          if (_useNativeCamera)
-            Positioned(
-              top: MediaQuery.of(context).size.height * 0.1,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    'โหมดกล้องภายนอก',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'BaiJamjuree',
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -393,6 +333,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
 
     // Handle error states
     if (_cameraService.errorMessage != null || _errorMessage != null) {
+      // Your existing error handling code
       return Container(
         width: double.infinity,
         height: double.infinity,
@@ -402,30 +343,21 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
           children: [
             const Icon(Icons.error_outline, color: MainTheme.redWarning, size: 64),
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                _cameraService.errorMessage ?? _errorMessage ?? 'กล้องไม่พร้อมใช้งาน',
-                style: const TextStyle(
-                  color: MainTheme.redWarning,
-                  fontFamily: 'BaiJamjuree',
-                  fontSize: 16,
-                ),
-                textAlign: TextAlign.center,
-              ),
+            Text(
+              _cameraService.errorMessage ?? _errorMessage!,
+              style: const TextStyle(color: MainTheme.redWarning),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                setState(() {
-                  _forceMockCamera = true;
-                  _cameraService.enableMockCamera();
-                });
+                _cameraService.enableMockCamera();
+                setState(() {});
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: MainTheme.blueText,
               ),
-              child: const Text('ใช้กล้องจำลองแทน', style: TextStyle(fontFamily: 'BaiJamjuree')),
+              child: const Text('Use Mock Camera Instead'),
             ),
           ],
         ),
@@ -433,85 +365,39 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
     }
 
     if (_isCameraInitializing) {
+      // Your existing loading code
       return Container(
         width: double.infinity,
         height: double.infinity,
         color: Colors.black,
         child: const Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(color: MainTheme.blueText),
-              SizedBox(height: 16),
-              Text(
-                'กำลังเปิดกล้อง...',
-                style: TextStyle(color: Colors.white, fontFamily: 'BaiJamjuree'),
-              ),
-            ],
-          ),
+          child: CircularProgressIndicator(color: MainTheme.blueText),
         ),
       );
     }
 
-    // Full-screen camera preview (only show if using in-app camera)
-    if (!_useNativeCamera && _cameraService.controller != null && _cameraService.controller!.value.isInitialized) {
-      return Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: Colors.black,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Full-screen camera preview
-            CameraPreview(_cameraService.controller!),
-            
-            // Centered focus frame
-            Center(
-              child: _buildFocusFrame(),
-            ),
-          ],
+    // Full-screen camera approach that works on all devices
+    return Stack(
+      children: [
+        // Black background with camera frame
+        Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: Colors.black,
         ),
-      );
-    }
-    
-    // If using native camera, just show background with focus frame
-    if (_useNativeCamera) {
-      return Stack(
-        children: [
-          // Black background
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.black,
-          ),
-          
-          // Optional: camera grid lines or frame guides
-          CustomPaint(
-            size: Size.infinite,
-            painter: CameraFramePainter(),
-          ),
-          
-          // Focus frame
-          Center(
-            child: _buildFocusFrame(),
-          ),
-          
 
-        ],
-      );
-    }
-    
-    // Fallback if camera isn't initialized
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      color: Colors.black,
-      child: const Center(
-        child: Text(
-          'กล้องไม่พร้อมใช้งาน',
-          style: TextStyle(color: Colors.white, fontFamily: 'BaiJamjuree'),
+        // Optional: camera grid lines or frame guides
+        CustomPaint(
+          size: Size.infinite,
+          painter: CameraFramePainter(),
         ),
-      ),
+
+        // Your existing focus frame
+        Center(
+          child: _buildFocusFrame(),
+        ),
+
+      ],
     );
   }
 
@@ -612,19 +498,41 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
     );
   }
 
+  Widget _buildCapturedImageIndicator(String text, File image) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(
+            color: MainTheme.greenComplete,
+            fontFamily: 'BaiJamjuree',
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            border: Border.all(color: MainTheme.greenComplete),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: Image.file(
+              image,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _captureImage() async {
     try {
-      File? image;
-      
-      if (_useNativeCamera) {
-        // Use native camera through image service
-        // This will properly handle lifecycle pause/resume
-        image = await _imageService.captureImageFromCamera();
-      } else {
-        // Use in-app camera
-        image = await _cameraService.takePicture();
-      }
-      
+      final File? image = await _imageService.captureImageFromCamera();
       if (image != null) {
         widget.onImageCaptured(image, _isRightEyeSelected);
       }
@@ -650,7 +558,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
   }
 }
 
-// Camera grid painter 
+// Add this helper class for the camera grid/frame
 class CameraFramePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -659,7 +567,8 @@ class CameraFramePainter extends CustomPainter {
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
-    // Draw grid lines
+    // Draw grid lines or guide frames if desired
+    // Example: draw rule-of-thirds grid
     canvas.drawLine(Offset(size.width / 3, 0), Offset(size.width / 3, size.height), paint);
     canvas.drawLine(Offset(2 * size.width / 3, 0), Offset(2 * size.width / 3, size.height), paint);
     canvas.drawLine(Offset(0, size.height / 3), Offset(size.width, size.height / 3), paint);
