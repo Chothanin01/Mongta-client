@@ -5,20 +5,14 @@ import 'package:client/services/user_api_service.dart';
 import 'package:client/services/user_service.dart';
 import 'package:client/services/tutorial_preferences.dart';
 import 'package:client/services/status_service.dart';
-import 'package:client/services/socket_service.dart';
-import 'package:client/core/lifecycle/app_lifecycle_observer.dart';
+import 'package:client/services/chat_polling_service.dart';
 import 'dart:async';
 
-// Global reference to maintain the observer
-late AppLifecycleObserver lifecycleObserver;
 
 void main() async {
-  // Add error catching for the entire app
   await runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
     
-    // Initialize the lifecycle observer
-    lifecycleObserver = AppLifecycleObserver();
     
     // Initialize initial route based on auth status
     String initialLocation = '/login'; // Default route
@@ -76,9 +70,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
-    // Clean up lifecycle observer when app is terminated
-    lifecycleObserver.dispose();
-    SocketService.dispose(); // Add this line
+    ChatPollingService.dispose();
     super.dispose();
   }
 
