@@ -60,7 +60,6 @@ dependencies:
   image: ^4.5.3
   cached_network_image: ^3.4.1
   intl: ^0.20.2
-  socket_io_client: ^3.1.1
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
 
