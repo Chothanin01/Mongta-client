@@ -43,8 +43,8 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _otpRef;
   String? _errorMessage;
 
-  String? _phoneHelperText; // New variable for dynamic helper text
-  Color? _phoneHelperColor; // Add a color variable
+  String? _phoneHelperText; 
+  Color? _phoneHelperColor; 
 
   @override
   void initState() {
@@ -114,9 +114,102 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
+  // Update the nextPage function to validate the first page
   void nextPage(context) {
+    // First page validation
+    if (currentPage == 0) {
+      // Check if username is empty
+      if (usernameController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text("กรุณากรอกชื่อผู้ใช้"),
+          ),
+        );
+        return;
+      }
+      
+      // Check if password is empty
+      if (passwordController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text("กรุณากรอกรหัสผ่าน"),
+          ),
+        );
+        return;
+      }
+      
+      // Check if password confirmation matches
+      if (passwordController.text != passwordConfirmController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text("รหัสผ่านไม่ตรงกัน โปรดตรวจสอบอีกครั้ง"),
+          ),
+        );
+        return;
+      }
+      
+      // Check if phone number is empty or invalid
+      final phoneNumber = numberController.text.replaceAll(RegExp(r'\D'), '');
+      if (phoneNumber.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text("กรุณากรอกเบอร์โทรศัพท์"),
+          ),
+        );
+        return;
+      }
+      
+      bool isValidPhone = false;
+      if (phoneNumber.length == 10 && 
+          (phoneNumber.startsWith('06') || 
+           phoneNumber.startsWith('08') || 
+           phoneNumber.startsWith('09'))) {
+        isValidPhone = true;
+      }
+      
+      if (!isValidPhone) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text("เบอร์โทรศัพท์ไม่ถูกต้อง โปรดกรอกเบอร์โทรศัพท์ที่ขึ้นต้นด้วย 06, 08 หรือ 09 และมี 10 หลัก"),
+          ),
+        );
+        return;
+      }
+      
+      // Check if email is empty
+      if (emailController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text("กรุณากรอกอีเมล"),
+          ),
+        );
+        return;
+      }
+      
+      // Validate email format using a simple regex
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (!emailRegex.hasMatch(emailController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: MainTheme.redWarning,
+            content: Text("รูปแบบอีเมลไม่ถูกต้อง"),
+          ),
+        );
+        return;
+      }
+    }
+    
+    // If validation passes or we're moving from second page, proceed
     _pageController.nextPage(
-        duration: Duration(milliseconds: 300), curve: Curves.ease);
+      duration: const Duration(milliseconds: 300), 
+      curve: Curves.ease
+    );
   }
 
   void previousPage(context) {
@@ -343,7 +436,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ),
                     ),
-                    // Add checkbox for agreement
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(

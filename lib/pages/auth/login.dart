@@ -21,7 +21,32 @@ class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-  String? warningMessage;
+  String? passwordErrorMessage;
+  bool hasPasswordError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Add listener to clear error when user types in password field
+    passwordController.addListener(_clearPasswordError);
+  }
+  
+  @override
+  void dispose() {
+    // Remove the listener
+    passwordController.removeListener(_clearPasswordError);
+    super.dispose();
+  }
+  
+  void _clearPasswordError() {
+    if (hasPasswordError) {
+      setState(() {
+        hasPasswordError = false;
+        passwordErrorMessage = null;
+      });
+    }
+  }
 
   /// Method to handle user login logic
   void signUserIn(
@@ -65,9 +90,21 @@ class _LoginPageState extends State<LoginPage> {
         await _authService.navigateAfterLogin(context, userId);
       } else {
         print('Login failed with message: ${result['message']}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'])),
-        );
+        
+        // Check if it's a password error
+        if (result['message'].toString().contains('รหัสผ่านไม่ถูกต้อง') || 
+            result['message'].toString().contains('password') ||
+            result['message'].toString().contains('invalid credentials')) {
+          setState(() {
+            hasPasswordError = true;
+            passwordErrorMessage = 'รหัสผ่านไม่ถูกต้อง';
+          });
+        } else {
+          // For other errors, still use SnackBar
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result['message'])),
+          );
+        }
       }
     } catch (e) {
       print('Login error details: ${e.toString()}');
@@ -193,13 +230,17 @@ class _LoginPageState extends State<LoginPage> {
 
                   const SizedBox(height: 20), // Spacer
 
-                  // Password input field
+                  // Password input field with error handling
                   EntryTextField(
                     controller: passwordController,
                     label: 'รหัสผ่าน',
                     hintText: 'รหัสผ่าน',
                     obscureText: true,
                     icon: Bxs.lock,
+                    showHelper: hasPasswordError,
+                    helperText: passwordErrorMessage,
+                    helperTextColor: MainTheme.redWarning,
+                    hasError: hasPasswordError,
                   ),
 
                   const SizedBox(height: 19), // Spacer
