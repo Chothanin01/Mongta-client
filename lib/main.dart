@@ -21,7 +21,7 @@ void main() async {
     lifecycleObserver = AppLifecycleObserver();
     
     // Initialize initial route based on auth status
-    String initialLocation = '/login'; // Default route
+    String initialLocation = '/landing'; // Default route
     
     try {
       // Check if landing page has been viewed before
