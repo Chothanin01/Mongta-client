@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '/services/user_api_service.dart'; 
 import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/material_symbols.dart';
 import 'package:iconify_flutter/icons/ri.dart';
 import 'package:client/services/user_service.dart'; 
 import 'package:go_router/go_router.dart'; 
@@ -424,8 +423,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: const Center(
-                                      child: Iconify(
-                                        MaterialSymbols.docs,
+                                      child: Icon(
+                                        Icons.insert_chart,
                                         color: Colors.black,
                                         size: 50,
                                       ),
