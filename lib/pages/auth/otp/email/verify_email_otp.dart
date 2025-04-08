@@ -298,7 +298,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                         fontSize: 16,
                         fontFamily: 'BaiJamjuree',
                         fontWeight: FontWeight.w600,
-                        color: MainTheme.black,
+                        color: MainTheme.white,
                       ),
                     ),
               ),
