@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/services.dart';
-import 'package:client/main.dart';  // Add this import
 
 class CameraService {
   CameraController? controller;
@@ -97,8 +96,6 @@ class CameraService {
     }
 
     try {
-      // Flag taking picture as active media operation
-      lifecycleObserver.setMediaPickerActive();
       
       // Take picture
       final XFile image = await controller!.takePicture();
@@ -111,14 +108,10 @@ class CameraService {
       // Copy image to new file to ensure proper handling
       await File(image.path).copy(imageFile.path);
       
-      // Reset flag after successful picture
-      lifecycleObserver.setMediaPickerInactive();
       
       return imageFile;
     } catch (e) {
       debugPrint('Failed to take picture: $e');
-      // Reset flag on error
-      lifecycleObserver.setMediaPickerInactive();
       return null;
     }
   }
