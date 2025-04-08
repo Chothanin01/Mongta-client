@@ -139,7 +139,6 @@ class OnboardingPage extends StatelessWidget {
     
     return Padding(
       padding: EdgeInsets.all(screenWidth * 0.08), // Responsive padding
-      child: SingleChildScrollView(
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: screenHeight * 0.7),
           child: Column(
@@ -266,7 +265,6 @@ class OnboardingPage extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }
