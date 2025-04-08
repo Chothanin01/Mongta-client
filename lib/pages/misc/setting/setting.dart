@@ -1,3 +1,4 @@
+import 'package:client/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import '/services/user_api_service.dart'; 
 import 'package:iconify_flutter/iconify_flutter.dart';
@@ -153,14 +154,14 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MainTheme.mainBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: MainTheme.white,
         elevation: 0,
         title: const Text(
           'การตั้งค่า',
           style: TextStyle(
-            color: Colors.black,
+            color: MainTheme.black,
             fontSize: 16,
             letterSpacing: -0.5,
             fontWeight: FontWeight.bold,
@@ -196,7 +197,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         const Text(
                           'โปรไฟล์ส่วนตัว',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: MainTheme.black,
                             letterSpacing: -0.5,
                             fontSize: 12,
                             fontFamily: 'BaiJamjuree',
@@ -209,7 +210,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: const Text(
                             'แก้ไขโปรไฟล์',
                             style: TextStyle(
-                              color: Color(0xFF12358F),
+                              color: MainTheme.resultBlue,
                               letterSpacing: -0.5,
                               fontSize: 12,
                               fontFamily: 'BaiJamjuree',
@@ -221,7 +222,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     const SizedBox(height: 10),
                     Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF12358F),
+                        color: MainTheme.resultBlue,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.all(20),
@@ -234,7 +235,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 width: 70,
                                 height: 70,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: MainTheme.white,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: ClipRRect(
@@ -259,7 +260,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                                         user['last_name'][0]
                                                     : 'กฟ',
                                                 style: const TextStyle(
-                                                  color: Color(0xFF12358F),
+                                                  color: MainTheme.resultBlue,
                                                   fontSize: 24,
                                                   fontWeight: FontWeight.bold,
                                                   fontFamily: 'BaiJamjuree',
@@ -290,7 +291,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                                     user['last_name'][0]
                                                 : 'กฟ',
                                             style: const TextStyle(
-                                              color: Color(0xFF12358F),
+                                              color: MainTheme.resultBlue,
                                               fontSize: 24,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: 'BaiJamjuree',
@@ -307,7 +308,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     Text(
                                       userFullName, // ใช้ userFullName จาก fetchUserData
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: MainTheme.white,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         fontFamily: 'BaiJamjuree',
@@ -317,7 +318,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     Text(
                                       'อายุ: ${user['date_of_birth'] != null ? _calculateAge(user['date_of_birth']) : 'ไม่ระบุ'} ปี',
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: MainTheme.white,
                                         fontSize: 14,
                                         fontFamily: 'BaiJamjuree',
                                       ),
@@ -326,7 +327,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     Text(
                                       'เพศ: ${_getSexDisplay(sex)}', // ใช้ฟังก์ชันจากข้อ 2
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: MainTheme.white,
                                         fontSize: 14,
                                         fontFamily: 'BaiJamjuree',
                                       ),
@@ -344,12 +345,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                     8),
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
-                                    color: Color(
-                                        0xFF749DF5) 
+                                    color: (MainTheme.settingBlue),
                                     ),
                                 child: const Iconify(
                                   Ri.user_3_fill,
-                                  color: Colors.white,
+                                  color: MainTheme.white,
                                   size: 20,
                                 ),
                               ),
@@ -357,7 +357,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               Text(
                                 username, // เปลี่ยนจาก username เป็น phone
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: MainTheme.white,
                                   fontSize: 14,
                                   fontFamily: 'BaiJamjuree',
                                 ),
@@ -373,12 +373,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                     8), // Adding some padding inside the container
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
-                                    color: Color(
-                                        0xFF749DF5)
+                                    color: MainTheme.settingBlue,
                                     ),
                                 child: const Icon(
                                   Icons.email,
-                                  color: Colors.white,
+                                  color: MainTheme.white,
                                   size: 20,
                                 ),
                               ),
@@ -386,7 +385,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               Text(
                                 email, // เปลี่ยนจาก username เป็น phone
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: MainTheme.white,
                                   fontSize: 14,
                                   fontFamily: 'BaiJamjuree',
                                 ),
@@ -409,7 +408,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             child: Container(
                               height: 170,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF0A3B8C),
+                                color: MainTheme.resultBlue,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               padding: const EdgeInsets.all(16),
@@ -421,13 +420,13 @@ class _SettingsPageState extends State<SettingsPage> {
                                     width: 70,
                                     height: 70,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: MainTheme.white,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: const Center(
                                       child: Iconify(
                                         MaterialSymbols.docs,
-                                        color: Colors.black,
+                                        color: MainTheme.black,
                                         size: 50,
                                       ),
                                     ),
@@ -436,7 +435,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   const Text(
                                     'ประวัติการสเเกนตา',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: MainTheme.white,
                                       fontSize: 16,
                                       letterSpacing: -0.5,
                                       fontWeight: FontWeight.w500,
@@ -448,7 +447,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   const Text(
                                     'ประวัติการสเเกนทั้งหมด',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: MainTheme.white,
                                       letterSpacing: -0.5,
                                       fontSize: 12,
                                       fontFamily: 'BaiJamjuree',
@@ -471,7 +470,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             child: Container(
                               height: 170,
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF5BBD1),
+                                color: MainTheme.resultPink,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               padding: const EdgeInsets.all(16),
@@ -483,13 +482,13 @@ class _SettingsPageState extends State<SettingsPage> {
                                     width: 70,
                                     height: 70,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: MainTheme.white,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: const Center(
                                       child: Icon(
                                         Icons.lock,
-                                        color: Colors.black,
+                                        color: MainTheme.black,
                                         size: 50,
                                       ),
                                     ),
@@ -498,7 +497,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   const Text(
                                     'แก้ไขรหัสผ่าน',
                                     style: TextStyle(
-                                      color: Colors.black,
+                                      color: MainTheme.black,
                                       fontSize: 16,
                                       letterSpacing: -0.5,
                                       fontWeight: FontWeight.w500,
@@ -510,7 +509,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   const Text(
                                     'เริ่มเปลี่ยนกันเลย..',
                                     style: TextStyle(
-                                      color: Colors.black,
+                                      color: MainTheme.black,
                                       letterSpacing: -0.5,
                                       fontSize: 12,
                                       fontFamily: 'BaiJamjuree',
@@ -530,10 +529,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         width: 260,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: MainTheme.white,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: Color(0xFF12358F),
+                            color: MainTheme.resultBlue,
                             width: 1,
                           ),
                         ),
@@ -543,13 +542,13 @@ class _SettingsPageState extends State<SettingsPage> {
                           },
                           icon: const Icon(
                             Icons.school_outlined,
-                            color: Color(0xFF12358F),
+                            color: MainTheme.resultBlue,
                             size: 20,
                           ),
                           label: const Text(
                             'การสอนใช้งาน',
                             style: TextStyle(
-                              color: Color(0xFF12358F),
+                              color: MainTheme.resultBlue,
                               fontSize: 14,
                               fontFamily: 'BaiJamjuree',
                               letterSpacing: -0.5,
@@ -564,20 +563,20 @@ class _SettingsPageState extends State<SettingsPage> {
                         width: 130,
                         height: 40,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.red, width: 1.5),
+                          border: Border.all(color: MainTheme.redWarning, width: 1.5),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: TextButton.icon(
                           onPressed: _handleLogout,
                           icon: const Icon(
                             Icons.logout,
-                            color: Colors.red,
+                            color: MainTheme.redWarning,
                             size: 18,
                           ),
                           label: const Text(
                             'ออกจากระบบ',
                             style: TextStyle(
-                              color: Colors.red,
+                              color: MainTheme.redWarning,
                               fontSize: 12,
                               fontFamily: 'BaiJamjuree',
                             ),

@@ -244,9 +244,9 @@ class _ForgotPasswordOTPPageState extends State<ForgotPasswordOTPPage> {
                 borderRadius: BorderRadius.circular(8),
                 fieldHeight: 50,
                 fieldWidth: 40,
-                activeFillColor: Colors.white,
-                inactiveFillColor: Colors.white,
-                selectedFillColor: Colors.white,
+                activeFillColor: MainTheme.white,
+                inactiveFillColor: MainTheme.white,
+                selectedFillColor: MainTheme.white,
                 activeColor: MainTheme.blueText,
                 inactiveColor: MainTheme.textfieldBorder,
                 selectedColor: MainTheme.blueText,
@@ -276,7 +276,7 @@ class _ForgotPasswordOTPPageState extends State<ForgotPasswordOTPPage> {
                       height: 24,
                       width: 24,
                       child: CircularProgressIndicator(
-                        color: Colors.black,
+                        color: MainTheme.black,
                         strokeWidth: 2,
                       ),
                     )

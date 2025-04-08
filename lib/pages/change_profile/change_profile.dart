@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:client/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '/services/user_api_service.dart';
@@ -270,12 +271,12 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MainTheme.mainBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: MainTheme.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: MainTheme.black),
           onPressed: () {
             Navigator.pop(context); // Go back to the previous screen
           },
@@ -283,7 +284,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         title: const Text(
           'แก้ไขโปรไฟล์',
           style: TextStyle(
-            color: Colors.black,
+            color: MainTheme.black,
             fontSize: 16,
             letterSpacing: -0.5,
             fontWeight: FontWeight.w600,
@@ -309,7 +310,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: const Color(0xFF1A3E9E), width: 1),
+                                color: MainTheme.profileBlue, width: 1),
                           ),
                           child: _newProfilePicture != null
                               ? ClipOval(
@@ -339,15 +340,15 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: MainTheme.white,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                  color: const Color(0xFF1A3E9E), width: 1),
+                                  color: MainTheme.profileBlue, width: 1),
                             ),
                             child: const Icon(
                               Icons.camera_alt,
                               size: 18,
-                              color: Color(0xFF1A3E9E),
+                              color: MainTheme.profileBlue,
                             ),
                           ),
                         ),
@@ -387,7 +388,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                     ElevatedButton(
                       onPressed: _isSaving ? null : _saveProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1A3E9E),
+                        backgroundColor: MainTheme.profileBlue,
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
@@ -398,14 +399,14 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: MainTheme.white,
                                 strokeWidth: 2.0,
                               ),
                             )
                           : const Text(
                               'ยืนยันการแก้ไข',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: MainTheme.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: -0.5,
@@ -432,7 +433,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
         initials,
         style: const TextStyle(
           fontSize: 32,
-          color: Color(0xFF1A3E9E),
+          color: MainTheme.profileBlue,
           fontWeight: FontWeight.w500,
           fontFamily: 'BaiJamjuree',
         ),
@@ -449,15 +450,15 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: MainTheme.profileGrey),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: Row(
         children: [
           // Updated icon handling
           icon is IconData 
-              ? Icon(icon, color: Colors.grey, size: 20)
-              : Iconify(icon, color: Colors.grey, size: 20),
+              ? Icon(icon, color: MainTheme.profileIcon, size: 20)
+              : Iconify(icon, color: MainTheme.profileIcon, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
@@ -466,7 +467,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                 labelText: label,
                 border: InputBorder.none,
                 labelStyle: TextStyle(
-                  color: Colors.black,
+                  color: MainTheme.black,
                   letterSpacing: -0.5,
                   fontSize: 14,
                   fontFamily: 'BaiJamjuree',

@@ -30,6 +30,33 @@ class MainTheme {
   static const Color chatPink = Color.fromARGB(255, 245, 187, 209);
   static const Color chatWhite = Color.fromARGB(255, 252, 252, 252);
   static const Color chatBlue = Color.fromARGB(255, 18, 53, 143);
+  static const Color chatPerson = Color.fromARGB(255, 97, 97, 97);
+  static const Color chatRound = Color.fromARGB(255, 224, 224, 224);
+
+  // change profile
+  static const Color profileBlue = Color.fromARGB(255, 26, 62, 158);
+  static const Color profileGrey = Color.fromARGB(255, 224, 224, 224);
+  static const Color profileIcon = Color.fromARGB(255, 158, 158, 158);
+
+  // near chart results
+  static const Color resultGrey = Color.fromARGB(255, 238, 238, 238);
+  static const Color resultBlue = Color.fromARGB(255, 18, 53, 143);
+  static const Color resultPink = Color.fromARGB(255, 245, 187, 209);
+  static const Color resultRed = Color.fromARGB(255, 244, 67, 54);
+  static const Color resultOrange = Color.fromARGB(255, 255, 152, 0);
+  static const Color resultGreen = Color.fromARGB(255, 76, 175, 80);
+
+  // scanlog
+  static const Color logGrey = Color.fromARGB(255, 158, 158, 158);
+  static const Color logGrey2 = Color.fromARGB(255, 117, 117, 117);
+  static const Color logBlack = Color.fromARGB(221, 0, 0, 0);
+
+  // map
+  static const Color mapBlack = Color.fromARGB(66, 0, 0, 0);
+  static const Color mapBlue = Color.fromARGB(255, 33, 150, 243);
+
+  // setting
+  static const Color settingBlue = Color.fromARGB(255, 116, 157, 245);
 
   // button (* include gradient button *)
   static const Color buttonBackground = Color.fromRGBO(18, 53, 143, 1);

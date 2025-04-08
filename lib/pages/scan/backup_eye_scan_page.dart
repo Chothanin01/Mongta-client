@@ -91,7 +91,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
     
     return Scaffold(
       // Remove the background color entirely
-      backgroundColor: Colors.black,
+      backgroundColor: MainTheme.black,
       body: Stack(
         children: [
           // Camera preview first (full screen)
@@ -112,7 +112,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                       width: 280,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.85), // Semi-transparent background
+                        color: MainTheme.white.withOpacity(0.85), // Semi-transparent background
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(color: MainTheme.blueText, width: 1),
                       ),
@@ -141,7 +141,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                                     'ตาขวา',
                                     style: TextStyle(
                                       color: _isRightEyeSelected 
-                                          ? Colors.white 
+                                          ? MainTheme.white 
                                           : MainTheme.blueText,
                                       fontFamily: 'BaiJamjuree',
                                       fontWeight: FontWeight.w500,
@@ -175,7 +175,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                                     'ตาซ้าย',
                                     style: TextStyle(
                                       color: !_isRightEyeSelected 
-                                          ? Colors.white 
+                                          ? MainTheme.white 
                                           : widget.rightEyeImage != null
                                               ? MainTheme.blueText
                                               : MainTheme.placeholderText,
@@ -257,7 +257,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
               child: IconButton(
                 icon: const Icon(
                   Icons.arrow_back_ios,
-                  color: Colors.white,
+                  color: MainTheme.white,
                   size: 22,
                 ),
                 onPressed: widget.onBackPressed,
@@ -304,7 +304,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: Center(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -322,7 +322,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -353,7 +353,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -379,7 +379,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: const Center(
           child: CircularProgressIndicator(color: MainTheme.blueText),
         ),
@@ -391,7 +391,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -418,8 +418,8 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                         height: 40,
                         decoration: BoxDecoration(
                           border: Border(
-                            top: BorderSide(color: Colors.white, width: 3),
-                            left: BorderSide(color: Colors.white, width: 3),
+                            top: BorderSide(color: MainTheme.white, width: 3),
+                            left: BorderSide(color: MainTheme.white, width: 3),
                           ),
                         ),
                       ),
@@ -433,8 +433,8 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                         height: 40,
                         decoration: BoxDecoration(
                           border: Border(
-                            top: BorderSide(color: Colors.white, width: 3),
-                            right: BorderSide(color: Colors.white, width: 3),
+                            top: BorderSide(color: MainTheme.white, width: 3),
+                            right: BorderSide(color: MainTheme.white, width: 3),
                           ),
                         ),
                       ),
@@ -448,8 +448,8 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                         height: 40,
                         decoration: BoxDecoration(
                           border: Border(
-                            bottom: BorderSide(color: Colors.white, width: 3),
-                            left: BorderSide(color: Colors.white, width: 3),
+                            bottom: BorderSide(color: MainTheme.white, width: 3),
+                            left: BorderSide(color: MainTheme.white, width: 3),
                           ),
                         ),
                       ),
@@ -463,8 +463,8 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                         height: 40,
                         decoration: BoxDecoration(
                           border: Border(
-                            bottom: BorderSide(color: Colors.white, width: 3),
-                            right: BorderSide(color: Colors.white, width: 3),
+                            bottom: BorderSide(color: MainTheme.white, width: 3),
+                            right: BorderSide(color: MainTheme.white, width: 3),
                           ),
                         ),
                       ),
@@ -481,14 +481,14 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                 height: 15,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 1.5),
+                  border: Border.all(color: MainTheme.white, width: 1.5),
                 ),
                 child: Center(
                   child: Container(
                     width: 5,
                     height: 5,
                     decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: MainTheme.white,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -504,11 +504,11 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: Colors.black,
+      color: MainTheme.black,
       child: const Center(
         child: Text(
           'กล้องไม่พร้อมใช้งาน',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: MainTheme.white),
         ),
       ),
     );

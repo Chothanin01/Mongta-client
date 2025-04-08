@@ -105,7 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
       } else if (hasValidPrefix && hasCorrectLength) {
         _phoneHelperText = 'รูปแบบเบอร์โทรศัพท์ถูกต้อง';
         _showPhoneHelper = true;
-        _phoneHelperColor = Colors.green; // Green for success
+        _phoneHelperColor = MainTheme.greenComplete; // Green for success
       } else {
         _phoneHelperText = 'กรุณากรอกในรูปแบบ 06-XXXX-XXXX, 08-XXXX-XXXX หรือ 09-XXXX-XXXX';
         _showPhoneHelper = true;
@@ -376,7 +376,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: MainTheme.buttonBackground,
-                            foregroundColor: Colors.white,
+                            foregroundColor: MainTheme.white,
                             padding: EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -777,7 +777,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     Text(
                                       'กรุณายอมรับเงื่อนไขและข้อตกลง',
                                       style: TextStyle(
-                                        color: Colors.red,
+                                        color: MainTheme.redWarning,
                                         fontSize: 12,
                                         fontFamily: 'BaiJamjuree',
                                         fontWeight: FontWeight.w500,

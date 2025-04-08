@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:client/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:client/services/user_service.dart';
 import 'package:client/services/http_client.dart';
@@ -65,11 +66,11 @@ class _ScanlogPageState extends State<ScanlogPage> {
 
   Color getColorForPercentage(double percentage) {
     if (percentage <= 0.3) {
-      return Colors.red; // Poor vision
+      return MainTheme.resultRed; // Poor vision
     } else if (percentage <= 0.6) {
-      return Colors.orange; // Moderate vision
+      return MainTheme.resultOrange; // Moderate vision
     } else {
-      return Colors.green; // Good vision
+      return MainTheme.resultGreen; // Good vision
     }
   }
 
@@ -297,18 +298,18 @@ class _ScanlogPageState extends State<ScanlogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MainTheme.mainBackground,
       appBar: PreferredSize(
         preferredSize:
             Size.fromHeight(kToolbarHeight + 30),
         child: Container(
           padding: const EdgeInsets.only(top: 30),
           child: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: MainTheme.white,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios,
-                  color: Colors.black, size: 20),
+                  color: MainTheme.black, size: 20),
               onPressed: () {
                 context.go('/home');
               },
@@ -316,7 +317,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
             title: const Text(
               'ประวัติการสแกน',
               style: TextStyle(
-                color: Colors.black,
+                color: MainTheme.black,
                 fontSize: 16,
                 fontFamily: 'BaiJamjuree',
                 fontWeight: FontWeight.bold,
@@ -340,7 +341,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                           errorMessage,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Colors.red, 
+                            color: MainTheme.redWarning, 
                             letterSpacing: -0.5,
                             fontFamily: 'BaiJamjuree',
                           ),

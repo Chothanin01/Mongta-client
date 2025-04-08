@@ -363,11 +363,11 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
         }
       },
       child: CircleAvatar(
-        backgroundColor: Colors.blue,
+        backgroundColor: MainTheme.mapBlue,
         radius: 16,
         child: Icon(
           Icons.directions,
-          color: Colors.white,
+          color: MainTheme.white,
           size: 24,
         ),
       ),
@@ -390,7 +390,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
               padding: EdgeInsets.all(8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
-                side: BorderSide(color: Colors.grey.shade300),
+                side: BorderSide(color: MainTheme.profileGrey),
               ),
             ),
           ),
@@ -421,7 +421,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                   padding: EdgeInsets.all(8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
-                    side: BorderSide(color: Colors.grey.shade300),
+                    side: BorderSide(color: MainTheme.profileGrey),
                   ),
                 ),
               ),
@@ -476,20 +476,20 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                         padding: EdgeInsets.all(8),
                         child: CircleAvatar(
                           backgroundColor: _selectedHospital == null
-                              ? Color(0xFF12358F)
-                              : Colors.red,
+                              ? MainTheme.resultBlue
+                              : MainTheme.redWarning,
                           radius: 16,
                           child: Icon(
                             _selectedHospital == null
                                 ? Icons.search
                                 : Icons.local_hospital,
-                            color: Colors.white,
+                            color: MainTheme.white,
                             size: 20,
                           ),
                         ),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: MainTheme.white,
                       enabled: _selectedHospital == null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25.0),
@@ -497,7 +497,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25.0),
-                        borderSide: BorderSide(color: Colors.white),
+                        borderSide: BorderSide(color: MainTheme.white),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25.0),
@@ -515,12 +515,12 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                     height: 200,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: MainTheme.white,
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(20)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black26,
+                          color: MainTheme.mapBlack,
                           blurRadius: 5,
                           offset: Offset(0, -2),
                         ),
@@ -543,7 +543,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                     title: Text(hospital['name']),
                                     subtitle: Text(hospital['address']),
                                     leading: Icon(Icons.local_hospital,
-                                        color: Colors.red),
+                                        color: MainTheme.redWarning),
                                     onTap: () {
                                       _onHospitalSelected(hospital);
                                     },
@@ -563,7 +563,7 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                           fontSize: 12,
                                           fontWeight: FontWeight.w500,
                                           fontFamily: 'BaiJamjuree',
-                                          color: Colors.black,
+                                          color: MainTheme.black,
                                           letterSpacing: -0.5,
                                         ),
                                       ),
@@ -590,12 +590,12 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                                   Container(
                                                     padding: EdgeInsets.all(8),
                                                     decoration: BoxDecoration(
-                                                      color: Color(0xFF12358F),
+                                                      color: MainTheme.resultBlue,
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: Icon(
                                                         Icons.location_on,
-                                                        color: Colors.white,
+                                                        color: MainTheme.white,
                                                         size: 24),
                                                   ),
                                                   SizedBox(width: 20),
@@ -656,11 +656,11 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
                                                   Container(
                                                     padding: EdgeInsets.all(8),
                                                     decoration: BoxDecoration(
-                                                      color: Color(0xFF12358F),
+                                                      color: MainTheme.resultBlue,
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: Icon(Icons.phone,
-                                                        color: Colors.white,
+                                                        color: MainTheme.white,
                                                         size: 24),
                                                   ),
                                                   SizedBox(width: 20),

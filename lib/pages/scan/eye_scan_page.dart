@@ -206,7 +206,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
               child: IconButton(
                 icon: const Icon(
                   Icons.arrow_back_ios,
-                  color: Colors.white,
+                  color: MainTheme.white,
                   size: 22,
                 ),
                 onPressed: widget.onBackPressed,
@@ -280,7 +280,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                         'ตาขวา',
                         style: TextStyle(
                           color: _isRightEyeSelected 
-                              ? Colors.white 
+                              ? MainTheme.white 
                               : MainTheme.blueText,
                           fontFamily: 'BaiJamjuree',
                           fontWeight: FontWeight.w500,
@@ -313,7 +313,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
                         'ตาซ้าย',
                         style: TextStyle(
                           color: !_isRightEyeSelected 
-                              ? Colors.white 
+                              ? MainTheme.white 
                               : widget.rightEyeImage != null
                                   ? MainTheme.blueText
                                   : MainTheme.placeholderText,
@@ -394,7 +394,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: Center(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -412,7 +412,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -452,7 +452,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -461,7 +461,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
               SizedBox(height: 16),
               Text(
                 'กำลังเปิดกล้อง...',
-                style: TextStyle(color: Colors.white, fontFamily: 'BaiJamjuree'),
+                style: TextStyle(color: MainTheme.white, fontFamily: 'BaiJamjuree'),
               ),
             ],
           ),
@@ -474,7 +474,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       return Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.black,
+        color: MainTheme.black,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -493,7 +493,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
 
             // Semi-transparent scrim for better contrast
             Container(
-              color: Colors.black.withOpacity(0.2),
+              color: MainTheme.black.withOpacity(0.2),
             ),
 
             // Centered focus frame
@@ -509,11 +509,11 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: Colors.black,
+      color: MainTheme.black,
       child: const Center(
         child: Text(
           'กล้องไม่พร้อมใช้งาน',
-          style: TextStyle(color: Colors.white, fontFamily: 'BaiJamjuree'),
+          style: TextStyle(color: MainTheme.white, fontFamily: 'BaiJamjuree'),
         ),
       ),
     );
@@ -533,7 +533,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
+            color: MainTheme.black.withOpacity(0.6),
             borderRadius: BorderRadius.circular(16),
           ),
         ),
@@ -544,7 +544,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
           width: frameSize,
           height: frameSize,
           decoration: BoxDecoration(
-            color: Colors.transparent,
+            color: MainTheme.transparent,
             border: Border.all(color: Colors.transparent),
           ),
           child: Stack(

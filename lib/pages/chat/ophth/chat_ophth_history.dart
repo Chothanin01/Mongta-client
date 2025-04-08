@@ -45,11 +45,11 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MainTheme.mainBackground,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios, color: MainTheme.black),
           onPressed: () {
             context.go('/home-opht');
           },
@@ -73,8 +73,8 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
                             ? _buildRoundedBox(context, profilePicture!)
                             : CircleAvatar(
                                 radius: MediaQuery.of(context).size.width * 0.09,
-                                backgroundColor: Colors.grey[300],
-                                child: Icon(Icons.person, size: 40, color: Colors.grey[700]),
+                                backgroundColor: MainTheme.chatRound,
+                                child: Icon(Icons.person, size: 40, color: MainTheme.chatPerson),
                               ),
                         const SizedBox(width: 20),
                         _buildBlueBox(context, userName),
@@ -103,8 +103,8 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
         errorBuilder: (context, error, stackTrace) => Container(
           width: boxSize,
           height: boxSize,
-          color: Colors.grey[300],
-          child: Icon(Icons.person, size: boxSize * 0.6, color: Colors.grey[700]),
+          color: MainTheme.chatRound,
+          child: Icon(Icons.person, size: boxSize * 0.6, color: MainTheme.chatPerson),
         ),
       ),
     );
@@ -126,7 +126,7 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> {
           text,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white,
+            color: MainTheme.white,
             fontFamily: 'BaiJamjuree',
           ),
           textAlign: TextAlign.center,

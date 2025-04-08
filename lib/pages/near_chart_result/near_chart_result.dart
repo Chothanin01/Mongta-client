@@ -1,3 +1,4 @@
+import 'package:client/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,11 +62,11 @@ class _EyeTestResultsScreenState extends State<EyeTestResultsScreen> {
   // Function to get color based on percentage
   Color getColorForPercentage(double percentage) {
     if (percentage <= 0.3) {
-      return Colors.red; // Poor vision
+      return MainTheme.resultRed; // Poor vision
     } else if (percentage <= 0.6) {
-      return Colors.orange; // Moderate vision
+      return MainTheme.resultOrange; // Moderate vision
     } else {
-      return Colors.green; // Good vision
+      return MainTheme.resultGreen; // Good vision
     }
   }
 
@@ -166,7 +167,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MainTheme.mainBackground,
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
@@ -179,7 +180,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
                         Text(
                           errorMessage,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.red, letterSpacing: -0.5),
+                          style: const TextStyle(color: MainTheme.resultRed, letterSpacing: -0.5),
                         ),
                         const SizedBox(height: 20),
                         ElevatedButton(
@@ -280,7 +281,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
                 child: CircularProgressIndicator(
                   value: percentage, // Use the calculated percentage
                   strokeWidth: 10,
-                  backgroundColor: Colors.grey.shade200,
+                  backgroundColor: MainTheme.resultGrey,
                   valueColor: AlwaysStoppedAnimation<Color>(progressColor), // Use dynamic color
                 ),
               ),
@@ -297,7 +298,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
                       ),
                     ),
                     const Divider(
-                      color: Colors.black,
+                      color: MainTheme.black,
                       thickness: 1,
                       indent: 30,
                       endIndent: 30,
@@ -327,7 +328,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
         gradient: const LinearGradient(
-          colors: [Color(0xFF12358F), Color(0xFFF5BBD1)],
+          colors: [MainTheme.resultBlue, MainTheme.resultPink],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           stops: [0.4, 1.0],
@@ -349,7 +350,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
             fontFamily: 'BaiJamjuree',
             fontWeight: FontWeight.w600,
             letterSpacing: -0.5,
-            color: Colors.white,
+            color: MainTheme.white,
           ),
         ),
       ),

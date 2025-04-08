@@ -114,7 +114,7 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
       } else if (hasValidPrefix && hasCorrectLength) {
         _phoneHelperText = 'รูปแบบเบอร์โทรศัพท์ถูกต้อง';
         _showPhoneHelper = true;
-        _phoneHelperColor = Colors.green; // Green for success
+        _phoneHelperColor = MainTheme.greenComplete; // Green for success
       } else {
         _phoneHelperText = 'กรุณากรอกในรูปแบบ 06-XXXX-XXXX, 08-XXXX-XXXX หรือ 09-XXXX-XXXX';
         _showPhoneHelper = true;
@@ -260,7 +260,7 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
         top: 0,
         bottom: 0,
         child: Container(
-          color: Colors.black.withOpacity(0.5),
+          color: MainTheme.black.withOpacity(0.5),
           child: Center(
             child: CircularProgressIndicator(
               color: MainTheme.blueText,
@@ -394,7 +394,7 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
                                     Text(
                                       'กรุณายอมรับเงื่อนไขและข้อตกลง',
                                       style: TextStyle(
-                                        color: Colors.red,
+                                        color: MainTheme.redWarning,
                                         fontSize: 12,
                                         fontFamily: 'BaiJamjuree',
                                         fontWeight: FontWeight.w500,

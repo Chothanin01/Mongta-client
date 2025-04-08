@@ -269,13 +269,13 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                     width: 50,
                                     height: 50,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: MainTheme.white,
                                       shape: BoxShape.circle,
                                     ),
                                     child: Center(
                                       child: Iconify(
                                         MaterialSymbols.settings,
-                                        color: Colors.black,
+                                        color: MainTheme.black,
                                         size: 43,
                                       ),
                                     ),
@@ -342,13 +342,13 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                     width: 50,
                                     height: 50,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: MainTheme.white,
                                       shape: BoxShape.circle,
                                     ),
                                     child: Center(
                                       child: Iconify(
                                         MaterialSymbols.chat,
-                                        color: Colors.black,
+                                        color: MainTheme.black,
                                         size: 43,
                                       ),
                                     ),
@@ -442,7 +442,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                 style: TextStyle(
                                     fontFamily: 'BaiJamjuree',
                                     fontSize: 12,
-                                    color: Colors.grey[600],
+                                    color: MainTheme.logGrey2,
                                     letterSpacing: -0.5),
                               ),
                             ],
@@ -465,7 +465,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                       borderRadius: BorderRadius.circular(15),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.25),
+                                          color: MainTheme.black.withOpacity(0.25),
                                           blurRadius: 2,
                                           offset: const Offset(0, 0),
                                         ),
@@ -511,7 +511,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                                 Text(
                                                   '$firstName ส่งข้อความเข้ามา',
                                                   style: TextStyle(
-                                                    color: Colors.grey[600],
+                                                    color: MainTheme.logGrey2,
                                                     fontFamily: 'BaiJamjuree',
                                                     fontSize: 10,
                                                     letterSpacing: -0.5,

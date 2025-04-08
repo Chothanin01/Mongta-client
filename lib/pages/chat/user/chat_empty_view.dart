@@ -73,7 +73,7 @@ class _ChatEmptyViewState extends State<ChatEmptyView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MainTheme.white,
+      backgroundColor: MainTheme.mainBackground,
       body: SafeArea(
         child: _isLoading 
           ? const Center(child: CircularProgressIndicator())
@@ -91,8 +91,8 @@ class _ChatEmptyViewState extends State<ChatEmptyView> {
                           ? _buildRoundedBox(context, profilePicture!)
                           : CircleAvatar(
                               radius: MediaQuery.of(context).size.width * 0.09,
-                              backgroundColor: Colors.grey[300],
-                              child: Icon(Icons.person, size: 40, color: Colors.grey[700]),
+                              backgroundColor: MainTheme.chatRound,
+                              child: Icon(Icons.person, size: 40, color: MainTheme.chatPerson),
                             ),
                       const SizedBox(width: 20),
                       _buildBlueBox(context, userName),
@@ -120,8 +120,8 @@ class _ChatEmptyViewState extends State<ChatEmptyView> {
         errorBuilder: (context, error, stackTrace) => Container(
           width: boxSize,
           height: boxSize,
-          color: Colors.grey[300],
-          child: Icon(Icons.person, size: boxSize * 0.6, color: Colors.grey[700]),
+          color: MainTheme.chatRound,
+          child: Icon(Icons.person, size: boxSize * 0.6, color: MainTheme.chatPerson),
         ),
       ),
     );

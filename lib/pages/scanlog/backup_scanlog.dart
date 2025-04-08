@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:client/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:client/services/user_service.dart';
 import 'package:client/services/http_client.dart';
@@ -69,11 +70,11 @@ class _ScanlogPageState extends State<ScanlogPage> {
   Color getColorForPercentage(double percentage) {
     // Keep existing implementation
     if (percentage <= 0.3) {
-      return Colors.red; // Poor vision
+      return MainTheme.resultRed; // Poor vision
     } else if (percentage <= 0.6) {
-      return Colors.orange; // Moderate vision
+      return MainTheme.resultOrange; // Moderate vision
     } else {
-      return Colors.green; // Good vision
+      return MainTheme.resultGreen; // Good vision
     }
   }
 
@@ -333,18 +334,18 @@ class _ScanlogPageState extends State<ScanlogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MainTheme.mainBackground,
       appBar: PreferredSize(
         preferredSize:
             Size.fromHeight(kToolbarHeight + 30),
         child: Container(
           padding: const EdgeInsets.only(top: 30),
           child: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: MainTheme.white,
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios,
-                  color: Colors.black, size: 20),
+                  color: MainTheme.black, size: 20),
               onPressed: () {
                 context.go('/home'); // Navigate directly to home
               },
@@ -352,7 +353,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
             title: const Text(
               'ประวัติการสแกน',
               style: TextStyle(
-                color: Colors.black,
+                color: MainTheme.black,
                 fontSize: 16,
                 fontFamily: 'BaiJamjuree',
                 fontWeight: FontWeight.bold,
@@ -376,7 +377,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                           errorMessage,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Colors.red, 
+                            color: MainTheme.resultRed, 
                             letterSpacing: -0.5,
                             fontFamily: 'BaiJamjuree',
                           ),
@@ -444,11 +445,11 @@ class _ScanlogPageState extends State<ScanlogPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: MainTheme.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: MainTheme.logGrey.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 3,
             offset: const Offset(0, 1),
@@ -472,7 +473,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                     ),
                     child: const Icon(
                       Icons.insert_chart,
-                      color: Colors.white,
+                      color: MainTheme.white,
                       size: 24,
                     ),
                   ),
@@ -494,7 +495,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                           item['date'],
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: MainTheme.logGrey2,
                             letterSpacing: -0.5,
                             fontFamily: 'BaiJamjuree',
                           ),
@@ -506,7 +507,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                     item['isExpanded']
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
-                    color: Colors.grey[600],
+                    color: MainTheme.logGrey2,
                   ),
                 ],
               ),
@@ -536,7 +537,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
               item['conclusion'],
               style: const TextStyle(
                 fontSize: 14,
-                color: Colors.black87,
+                color: MainTheme.logBlack,
                 letterSpacing: -0.5,
                 fontFamily: 'BaiJamjuree',
               ),
@@ -652,7 +653,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                 child: CircularProgressIndicator(
                   value: percentage,
                   strokeWidth: 8,
-                  backgroundColor: Colors.grey.shade200,
+                  backgroundColor: MainTheme.resultGrey,
                   valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                 ),
               ),
@@ -668,7 +669,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                       ),
                     ),
                     const Divider(
-                      color: Colors.black,
+                      color: MainTheme.black,
                       thickness: 1,
                       indent: 25,
                       endIndent: 25,
@@ -704,7 +705,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: MainTheme.black,
             letterSpacing: -0.5,
             fontFamily: 'BaiJamjuree',
           ),
@@ -728,7 +729,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                 eyeScan['result'],
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.white,
+                  color: MainTheme.white,
                   letterSpacing: -0.5,
                 ),
                 textAlign: TextAlign.center,
@@ -763,7 +764,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                     'ตาซ้าย',
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.white,
+                      color: MainTheme.white,
                       fontWeight: FontWeight.w500,
                       letterSpacing: -0.5,
                       fontFamily: 'BaiJamjuree',
@@ -778,7 +779,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                     'ตาขวา',
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.white,
+                      color: MainTheme.white,
                       fontWeight: FontWeight.w500,
                       letterSpacing: -0.5,
                       fontFamily: 'BaiJamjuree',
@@ -803,7 +804,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                   'ภาพถ่าย',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.white,
+                    color: MainTheme.white,
                     fontWeight: FontWeight.w500,
                     letterSpacing: -0.5,
                     fontFamily: 'BaiJamjuree',
@@ -843,7 +844,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
                   'ภาพจาก AI',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.white,
+                    color: MainTheme.white,
                     fontWeight: FontWeight.w500,
                     letterSpacing: -0.5,
                     fontFamily: 'BaiJamjuree',
@@ -888,7 +889,7 @@ class _ScanlogPageState extends State<ScanlogPage> {
       aspectRatio: 1,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: MainTheme.white,
           borderRadius: BorderRadius.circular(12),
         ),
         child: isUrl
@@ -938,11 +939,11 @@ class FullscreenImageViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: MainTheme.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: MainTheme.black,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: MainTheme.white),
       ),
       body: Center(
         child: InteractiveViewer(
@@ -952,10 +953,10 @@ class FullscreenImageViewer extends StatelessWidget {
             imageUrl: imageUrl,
             fit: BoxFit.contain,
             placeholder: (context, url) => const Center(
-              child: CircularProgressIndicator(color: Colors.white),
+              child: CircularProgressIndicator(color: MainTheme.white),
             ),
             errorWidget: (context, url, error) => const Center(
-              child: Icon(Icons.error_outline, color: Colors.red, size: 50),
+              child: Icon(Icons.error_outline, color: MainTheme.resultRed, size: 50),
             ),
           ),
         ),
