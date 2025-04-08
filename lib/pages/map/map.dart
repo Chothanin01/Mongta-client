@@ -3,13 +3,11 @@ import 'package:client/core/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 import 'package:client/services/http_client.dart';
 import 'package:client/services/user_service.dart';
 import 'dart:io' show Platform;
-import 'package:client/main.dart';
 
 class HospitalMapScreen extends StatefulWidget {
   const HospitalMapScreen({super.key});
@@ -22,6 +20,7 @@ class HospitalMapScreen extends StatefulWidget {
 class _HospitalMapScreenState extends State<HospitalMapScreen> {
   GoogleMapController? _mapController;
   final Map<MarkerId, Marker> _hospitalMarkers = {};
+  Marker? _currentLocationMarker;
   static const LatLng _defaultLocation = LatLng(13.7563, 100.5018);
   CameraPosition _currentPosition = const CameraPosition(
     target: _defaultLocation,
@@ -66,16 +65,12 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
 
   // Check LocationPermission
   Future<void> _checkLocationPermission() async {
-    // Flag location services as media picker to prevent lifecycle issues
-    lifecycleObserver.setMediaPickerActive();
-
     bool serviceEnabled;
     LocationPermission permission;
 
     try {
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        lifecycleObserver.setMediaPickerInactive();
         _showErrorDialog(
           'Location Services Disabled',
           'Please enable location services to use this feature.',
@@ -87,7 +82,6 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          lifecycleObserver.setMediaPickerInactive();
           _showErrorDialog(
             'Permission Denied',
             'Location permissions are denied. Please grant permissions to use this feature.',
@@ -97,7 +91,6 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
       }
 
       if (permission == LocationPermission.deniedForever) {
-        lifecycleObserver.setMediaPickerInactive();
         _showErrorDialog(
           'Permission Denied Forever',
           'Location permissions are permanently denied. Please enable permissions from settings.',
@@ -107,33 +100,28 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
 
       await _getCurrentLocation();
     } finally {
-      // Reset flag regardless of outcome
-      lifecycleObserver.setMediaPickerInactive();
     }
   }
 
-  // Get LocationPermission
   Future<void> _getCurrentLocation() async {
     try {
-      lifecycleObserver.setMediaPickerActive();
-
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-
-      lifecycleObserver.setMediaPickerInactive();
-
-      final LatLng currentLatLng =
-          LatLng(position.latitude, position.longitude);
+      final LatLng currentLatLng = LatLng(position.latitude, position.longitude);
+      
       setState(() {
         _currentPosition = CameraPosition(target: currentLatLng, zoom: 15);
-        _addMarker(
-          'Your Location',
-          currentLatLng,
-          'Your current location',
-          BitmapDescriptor.hueAzure,
+        _currentLocationMarker = Marker(
+          markerId: MarkerId('current_location'),
+          position: currentLatLng,
+          infoWindow: InfoWindow(title: 'Your Current Location'),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
         );
+        
+        _hospitalMarkers[MarkerId('current_location')] = _currentLocationMarker!;
       });
+      
       _mapController?.animateCamera(
         CameraUpdate.newCameraPosition(
           CameraPosition(target: currentLatLng, zoom: 15),
@@ -141,28 +129,23 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
       );
       await _fetchNearbyHospitals(currentLatLng);
     } catch (e) {
-      lifecycleObserver.setMediaPickerInactive();
       _showErrorDialog(
         'Location Error',
         'Could not determine your current location. Please try again.',
       );
     }
   }
-
   //backend NearbyHospitals
   Future<void> _fetchNearbyHospitals(LatLng currentLocation) async {
     try {
-      // Replace direct http call with HttpClient.get
       final response = await HttpClient.get(
-        '/nearby-hospitals?lat=${currentLocation.latitude}&lng=${currentLocation.longitude}',
-      );
-
-      print('Fetching hospitals from: ${HttpClient.baseUrl}/nearby-hospitals');
-
+          '/nearby-hospitals?lat=${currentLocation.latitude}&lng=${currentLocation.longitude}');
       if (response.statusCode == 200) {
         final List hospitals = json.decode(response.body);
         setState(() {
-          _hospitalMarkers.clear();
+          _hospitalMarkers.removeWhere((key, value) => 
+            key.value != 'current_location');
+          
           _nearHospital = hospitals.cast<Map<String, dynamic>>();
           for (var hospital in hospitals) {
             _addMarker(
@@ -173,16 +156,11 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
             );
           }
         });
-      } else if (response.statusCode == 401) {
-        // Handle authentication errors
-        _showErrorDialog(
-            'Authentication Error', 'Please log in to use this feature');
       } else {
-        _showErrorDialog(
-            'Error', 'Failed to fetch hospitals: ${response.statusCode}');
+        _showErrorDialog('Error', 'Failed to fetch hospitals');
       }
     } catch (e) {
-      _showErrorDialog('Error', 'Could not connect to the server: $e');
+      _showErrorDialog('Error', 'Could not connect to the server');
     }
   }
 
@@ -448,8 +426,6 @@ class _HospitalMapScreenState extends State<HospitalMapScreen> {
           // Replace the old back button with our new back buttons component
           _buildBackButtons(),
 
-          // Rest of your UI components...
-          // When you have the hospital detail panel showing, add the navigation button
           if (_selectedHospital != null)
             Positioned(
               bottom: 20,
