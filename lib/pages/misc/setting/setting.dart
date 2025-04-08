@@ -80,7 +80,6 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  // Add logout functionality
   Future<void> _handleLogout() async {
     try {
       // Show loading indicator
@@ -437,20 +436,20 @@ class _SettingsPageState extends State<SettingsPage> {
                                     'ประวัติการสเเกนตา',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 16,
+                                      fontSize: 12,
                                       letterSpacing: -0.5,
                                       fontWeight: FontWeight.w500,
                                       fontFamily: 'BaiJamjuree',
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 3),
                                   const Text(
                                     'ประวัติการสเเกนทั้งหมด',
                                     style: TextStyle(
                                       color: Colors.white,
                                       letterSpacing: -0.5,
-                                      fontSize: 12,
+                                      fontSize: 10,
                                       fontFamily: 'BaiJamjuree',
                                     ),
                                     textAlign: TextAlign.center,
@@ -499,20 +498,20 @@ class _SettingsPageState extends State<SettingsPage> {
                                     'แก้ไขรหัสผ่าน',
                                     style: TextStyle(
                                       color: Colors.black,
-                                      fontSize: 16,
+                                      fontSize: 12,
                                       letterSpacing: -0.5,
                                       fontWeight: FontWeight.w500,
                                       fontFamily: 'BaiJamjuree',
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 3),
                                   const Text(
                                     'เริ่มเปลี่ยนกันเลย..',
                                     style: TextStyle(
                                       color: Colors.black,
                                       letterSpacing: -0.5,
-                                      fontSize: 12,
+                                      fontSize: 10,
                                       fontFamily: 'BaiJamjuree',
                                     ),
                                     textAlign: TextAlign.center,

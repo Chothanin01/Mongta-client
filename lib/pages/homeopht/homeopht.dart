@@ -292,7 +292,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                     letterSpacing: -0.5,
                                     fontSize: 12),
                               ),
-                              SizedBox(height: 4),
+                              SizedBox(height: 3),
                               Text(
                                 'แก้ไขโปรไฟล์ รหัสผ่าน',
                                 style: TextStyle(
@@ -300,7 +300,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                     fontWeight: FontWeight.w500,
                                     fontFamily: 'BaiJamjuree',
                                     letterSpacing: -0.5,
-                                    fontSize: 14),
+                                    fontSize: 10),
                               ),
                             ],
                           ),
@@ -365,7 +365,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                     letterSpacing: -0.5,
                                     fontSize: 12),
                               ),
-                              SizedBox(height: 4),
+                              SizedBox(height: 3),
                               isLoading
                                   ? Text(
                                       'กำลังโหลด...',
@@ -374,7 +374,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                           fontWeight: FontWeight.w500,
                                           fontFamily: 'BaiJamjuree',
                                           letterSpacing: -0.5,
-                                          fontSize: 14),
+                                          fontSize: 10),
                                     )
                                   : Text(
                                       'ทั้งหมด: $chatCount คน',
@@ -383,7 +383,7 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                           fontWeight: FontWeight.w500,
                                           fontFamily: 'BaiJamjuree',
                                           letterSpacing: -0.5,
-                                          fontSize: 14),
+                                          fontSize: 10),
                                     ),
                             ],
                           ),

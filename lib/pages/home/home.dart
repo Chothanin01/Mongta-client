@@ -303,7 +303,7 @@ class _HomePageState extends State<HomePage> {
                                   letterSpacing: -0.5,
                                   fontSize: 12),
                             ),
-                            SizedBox(height: 4),
+                            SizedBox(height: 3),
                             Text(
                               isLoading
                                   ? 'กำลังโหลด...'
@@ -313,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'BaiJamjuree',
                                   letterSpacing: -0.5,
-                                  fontSize: 14),
+                                  fontSize: 10),
                             ),
                           ],
                         ),
@@ -373,7 +373,7 @@ class _HomePageState extends State<HomePage> {
                                   letterSpacing: -0.5,
                                   fontSize: 12),
                             ),
-                            SizedBox(height: 4),
+                            SizedBox(height: 3),
                             Text(
                               isLoading
                                   ? 'กำลังโหลด...'
@@ -383,7 +383,7 @@ class _HomePageState extends State<HomePage> {
                                   fontWeight: FontWeight.w500,
                                   fontFamily: 'BaiJamjuree',
                                   letterSpacing: -0.5,
-                                  fontSize: 14),
+                                  fontSize: 10),
                             ),
                           ],
                         ),
@@ -518,77 +518,86 @@ class _HomePageState extends State<HomePage> {
                                 final content = notification['content'] ?? '';
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 11.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: MainTheme.white,
-                                      borderRadius: BorderRadius.circular(15),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.25),
-                                          blurRadius: 2,
-                                          offset: const Offset(0, 0),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 10.0),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 32,
-                                            height: 32,
-                                            decoration: BoxDecoration(
-                                              color: type == 'chat'
-                                                  ? Color(0xFFFFC0CB)
-                                                  : MainTheme
-                                                      .blueBox, // เปลี่ยนสีตามประเภท
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            child: Center(
-                                              child: Iconify(
-                                                type == 'chat'
-                                                    ? MaterialSymbols.chat
-                                                    : MaterialSymbols.docs,
-                                                color: MainTheme.white,
-                                                size: 20,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  type == 'chat'
-                                                      ? 'แชท'
-                                                      : 'ประวัติการสแกน',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w600,
-                                                    fontFamily: 'BaiJamjuree',
-                                                    fontSize: 14,
-                                                    letterSpacing: -0.5,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  type == 'chat'
-                                                      ? '$content ส่งข้อความเข้ามา'
-                                                      : content, // ใช้ date ตรงๆ สำหรับ scan
-                                                  style: TextStyle(
-                                                    color: Colors.grey[600],
-                                                    fontFamily: 'BaiJamjuree',
-                                                    fontSize: 10,
-                                                    letterSpacing: -0.5,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      // Navigate based on notification type
+                                      if (type == 'chat') {
+                                        context.go('/chat-history');
+                                      } else if (type == 'scan') {
+                                        context.go('/scanlog');
+                                      }
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: MainTheme.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.25),
+                                            blurRadius: 2,
+                                            offset: const Offset(0, 0),
                                           ),
                                         ],
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 10.0),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 32,
+                                              height: 32,
+                                              decoration: BoxDecoration(
+                                                color: type == 'chat'
+                                                    ? Color(0xFFFFC0CB)
+                                                    : MainTheme.blueBox,
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Center(
+                                                child: Iconify(
+                                                  type == 'chat'
+                                                      ? MaterialSymbols.chat
+                                                      : MaterialSymbols.docs,
+                                                  color: MainTheme.white,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    type == 'chat'
+                                                        ? 'แชท'
+                                                        : 'ประวัติการสแกน',
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.w600,
+                                                      fontFamily: 'BaiJamjuree',
+                                                      fontSize: 14,
+                                                      letterSpacing: -0.5,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    type == 'chat'
+                                                        ? '$content ส่งข้อความเข้ามา'
+                                                        : content,
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontFamily: 'BaiJamjuree',
+                                                      fontSize: 10,
+                                                      letterSpacing: -0.5,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),

@@ -83,7 +83,6 @@ class _OphtSettingsPageState extends State<OphtSettingsPage> {
     }
   }
 
-  // Add logout functionality
   Future<void> _handleLogout() async {
     try {
       // Show loading indicator
@@ -226,7 +225,7 @@ class _OphtSettingsPageState extends State<OphtSettingsPage> {
                                       style: TextStyle(
                                         color: Color(0xFF12358F),
                                         letterSpacing: -0.5,
-                                        fontSize: 12,
+                                        fontSize: 10,
                                         fontFamily: 'BaiJamjuree',
                                       ),
                                     ),
