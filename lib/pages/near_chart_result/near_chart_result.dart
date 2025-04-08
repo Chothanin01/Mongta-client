@@ -334,7 +334,7 @@ Future<void> _saveEyeTestResultsToPrefs(Map<String, dynamic> results) async {
         ),
       ),
       child: ElevatedButton(
-        onPressed: _onFinishedPressed, // Change to call new method instead of direct navigation
+        onPressed: _onFinishedPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
