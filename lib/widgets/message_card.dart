@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/services/chat_service.dart';
 import 'package:client/services/user_service.dart';
-import 'package:client/services/socket_service.dart';
+import 'package:client/services/chat_polling_service.dart';
 
 class MessageCard extends StatefulWidget {
   final int conversationId;
@@ -40,7 +40,7 @@ class MessageCardState extends State<MessageCard> {
   }
 
   void _setupMessageListener() {
-    _messageSubscription = SocketService.onNewMessage.listen((data) {
+    _messageSubscription = ChatPollingService.onNewMessage.listen((data) {
       if (data['conversation_id'].toString() == widget.conversationId.toString()) {
         // A new message for this conversation - refresh the messages
         fetchChatData();
@@ -66,9 +66,6 @@ class MessageCardState extends State<MessageCard> {
     setState(() {
       _userId = userId;
     });
-    
-    // Join the conversation room after getting user ID
-    SocketService.joinRoom(widget.conversationId.toString(), userId);
     
     // Then fetch chat data
     fetchChatData();
@@ -157,7 +154,7 @@ class MessageCardState extends State<MessageCard> {
     List<dynamic> reversedChatLog = List.from(_chatLog.reversed);
 
     return ListView.builder(
-      controller: _scrollController,  // Add scroll controller
+      controller: _scrollController,  
       padding: const EdgeInsets.all(16),
       itemCount: reversedChatLog.length,
       itemBuilder: (context, index) {

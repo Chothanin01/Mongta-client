@@ -207,8 +207,8 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
       final result = await apiService.updateUser(
         _firstNameController.text,
         _lastNameController.text,
-        _usernameController.text,  // Add username
-        "",                        // Empty string for email
+        _usernameController.text, 
+        "",                       
         profileImageFile,
       );
 

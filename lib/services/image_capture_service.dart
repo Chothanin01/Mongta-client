@@ -19,31 +19,22 @@ class ImageCaptureService {
   
   Future<File?> captureImageFromCamera() async {
     try {
-      // Flag media picker as active before using camera
-      lifecycleObserver.setMediaPickerActive();
       
       final XFile? image = await _picker.pickImage(
         source: ImageSource.camera,
         preferredCameraDevice: CameraDevice.front,
         imageQuality: 90,
       );
-      
-      // Flag media picker as inactive after camera use
-      lifecycleObserver.setMediaPickerInactive();
-      
+            
       return image != null ? File(image.path) : null;
     } catch (e) {
       debugPrint('Error capturing image: $e');
-      // Make sure to reset the flag even on error
-      lifecycleObserver.setMediaPickerInactive();
       return null;
     }
   }
   
   Future<File?> pickImageFromGallery() async {
     try {
-      // Flag media picker as active
-      lifecycleObserver.setMediaPickerActive();
       
       final XFile? pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -52,8 +43,6 @@ class ImageCaptureService {
         imageQuality: 85,
       );
       
-      // Flag media picker as inactive
-      lifecycleObserver.setMediaPickerInactive();
       
       if (pickedFile == null) return null;
       
@@ -61,8 +50,6 @@ class ImageCaptureService {
       return await _optimizeImage(File(pickedFile.path));
     } catch (e) {
       debugPrint('Error picking image: $e');
-      // Make sure to reset the flag even on error
-      lifecycleObserver.setMediaPickerInactive();
       return null;
     }
   }

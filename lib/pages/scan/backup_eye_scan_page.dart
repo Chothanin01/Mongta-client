@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:client/services/camera_service.dart';
 import 'package:client/services/image_capture_service.dart';
-import 'package:client/main.dart'; // Add this import for lifecycleObserver
 
 
 class EyeScanPage extends StatefulWidget {
@@ -36,7 +35,6 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    lifecycleObserver.setMediaPickerActive();
     _initializeCamera();
   }
   
@@ -47,7 +45,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
     });
     
     try {
-      await _cameraService.initializeService();
+      //TODO: await _cameraService.initializeService();
     } catch (e) {
       setState(() {
         _errorMessage = 'ไม่สามารถเข้าถึงกล้องได้: $e';
@@ -73,7 +71,6 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
   
   @override
   void dispose() {
-    lifecycleObserver.setMediaPickerInactive();
     WidgetsBinding.instance.removeObserver(this);
     _cameraService.dispose();
     super.dispose();
@@ -336,7 +333,7 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                _cameraService.enableMockCamera();
+                //TODO: _cameraService.enableMockCamera();
                 setState(() {});
               },
               style: ElevatedButton.styleFrom(

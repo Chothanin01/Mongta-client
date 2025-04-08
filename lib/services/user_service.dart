@@ -2,7 +2,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:client/services/http_client.dart';
 import 'package:client/services/status_service.dart';
-import 'package:client/services/socket_service.dart';
 
 class UserService {
   static final _storage = FlutterSecureStorage();
@@ -78,7 +77,6 @@ class UserService {
     }
   }
 
-  // Add this public method to UserService
   static Future<void> clearUserDataOnly() async {
     await _clearUserData();
   }

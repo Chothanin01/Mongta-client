@@ -82,7 +82,7 @@ class _ChatEmptyViewState extends State<ChatEmptyView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 80), // Add top spacing
+                  SizedBox(height: 80), 
                   // Profile picture and name row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

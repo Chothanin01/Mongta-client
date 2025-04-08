@@ -115,13 +115,11 @@ class ChatService {
       final uri = Uri.parse('${HttpClient.baseUrl}/api/sendchat');
       final request = http.MultipartRequest('POST', uri);
       
-      // Add authorization token
       final token = await UserService.getToken();
       if (token != null) {
         request.headers['Authorization'] = 'Bearer $token';
       }
       
-      // Add required fields
       request.fields['conversation_id'] = conversationId.toString();
       request.fields['sender_id'] = userId;
       
@@ -137,14 +135,13 @@ class ChatService {
           : MediaType('image', 'jpeg');
       
       final multipartFile = http.MultipartFile(
-        'file', // Make sure this field name matches your server expectations
+        'file', 
         fileStream,
         fileLength,
         filename: filename,
         contentType: contentType,
       );
       
-      // Add the file to the request
       request.files.add(multipartFile);
       
       // Send the request

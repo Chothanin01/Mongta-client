@@ -65,8 +65,8 @@ class ApiService {
   Future<Map<String, dynamic>> updateUser(
       String firstName, 
       String lastName,
-      String username,  // Add username parameter
-      String email,     // Keep for compatibility
+      String username,  
+      String email,     
       File? profilePicture) async {
     try {
       print('Update profile request with:');
@@ -81,14 +81,12 @@ class ApiService {
         Uri.parse('${HttpClient.baseUrl}/api/updateuser'),
       );
       
-      // Add authorization header
       final token = await UserService.getToken();
       request.headers['Authorization'] = 'Bearer $token';
       
-      // Add text fields - include username
       request.fields['first_name'] = firstName;
       request.fields['last_name'] = lastName;
-      request.fields['username'] = username;  // Add username field
+      request.fields['username'] = username;  
       
       // Profile picture handling
       if (profilePicture == null) {

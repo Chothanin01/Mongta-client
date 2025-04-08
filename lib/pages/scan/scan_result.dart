@@ -16,7 +16,6 @@ class ScanResultPage extends StatelessWidget {
     required this.onNewScan,
   });
 
-  // Add this method to extract image URLs regardless of format
   Map<String, dynamic> _extractPhotoData(Map<String, dynamic> data) {
     // Debug the incoming structure
     debugPrint('Extracting photo from: ${jsonEncode(data)}');
@@ -338,9 +337,8 @@ class ScanResultPage extends StatelessWidget {
     );
   }
 
-  // Updated _buildImageWidget method to add tap to view fullscreen
   Widget _buildImageWidget(
-    BuildContext context, // Add context parameter
+    BuildContext context, 
     String? imageUrl, {
     required double width,
     required double height,
@@ -353,7 +351,6 @@ class ScanResultPage extends StatelessWidget {
       return _buildPlaceholderWidget(width, height, borderRadius);
     }
 
-    // Add tap to view fullscreen
     return GestureDetector(
       onTap: () {
         // Open fullscreen image viewer when tapped
@@ -373,9 +370,7 @@ class ScanResultPage extends StatelessWidget {
           width: width,
           height: height,
           fit: BoxFit.cover,
-          // Add caching key to prevent conflicts
           cacheKey: imageUrl.split('/').last,
-          // Add Firebase Storage specific headers
           httpHeaders: {
             'Accept': 'image/jpeg, image/png, image/*',
             'Cache-Control': 'max-age=86400', // 24 hours cache
@@ -542,7 +537,6 @@ class ScanResultPage extends StatelessWidget {
   }
 }
 
-// Add this new widget for fullscreen image viewing
 class FullscreenImageViewer extends StatelessWidget {
   final String imageUrl;
   
