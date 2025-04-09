@@ -84,9 +84,12 @@ GoRouter createRouter({String initialLocation = '/login'}) {
       // Chat Page Route
       GoRoute(
         path: Path.chatEntryPage,
-        builder: (context, state) => BottomNavBar(
-          child: const ChatNavigator(),
-        ),
+        builder: (context, state) {
+          // Use a unique key based on DateTime to force rebuild when navigating here
+          return BottomNavBar(
+            child: ChatNavigator(key: ValueKey(DateTime.now().toString())),
+          );
+        },
       ),
 
       GoRoute(
