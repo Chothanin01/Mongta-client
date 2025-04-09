@@ -6,21 +6,32 @@ import 'package:client/core/theme/theme.dart';
 import 'package:go_router/go_router.dart';
 
 class ChatUserHistory extends StatefulWidget {
-  const ChatUserHistory({super.key});
+  final VoidCallback? onRefresh;
+  
+  const ChatUserHistory({super.key, this.onRefresh});
 
   @override
   _ChatUserHistoryState createState() => _ChatUserHistoryState();
 }
 
-class _ChatUserHistoryState extends State<ChatUserHistory> {
+class _ChatUserHistoryState extends State<ChatUserHistory> with AutomaticKeepAliveClientMixin {
   String? profilePicture;
   String userName = '';
   final ChatService _chatService = ChatService();
   bool _isLoading = true;
+  
+  @override
+  bool get wantKeepAlive => false; // Don't keep alive to ensure refresh
 
   @override
   void initState() {
     super.initState();
+    fetchChatData();
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     fetchChatData();
   }
 
@@ -31,60 +42,82 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
       
       if (chatData.containsKey('user')) {
         final user = chatData['user'];
-        setState(() {
-          profilePicture = user['profile_picture'];
-          userName = '${user['first_name']} ${user['last_name']}';
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            profilePicture = user['profile_picture'];
+            userName = '${user['first_name']} ${user['last_name']}';
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     } catch (e) {
       print('API Error: $e');
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+    
     return Scaffold(
       backgroundColor: MainTheme.mainBackground,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
-          child: _isLoading 
-            ? Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 40),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        profilePicture != null
-                            ? _buildRoundedBox(context, profilePicture!)
-                            : CircleAvatar(
-                                radius: MediaQuery.of(context).size.width * 0.09,
-                                backgroundColor: Colors.grey[300],
-                                child: Icon(Icons.person, size: 40, color: Colors.grey[700]),
-                              ),
-                        const SizedBox(width: 20),
-                        _buildBlueBox(context, userName),
-                      ],
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await fetchChatData();
+          if (widget.onRefresh != null) {
+            widget.onRefresh!();
+          }
+        },
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
+            child: _isLoading 
+              ? Center(child: CircularProgressIndicator())
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 40),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          profilePicture != null
+                              ? _buildRoundedBox(context, profilePicture!)
+                              : CircleAvatar(
+                                  radius: MediaQuery.of(context).size.width * 0.09,
+                                  backgroundColor: Colors.grey[300],
+                                  child: Icon(Icons.person, size: 40, color: Colors.grey[700]),
+                                ),
+                          const SizedBox(width: 20),
+                          _buildBlueBox(context, userName),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  _buildSearchRow(context),
-                  SizedBox(height: 20),
-                  Expanded(child: ChatUserCard()),
-                ],
-              ),
+                    SizedBox(height: 20),
+                    _buildSearchRow(context),
+                    SizedBox(height: 20),
+                    Expanded(
+                      child: ChatUserCard(onRefresh: fetchChatData),
+                    ),
+                  ],
+                ),
           ),
         ),
-      );
+      ),
+    );
   }
   
+  // Keep your existing widget methods
   Widget _buildRoundedBox(BuildContext context, String imageUrl) {
+    // Existing implementation
     double boxSize = MediaQuery.of(context).size.width * 0.18;
 
     return ClipRRect(
@@ -105,6 +138,7 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
   }
 
   Widget _buildBlueBox(BuildContext context, String text) {
+    // Existing implementation
     double boxWidth = MediaQuery.of(context).size.width * 0.55;
     double boxHeight = MediaQuery.of(context).size.width * 0.18;
 
@@ -130,6 +164,7 @@ class _ChatUserHistoryState extends State<ChatUserHistory> {
   }
 
   Widget _buildSearchRow(BuildContext context) {
+    // Existing implementation
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
