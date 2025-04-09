@@ -15,7 +15,7 @@ class ChatNavigator extends StatefulWidget {
 
 class _ChatNavigatorState extends State<ChatNavigator> {
   final _chatService = ChatService();
-  final _apiService = ApiService(); // Create instance
+  final _apiService = ApiService();
   bool _isLoading = true;
   bool _hasHistory = false;
   bool _isOphthalmologist = false;
@@ -26,26 +26,31 @@ class _ChatNavigatorState extends State<ChatNavigator> {
     _checkUserAndHistory();
   }
 
+  // Make this public so it can be called from outside
   Future<void> _checkUserAndHistory() async {
     try {
       setState(() => _isLoading = true);
       
       // Check if user is an ophthalmologist
       final userId = await UserService.getCurrentUserId();
-      final userData = await _apiService.getUser(userId); // Now use the instance
+      final userData = await _apiService.getUser(userId);
       _isOphthalmologist = userData['is_opthamologist'] ?? false;
       
       // Get chat history
       final chatData = await _chatService.getChatHistory();
       final chatHistory = chatData['latest_chat'] ?? [];
       
-      setState(() {
-        _hasHistory = chatHistory.isNotEmpty;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _hasHistory = chatHistory.isNotEmpty;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       print('Error checking chat history: $e');
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -64,8 +69,9 @@ class _ChatNavigatorState extends State<ChatNavigator> {
       }
       
       // For regular users, check if they have chat history
+      // Pass the refresh function to ChatUserHistory
       return _hasHistory 
-          ? const ChatUserHistory() 
+          ? ChatUserHistory(onRefresh: _checkUserAndHistory)
           : const ChatEmptyView();
     } catch (e) {
       // Safety fallback if something fails
