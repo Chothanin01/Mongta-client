@@ -6,6 +6,7 @@ import 'package:client/services/image_capture_service.dart';
 import 'package:client/widgets/eye_scan_tab_selector.dart';
 import 'package:client/widgets/focus_frame.dart';
 import 'package:client/widgets/camera_mode_button.dart';
+import 'package:client/widgets/capture_button.dart';
 import 'package:camera/camera.dart';
 
 class EyeScanPage extends StatefulWidget {
@@ -82,77 +83,10 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Camera preview or image display
+          // Camera preview or image display - base layer
           _buildMainContent(),
           
-          // UI overlay
-          SafeArea(
-            child: Column(
-              children: [
-                // Top bar with eye selector
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: EyeScanTabSelector(
-                      isRightEyeSelected: _isRightEyeSelected,
-                      isRightEyeCaptured: widget.rightEyeImage != null,
-                      onEyeSelected: (isRight) {
-                        setState(() {
-                          _isRightEyeSelected = isRight;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                
-                const Spacer(),
-                
-                // Capture button
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: _isInitializing
-                          ? null
-                          : _isCaptureButtonRetake()
-                              ? _retakeCurrentImage
-                              : _captureImage,
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: _isCaptureButtonRetake()
-                                ? MainTheme.redWarning
-                                : MainTheme.blueText,
-                            width: 3,
-                          ),
-                        ),
-                        child: Center(
-                          child: _isInitializing
-                            ? const CircularProgressIndicator(color: MainTheme.blueText)
-                            : _isCaptureButtonRetake()
-                                ? const Icon(Icons.refresh, color: MainTheme.redWarning, size: 28)
-                                : Container(
-                                    width: 48,
-                                    height: 48,
-                                    decoration: const BoxDecoration(
-                                      color: MainTheme.blueText,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Back button
+          // Back button - positioned independently
           SafeArea(
             child: Positioned(
               top: 8,
@@ -168,7 +102,43 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
             ),
           ),
           
-          // Gallery button
+          // Eye tab selector - positioned independently at top 
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: EyeScanTabSelector(
+                isRightEyeSelected: _isRightEyeSelected,
+                isRightEyeCaptured: widget.rightEyeImage != null,
+                onEyeSelected: (isRight) {
+                  setState(() {
+                    _isRightEyeSelected = isRight;
+                  });
+                },
+              ),
+            ),
+          ),
+          
+          // Capture button - positioned independently at bottom center
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: CaptureButton(
+                isLoading: _isInitializing,
+                isRetake: _isCaptureButtonRetake(),
+                onTap: _isInitializing
+                    ? null
+                    : _isCaptureButtonRetake()
+                        ? _retakeCurrentImage
+                        : _captureImage,
+              ),
+            ),
+          ),
+          
+          // Gallery button - right side
           Positioned(
             bottom: 40,
             right: 32,
@@ -191,14 +161,13 @@ class _EyeScanPageState extends State<EyeScanPage> with WidgetsBindingObserver {
             ),
           ),
           
-          // Camera mode button
+          // Native camera button - left side
           Positioned(
             bottom: 40,
             left: 32,
             child: CameraModeButton(
               isDisabled: _isInitializing,
               onTap: () async {
-                // Directly use the native camera when this button is tapped
                 final image = await _imageService.captureImageFromCamera();
                 if (image != null) {
                   widget.onImageCaptured(image, _isRightEyeSelected);
