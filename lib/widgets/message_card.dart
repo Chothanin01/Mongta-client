@@ -42,8 +42,11 @@ class MessageCardState extends State<MessageCard> {
   void _setupMessageListener() {
     _messageSubscription = ChatPollingService.onNewMessage.listen((data) {
       if (data['conversation_id'].toString() == widget.conversationId.toString()) {
-        // A new message for this conversation - refresh the messages
-        fetchChatData();
+        // Check if still mounted before refreshing
+        if (mounted) {
+          // A new message for this conversation - refresh the messages
+          fetchChatData();
+        }
       }
     });
   }
@@ -74,21 +77,31 @@ class MessageCardState extends State<MessageCard> {
   Future<void> fetchChatData() async {
     if (_userId.isEmpty) return;
     
+    // Check mounted before first setState
+    if (!mounted) return;
+    
     setState(() {
       _isLoading = true;
     });
 
     try {
       final chatData = await _chatService.getChatMessages(widget.conversationId);
+      
+      // Check mounted again after async operation
+      if (!mounted) return;
+      
       setState(() {
         _chatLog = chatData['chatlog'] ?? [];
         _isLoading = false;
       });
       
-      // Scroll to the bottom when data is loaded
       _scrollToBottom();
     } catch (e) {
       print('Error fetching chat data: $e');
+      
+      // Check mounted before setState in error handler
+      if (!mounted) return;
+      
       setState(() {
         _isLoading = false;
       });
