@@ -19,7 +19,9 @@ class ChatAppBarOphth extends StatefulWidget implements PreferredSizeWidget {
   ChatAppBarOphthState createState() => ChatAppBarOphthState();
 
   @override
-  Size get preferredSize => Size.fromHeight(85);
+  Size get preferredSize {
+    return Size.fromHeight(kToolbarHeight * 1.5);
+  }
 }
 
 class ChatAppBarOphthState extends State<ChatAppBarOphth> {
@@ -67,9 +69,13 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final responsiveHeight = screenHeight * 0.10;
+    final toolbarHeight = responsiveHeight.clamp(55.0, 80.0); 
+
     if (_isLoading) {
       return AppBar(
-        toolbarHeight: 85,
+        toolbarHeight: toolbarHeight,
         backgroundColor: Colors.transparent,
         elevation: 0,
         flexibleSpace: Container(
@@ -84,7 +90,7 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
     }
 
     return AppBar(
-      toolbarHeight: 85,
+      toolbarHeight: toolbarHeight,
       automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -98,7 +104,7 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
           borderRadius: BorderRadius.circular(20),
           child: AppBar(
             automaticallyImplyLeading: false,
-            toolbarHeight: 85,
+            toolbarHeight: toolbarHeight,
             backgroundColor: Colors.transparent,
             elevation: 0,
             title: Row(
