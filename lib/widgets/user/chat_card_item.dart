@@ -15,7 +15,10 @@ class ChatCardItem extends StatelessWidget {
   final userName = "${profile["first_name"] ?? "Unknown"} ${profile["last_name"] ?? ""}";
   final profilePicture = profile["profile_picture"] ?? "";
   
-  final rawMessage = chatData["chat"] ?? "ยังไม่มีข้อความ";
+  final rawMessage = (chatData["chat"] == null || chatData["chat"].toString().trim().isEmpty) 
+    ? "ยังไม่มีข้อความ" 
+    : chatData["chat"];
+
   final lastMessage = isImageUrl(rawMessage) ? "รูปภาพ" : rawMessage;
 
   final timestamp = chatData["timestamp"] ?? "";
