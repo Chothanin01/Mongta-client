@@ -37,24 +37,32 @@ class _ChatOphthScreenState extends State<ChatOphthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MainTheme.mainBackground,
-      appBar: ChatAppBarOphth(conversationId: widget.conversationId),
-      body: Column(
-        children: [
-          Expanded(
-            child: MessageCard(
-              key: _messageCardKey,
-              conversationId: widget.conversationId,
+    return WillPopScope(
+      onWillPop: () async {
+        // Trigger refresh when using hardware back button
+        ChatPollingService.stopPolling();
+        Navigator.of(context).pop(true); // Pass true to indicate refresh needed
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: MainTheme.mainBackground,
+        appBar: ChatAppBarOphth(conversationId: widget.conversationId),
+        body: Column(
+          children: [
+            Expanded(
+              child: MessageCard(
+                key: _messageCardKey,
+                conversationId: widget.conversationId,
+              ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: ChatInput(
-        onMessageSent: () {
-          _messageCardKey.currentState?.refreshMessages();
-        },
-        conversationId: widget.conversationId,
+          ],
+        ),
+        bottomNavigationBar: ChatInput(
+          onMessageSent: () {
+            _messageCardKey.currentState?.refreshMessages();
+          },
+          conversationId: widget.conversationId,
+        ),
       ),
     );
   }

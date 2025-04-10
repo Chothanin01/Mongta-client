@@ -100,6 +100,7 @@ class _ChatOphthCardState extends State<ChatOphthCard> {
           return GestureDetector(
             onTap: () {
               context.push('/chat-ophth-screen/$conversationId').then((_) {
+                // Refresh when returning from chat screen
                 fetchChatHistory();
                 if (widget.onRefresh != null) {
                   widget.onRefresh!();

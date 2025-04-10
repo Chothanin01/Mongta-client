@@ -65,11 +65,11 @@ class _ChatNavigatorState extends State<ChatNavigator> {
     try {
       // If ophthalmologist, always show their chat history screen
       if (_isOphthalmologist) {
-        return const ChatOphthHistory();
+        // Pass the refresh function to ChatOphthHistory
+        return ChatOphthHistory(onRefresh: _checkUserAndHistory); 
       }
       
       // For regular users, check if they have chat history
-      // Pass the refresh function to ChatUserHistory
       return _hasHistory 
           ? ChatUserHistory(onRefresh: _checkUserAndHistory)
           : const ChatEmptyView();

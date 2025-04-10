@@ -45,16 +45,20 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
       if (chatData.containsKey('profile') && chatData['profile'].isNotEmpty) {
         final profile = chatData['profile'][0]['User_Conversation_user_idToUser'];
         
-        setState(() {
-          firstName = profile['first_name'] ?? '';
-          lastName = profile['last_name'] ?? '';
-          profilePicture = profile['profile_picture'] ?? '';
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            firstName = profile['first_name'] ?? '';
+            lastName = profile['last_name'] ?? '';
+            profilePicture = profile['profile_picture'] ?? '';
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       print('Failed to load chat details: $e');
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -71,7 +75,7 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final responsiveHeight = screenHeight * 0.10;
-    final toolbarHeight = responsiveHeight.clamp(55.0, 80.0); 
+    final toolbarHeight = responsiveHeight.clamp(45.0, 65.0); 
 
     if (_isLoading) {
       return AppBar(
@@ -110,9 +114,10 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
             title: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back_ios, color: MainTheme.black),
+                  icon: Icon(Icons.arrow_back, color: MainTheme.black),
                   onPressed: () {
-                    context.go('/chat-ophth-history');
+                    // Use go_router instead of Navigator.pop() for consistent navigation
+                    context.go('/chat');
                   },
                 ),
                 CircleAvatar(
@@ -122,32 +127,43 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
                       : AssetImage('assets/images/MongtaLogo.png') as ImageProvider,
                 ),
                 SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "$firstName $lastName",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'BaiJamjuree',
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(width: 10, height: 10, decoration: BoxDecoration(color: MainTheme.chatGreen, shape: BoxShape.circle)),
-                        SizedBox(width: 5),
-                        Text(
-                          "ออนไลน์",
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: MainTheme.chatGrey,
-                            fontFamily: 'BaiJamjuree',
-                          ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "$firstName $lastName",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'BaiJamjuree',
                         ),
-                      ],
-                    ),
-                  ],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 10, 
+                            height: 10, 
+                            decoration: BoxDecoration(
+                              color: MainTheme.chatGreen, 
+                              shape: BoxShape.circle
+                            )
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            "ออนไลน์",
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: MainTheme.chatGrey,
+                              fontFamily: 'BaiJamjuree',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
