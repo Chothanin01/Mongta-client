@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:client/services/scan_history_service.dart';
 import 'package:client/services/http_client.dart';
-import 'package:client/services/user_service.dart';
-import 'package:client/pages/chat/ophth/chat_ophth_screen.dart';
-import 'package:go_router/go_router.dart';
 
 class ScanHistoryScreen extends StatefulWidget {
   const ScanHistoryScreen({Key? key}) : super(key: key);
@@ -18,215 +18,128 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
   bool isLoading = true;
   String errorMessage = '';
   List<Map<String, dynamic>> scanHistory = [];
-  int? conversationId;
-
-  final ThemeData theme = ThemeData(
-    primarySwatch: Colors.blue,
-    fontFamily: 'BaiJamjuree',
-    scaffoldBackgroundColor: Colors.white,
-    appBarTheme: const AppBarTheme(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      iconTheme: IconThemeData(color: Colors.black),
-      titleTextStyle: TextStyle(
-        color: Colors.black,
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-  );
+  String userName = '';
 
   @override
   void initState() {
     super.initState();
-    _loadConversationIdAndFetchData();
-  }
-
-  Future<void> _loadConversationIdAndFetchData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      conversationId = prefs.getInt('conversation_id');
-
-      if (conversationId == null) {
-        setState(() {
-          errorMessage = 'Cannot find conversation ID';
-          isLoading = false;
-        });
-        return;
-      }
-
-      fetchScanHistory();
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Error loading data: $e';
-        isLoading = false;
-      });
-    }
+    fetchScanHistory();
   }
 
   double vaToPercentage(String va) {
+    // Map of VA values to percentages
     final Map<String, double> vaPercentages = {
-      '20/200': 0.1,
-      '20/100': 0.2,
-      '20/70': 0.3,
-      '20/50': 0.4,
-      '20/40': 0.5,
-      '20/30': 0.6,
-      '20/25': 0.7,
-      '20/20': 1.0,
+      '20/200': 0.1, // 10%
+      '20/100': 0.2, // 20%
+      '20/70': 0.3, // 30%
+      '20/50': 0.4, // 40%
+      '20/40': 0.5, // 50%
+      '20/30': 0.6, // 60%
+      '20/25': 0.7, // 70%
+      '20/20': 1.0, // 100%
     };
 
     return vaPercentages[va] ?? 0.0;
   }
 
+  // Function to get color based on percentage
   Color getColorForPercentage(double percentage) {
     if (percentage <= 0.3) {
-      return Colors.red;
+      return Colors.red; // Poor vision
     } else if (percentage <= 0.6) {
-      return Colors.orange;
+      return Colors.orange; // Moderate vision
     } else {
-      return Colors.green;
+      return Colors.green; // Good vision
     }
   }
 
   Future<void> fetchScanHistory() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = '';
-    });
-
     try {
-      final response = await HttpClient.get('/api/scanlog/ophtha/$conversationId');
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print('API Response: ${json.encode(data)}');
-
-        if (data['success'] == true) {
-          final List<dynamic> scanLogs = data['scanlog'];
-          final Map<String, dynamic> userData = data['user'];
-          print('Scan logs count: ${scanLogs.length}');
-
-          final fullName = _getFullNameWithPrefix(
-            userData['first_name'] ?? '',
-            userData['last_name'] ?? '',
-            userData['is_opthamologist'] as bool?,
-            userData['sex'] as String?,
-          );
-          final sexDisplay = _getSexDisplay(userData['sex'] as String?);
-          final age = _calculateAge(userData['date_of_birth'] as String);
-          final profilePicture = userData['profile_picture'] as String?;
-
-          print('User Full Name: $fullName, Sex: $sexDisplay, Age: $age, Profile Picture: $profilePicture');
-
-          setState(() {
-            scanHistory = scanLogs.map<Map<String, dynamic>>((scan) {
-              print('Processing scan: ${json.encode(scan)}');
-
-              final Map<String, dynamic> scanData = {
-                'id': scan['id'],
-                'title': 'ประวัติการสแกน',
-                'date': _formatDate(scan['date']),
-                'isExpanded': true,
-                'description': scan['description'] ?? '',
-                'user': {
-                  'fullName': fullName,
-                  'sex': sexDisplay,
-                  'age': age,
-                  'profilePicture': profilePicture,
-                },
-              };
-
-              if (scan['va'] != null) {
-                try {
-                  final va = scan['va'];
-                  print('VA data: ${json.encode(va)}');
-
-                  final eyeTest = {
-                    'leftEye': {
-                      'line': va['line_left'] ?? 0,
-                      'value': va['va_left'] ?? '0/0',
-                      'percentage': _convertVAToPercentage(va['va_left'] ?? '0/0'),
-                    },
-                    'rightEye': {
-                      'line': va['line_right'] ?? 0,
-                      'value': va['va_right'] ?? '0/0',
-                      'percentage': _convertVAToPercentage(va['va_right'] ?? '0/0'),
-                    },
-                  };
-                  scanData['eyeTest'] = eyeTest;
-                } catch (e) {
-                  print('Error processing VA data: $e');
-                  scanData['eyeTest'] = {
-                    'leftEye': _getDefaultEyeData(),
-                    'rightEye': _getDefaultEyeData(),
-                  };
-                }
-              } else {
-                scanData['eyeTest'] = {
-                  'leftEye': _getDefaultEyeData(),
-                  'rightEye': _getDefaultEyeData(),
-                };
-              }
-
-              if (scan['photos'] != null) {
-                try {
-                  final photos = scan['photos'];
-                  scanData['eyeScan'] = {
-                    'photos': {
-                      'leftEye': photos['left_eye'] ?? '',
-                      'rightEye': photos['right_eye'] ?? '',
-                      'leftEyeAI': photos['left_eye_ai'] ?? '',
-                      'rightEyeAI': photos['right_eye_ai'] ?? '',
-                    }
-                  };
-                } catch (e) {
-                  print('Error processing photo data: $e');
-                  scanData['eyeScan'] = {
-                    'photos': {}
-                  };
-                }
-              } else {
-                scanData['eyeScan'] = {
-                  'photos': {}
-                };
-              }
-
-              return scanData;
-            }).toList();
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            errorMessage = data['message'] ?? 'Unknown error';
-            isLoading = false;
-          });
-        }
-      } else if (response.statusCode == 401) {
-        await UserService.logout();
+      setState(() {
+        isLoading = true;
+        errorMessage = '';
+        scanHistory = []; // Clear existing data
+      });
+      
+      // Get the conversation ID saved during navigation
+      final prefs = await SharedPreferences.getInstance();
+      final conversationId = prefs.getInt('conversation_id');
+      
+      if (conversationId == null) {
         setState(() {
-          errorMessage = 'Session expired. Please log in again.';
+          errorMessage = 'No conversation ID found';
           isLoading = false;
         });
-
-        if (context.mounted) {
-          context.go('/login');
+        return;
+      }
+      
+      // Make API request directly like in scanlog.dart
+      final response = await HttpClient.get('/api/scanlog/ophtha/$conversationId');
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        debugPrint('API Response: ${jsonEncode(data)}'); // Debug print
+        
+        if (data['success'] == true) {
+          if (mounted) {
+            setState(() {
+              // Store user data directly
+              final userData = data['user'] ?? {};
+              
+              // Process the scanlog EXACTLY as it comes from API without manipulation
+              final rawScanLogs = data['scanlog'] as List? ?? [];
+              
+              // Simply map each scan log to a Map without any extra manipulation
+              scanHistory = rawScanLogs.map((item) {
+                // Create a direct copy of the scan item
+                final Map<String, dynamic> scanItem = Map<String, dynamic>.from(item);
+                
+                // Only add these essential fields but don't manipulate the original data
+                scanItem['isExpanded'] = false;
+                scanItem['user'] = userData;
+                
+                // Process date if available
+                if (scanItem.containsKey('date') && scanItem['date'] != null) {
+                  final date = scanItem['date'] is String 
+                      ? DateTime.parse(scanItem['date']) 
+                      : DateTime.fromMillisecondsSinceEpoch(scanItem['date']);
+                  scanItem['formattedDate'] = _formatDate(date.toIso8601String());
+                }
+                
+                return scanItem;
+              }).toList();
+              
+              isLoading = false;
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              errorMessage = data['message'] ?? 'Failed to fetch scan logs';
+              isLoading = false;
+            });
+          }
         }
       } else {
+        if (mounted) {
+          setState(() {
+            errorMessage = 'API Error: ${response.statusCode}';
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching scan history: $e');
+      if (mounted) {
         setState(() {
-          errorMessage = 'Server error: ${response.statusCode}';
+          errorMessage = 'Error: $e';
           isLoading = false;
         });
       }
-    } catch (e) {
-      print('Network error: $e');
-      setState(() {
-        errorMessage = 'Network error: $e';
-        isLoading = false;
-      });
     }
   }
 
+// เพิ่ม 3 ฟังก์ชันที่คุณให้มา
   String _getFullNameWithPrefix(
       String firstName, String lastName, bool? isOphth, String? sex) {
     String prefix = 'คุณ';
@@ -263,6 +176,7 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
     return age;
   }
 
+  // Helper method to get default eye data
   Map<String, dynamic> _getDefaultEyeData() {
     return {
       'line': 0,
@@ -271,42 +185,64 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
     };
   }
 
+  // Helper method to convert VA value like "20/20" to percentage
   double _convertVAToPercentage(String vaValue) {
     try {
+      // For format like "20/20"
       final parts = vaValue.split('/');
       if (parts.length == 2) {
+        // Try to convert to numeric values
         final numerator = double.parse(parts[0]);
         final denominator = double.parse(parts[1]);
 
-        if (denominator == 0) return 0.0;
+        if (denominator == 0) return 0.0; // Avoid division by zero
 
+        // Calculate percentage based on VA ratio
+        // 20/20 is considered perfect vision (100%)
+        // Lower values like 20/40 indicate worse vision
         if (numerator == 20) {
-          return 20 / denominator;
+          // Standard Snellen notation
+          return 20 / denominator; // 20/20 = 1.0, 20/40 = 0.5, etc.
         } else {
-          return 0.5;
+          // Generic ratio
+          return numerator / denominator;
         }
       }
 
+      // If it's just a number (like "10"), convert to percentage based on scale
+      // Assuming 10 is max (perfect vision)
       final lineNumber = double.parse(vaValue);
-      return lineNumber / 10.0;
+      return lineNumber / 10.0; // Scale to 0.0-1.0
     } catch (e) {
       print('Error converting VA to percentage: $e');
-      return 0.5;
+      return 0.5; // Default to 50% if parsing fails
     }
   }
 
+  // Helper method to format date from API
   String _formatDate(String dateString) {
     try {
       final date = DateTime.parse(dateString);
+      // Format date in Thai Buddhist calendar (BE = CE + 543)
       final thaiYear = date.year + 543;
       const thaiMonths = [
-        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+        'มกราคม',
+        'กุมภาพันธ์',
+        'มีนาคม',
+        'เมษายน',
+        'พฤษภาคม',
+        'มิถุนายน',
+        'กรกฎาคม',
+        'สิงหาคม',
+        'กันยายน',
+        'ตุลาคม',
+        'พฤศจิกายน',
+        'ธันวาคม'
       ];
       final day = date.day;
       final month = thaiMonths[date.month - 1];
-      final hour = date.hour.toString().padLeft(2, '0');
-      final minute = date.minute.toString().padLeft(2, '0');
+      final hour = date.hour.toString().padLeft(2, '0'); // ทำให้เป็น 2 หลัก
+      final minute = date.minute.toString().padLeft(2, '0'); // ทำให้เป็น 2 หลัก
 
       return 'วันที่ $day $month พ.ศ. $thaiYear เวลา $hour:$minute น.';
     } catch (e) {
@@ -320,98 +256,252 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
     });
   }
 
+  static Map<String, dynamic> _safelyConvertMap(dynamic data) {
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    } else {
+      // Return an empty map if the data is not a map
+      return <String, dynamic>{};
+    }
+  }
+  
+  static Map<String, dynamic> _processScanData(dynamic scan) {
+    // Convert to proper Map<String, dynamic>
+    final Map<String, dynamic> scanData = _safelyConvertMap(scan);
+    
+    // Ensure each scan item has an ID
+    if (!scanData.containsKey('id')) {
+      scanData['id'] = DateTime.now().millisecondsSinceEpoch.toString();
+    }
+    
+    // Add UI state
+    scanData['isExpanded'] = false;
+    
+    // Rest of your processing...
+    
+    return scanData;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: theme,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: const Text(
-            'ประวัติการสแกน',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'BaiJamjuree',
+    // Extract user data with complete null safety at the beginning
+    final bool hasData = scanHistory.isNotEmpty && scanHistory[0] != null;
+    
+    // Create a local user map with null safety
+    final Map<String, dynamic>? userData = hasData ? scanHistory[0]['user'] as Map<String, dynamic>? : null;
+    
+    // Extract individual properties safely
+    final String profilePicture = userData?['profile_picture'] ?? '';
+    final String firstName = userData?['first_name'] ?? '';
+    final String lastName = userData?['last_name'] ?? '';
+    final String fullName = userData?['fullName'] ?? '$firstName $lastName';
+    final String displayName = fullName.isNotEmpty ? fullName : 'คุณ แก้วตา ฟ้าประทานพร';
+    
+    // Parse age safely
+    final dynamic rawAge = userData?['age'];
+    final String ageDisplay = rawAge != null ? 'อายุ: $rawAge ปี' : 'อายุ: 40 ปี';
+    
+    // Parse sex safely
+    final String sexValue = userData?['sex'] ?? 'หญิง';
+    final String sexDisplay = 'เพศ: $sexValue';
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight + 30),
+        child: Container(
+          padding: const EdgeInsets.only(top: 30),
+          child: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios,
+                  color: Colors.black, size: 20),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
-          ),
-          centerTitle: true,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () async {
-              final prefs = await SharedPreferences.getInstance();
-              final conversationId = prefs.getInt('conversation_id');
-              
-              if (conversationId != null) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChatOphthScreen(
-                      conversationId: conversationId,
-                    ),
-                  ),
-                );
-              } else {
-                Navigator.pop(context);
-              }
-            },
+            title: const Text(
+              'ประวัติผู้ป่วย',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'BaiJamjuree',
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
+              ),
+            ),
+            centerTitle: true,
           ),
         ),
-        body: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : errorMessage.isNotEmpty
-                ? Center(child: Text(errorMessage))
-                : scanHistory.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'ไม่พบประวัติการสแกน',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'BaiJamjuree',
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            ElevatedButton(
-                              onPressed: () {
-                                fetchScanHistory();
-                              },
-                              child: const Text('รีเฟรช',
+      ),
+      body: Column(
+        children: [
+          // เพิ่มกรอบสีฟ้าตรงนี้
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF12358F),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Center(
+                      child: profilePicture.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.network(
+                              profilePicture,
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Text(
+                                  'ภพ', // Fallback if image load fails
                                   style: TextStyle(
-                                    letterSpacing: -0.5,
-                                    fontFamily: 'BaiJamjuree',
-                                  )),
-                            ),
-                          ],
-                        ),
-                      )
-                    : SafeArea(
-                        child: RefreshIndicator(
-                          onRefresh: fetchScanHistory,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            child: ListView.builder(
-                              itemCount: scanHistory.length,
-                              itemBuilder: (context, index) {
-                                return _buildScanHistoryItem(index);
+                                    color: Color(0xFF12358F),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
                               },
+                            ),
+                          )
+                        : const Text(
+                            'ภพ', // Fallback if no profilePicture
+                            style: TextStyle(
+                              color: Color(0xFF12358F),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          ageDisplay,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          sexDisplay,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // ส่วนที่เหลือของ body
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : errorMessage.isNotEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                errorMessage,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    color: Colors.red, letterSpacing: -0.5),
+                              ),
+                              const SizedBox(height: 20),
+                              ElevatedButton(
+                                onPressed: () {
+                                  fetchScanHistory();
+                                },
+                                child: const Text('ลองใหม่',
+                                    style: TextStyle(letterSpacing: -0.5)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : scanHistory.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'ไม่พบประวัติการสแกน',
+                                  style: TextStyle(
+                                      fontSize: 16, letterSpacing: -0.5),
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    fetchScanHistory();
+                                  },
+                                  child: const Text('รีเฟรช',
+                                      style: TextStyle(letterSpacing: -0.5)),
+                                ),
+                              ],
+                            ),
+                          )
+                        : SafeArea(
+                            child: RefreshIndicator(
+                              onRefresh: fetchScanHistory,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 8.0),
+                                child: ListView.builder(
+                                  itemCount: scanHistory.length,
+                                  itemBuilder: (context, index) {
+                                    return _buildScanHistoryItem(index);
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildScanHistoryItem(int index) {
     final item = scanHistory[index];
+
+    // Create variables with default values for missing fields
+    final String itemTitle = item['formattedDate'] ?? 'ผลการตรวจวันที่ไม่ระบุ';
+    final String itemDate = item['formattedDate'] ?? 'ไม่มีข้อมูลวันที่';
+    final bool isExpanded = item['isExpanded'] ?? false;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
@@ -420,156 +510,243 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: Column(
         children: [
-          GestureDetector(
+          InkWell(
             onTap: () => toggleExpand(index),
-            child: Container(
+            child: Padding(
               padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                  bottomLeft: item['isExpanded'] ? Radius.zero : Radius.circular(12),
-                  bottomRight: item['isExpanded'] ? Radius.zero : Radius.circular(12),
-                ),
-              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    item['title'],
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF12358F),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.insert_chart_outlined,
+                      color: Colors.white,
+                      size: 24,
                     ),
                   ),
-                  Row(
-                    children: [
-                      Text(
-                        item['date'],
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[700],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "ผลการตรวจวัดสายตา", // Fixed title instead of using dynamic data
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: 8),
-                      Icon(
-                        item['isExpanded'] ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-                        color: Colors.grey[700],
-                      ),
-                    ],
+                        Text(
+                          itemDate,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: Colors.grey[600],
                   ),
                 ],
               ),
             ),
           ),
-          if (item['isExpanded']) _buildExpandedContent(item),
+          if (isExpanded) _buildExpandedContent(item),
         ],
       ),
     );
   }
 
   Widget _buildExpandedContent(Map<String, dynamic> item) {
+    // Debug the exact item being expanded
+    debugPrint('Building expanded content for scan ID: ${item['id']}');
+    
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 23.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 25,
-                backgroundImage: item['user']['profilePicture'] != null && 
-                                 item['user']['profilePicture'].isNotEmpty
-                    ? NetworkImage(item['user']['profilePicture'])
-                    : null,
-                child: item['user']['profilePicture'] == null || 
-                       item['user']['profilePicture'].isEmpty
-                    ? Icon(Icons.person, size: 30)
-                    : null,
-              ),
-              SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item['user']['fullName'],
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'เพศ: ${item['user']['sex']} | อายุ: ${item['user']['age']} ปี',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-          if (item.containsKey('eyeTest'))
-            _buildEyeTestSection(item),
-          if (item.containsKey('eyeScan'))
-            _buildEyeScanSection(item),
-          if (item['description'] != null && item['description'].isNotEmpty) ...[
-            SizedBox(height: 16),
-            Text(
-              'หมายเหตุ',
-              style: TextStyle(
+          // Eye Test Section (Visual Acuity/VA data)
+          if (item.containsKey('va')) _buildEyeTestSection(item),
+          
+          // Eye Scan Section (Photos)
+          if (item.containsKey('photo')) _buildEyeScanSection(item),
+          
+          // Description/Conclusion
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              item['description'] ?? 'ไม่มีผลวิเคราะห์',
+              style: const TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+                letterSpacing: -0.5,
               ),
+              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 4),
-            Text(
-              item['description'],
-              style: TextStyle(fontSize: 14),
-            ),
-          ],
+          ),
         ],
       ),
     );
   }
 
   Widget _buildEyeTestSection(Map<String, dynamic> item) {
-    final eyeTest = item['eyeTest'];
-    final leftEye = eyeTest['leftEye'];
-    final rightEye = eyeTest['rightEye'];
-
+    // Process VA data from the API structure which uses 'va' key
+    final va = item['va'] as Map<String, dynamic>? ?? {};
+    
+    final leftEyeValue = va['va_left'] ?? '0/0';
+    final rightEyeValue = va['va_right'] ?? '0/0';
+    final leftEyeLine = va['line_left'] ?? '0';
+    final rightEyeLine = va['line_right'] ?? '0';
+    
+    final leftPercentage = _convertVAToPercentage(leftEyeValue);
+    final rightPercentage = _convertVAToPercentage(rightEyeValue);
+    final description = va['description'] ?? 'ไม่มีข้อมูล';
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 16),
+        // Text header for this section
         const Text(
-          'ผลการวัดค่าสายตา',
+          'การวัดสายตา',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
+            color: Colors.black,
+            letterSpacing: -0.5,
           ),
         ),
+        // 2px gap
         const SizedBox(height: 2),
+        // Pink container
         Container(
-          padding: const EdgeInsets.all(16),
+          width: double.infinity,
+          padding: const EdgeInsets.all(16.0),
           decoration: BoxDecoration(
-            color: Colors.pink[50],
-            borderRadius: BorderRadius.circular(12),
+            color: const Color(0xFFF9CDCF), // Light pink
+            borderRadius: BorderRadius.circular(20),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          child: Column(
             children: [
-              _buildEyeResult('ตาซ้าย', leftEye['value'], leftEye['percentage']),
-              _buildEyeResult('ตาขวา', rightEye['value'], rightEye['percentage']),
+              // Results label
+              const Text(
+                'ผลการตรวจวัดสายตา',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF333333),
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              
+              // Eye results row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Use _buildEyeResult for left eye
+                  _buildEyeResult(
+                    'ตาซ้าย',
+                    leftEyeValue,
+                    leftPercentage,
+                  ),
+                  
+                  // Use _buildEyeResult for right eye
+                  _buildEyeResult(
+                    'ตาขวา',
+                    rightEyeValue,
+                    rightPercentage,
+                  ),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Description
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEyeScanSection(Map<String, dynamic> item) {
+    // Process photo data from the API structure which uses 'photo' key
+    final photo = item['photo'] as Map<String, dynamic>? ?? {};
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        // Text header for this section
+        const Text(
+          'สแกนดวงตา',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+            letterSpacing: -0.5,
+          ),
+        ),
+        // 2px gap
+        const SizedBox(height: 2),
+        // Blue container
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: const Color(0xFF3B5998), // Dark blue
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Pass the CURRENT item's photo data, not scanHistory[0]
+              _buildEyeScanGrid(photo, item),
+              
+              const SizedBox(height: 16),
+              
+              // Description
+              Text(
+                photo['description'] ?? 'ไม่มีผลการวิเคราะห์',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -578,34 +755,35 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
   }
 
   Widget _buildEyeResult(String title, String value, double percentage) {
-    final color = getColorForPercentage(percentage);
+    final parts = value.split('/');
+    final percentage = vaToPercentage(value);
+    final progressColor = getColorForPercentage(percentage);
 
     return Column(
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            letterSpacing: -0.5,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 8),
         SizedBox(
-          width: 100,
-          height: 100,
+          width: 80,
+          height: 80,
           child: Stack(
             children: [
-              Center(
-                child: SizedBox(
-                  width: 80,
-                  height: 80,
-                  child: CircularProgressIndicator(
-                    value: percentage,
-                    strokeWidth: 8,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
-                  ),
+              SizedBox(
+                width: 80,
+                height: 80,
+                child: CircularProgressIndicator(
+                  value: percentage,
+                  strokeWidth: 8,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: AlwaysStoppedAnimation<Color>(progressColor),
                 ),
               ),
               Center(
@@ -613,17 +791,23 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      value,
-                      style: TextStyle(
+                      parts.isNotEmpty ? parts[0] : '0',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const Divider(
+                      color: Colors.black,
+                      thickness: 1,
+                      indent: 25,
+                      endIndent: 25,
+                    ),
                     Text(
-                      '${(percentage * 100).toInt()}%',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
+                      parts.length > 1 ? parts[1] : '0',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -636,142 +820,196 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
     );
   }
 
-  Widget _buildEyeScanSection(Map<String, dynamic> item) {
-    final eyeScan = item['eyeScan'];
-    final photos = eyeScan['photos'] ?? {};
-
+  // Update method signature to also receive the entire item
+  Widget _buildEyeScanGrid(Map<String, dynamic> photos, Map<String, dynamic> item) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
-        const Text(
-          'ภาพถ่ายดวงตา',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+        // Header row with "ตาซ้าย" and "ตาขวา" labels
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Row(
+            children: [
+              // Empty space for left column label alignment
+              const SizedBox(width: 70),
+              // Left eye label
+              Expanded(
+                child: const Center(
+                  child: Text(
+                    'ตาซ้าย',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+              ),
+              // Right eye label
+              Expanded(
+                child: const Center(
+                  child: Text(
+                    'ตาขวา',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 2),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.blue[50],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: _buildEyeScanGrid(photos),
+
+        // First row: Photos
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left label "ภาพถ่าย"
+            SizedBox(
+              width: 70,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 30),
+                child: Text(
+                  'ภาพถ่าย',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+            ),
+            // Left eye photo - Pass the current item, not scanHistory[0]
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: _buildEyeImage('lefteye', item),
+              ),
+            ),
+            // Right eye photo
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: _buildEyeImage('righteye', item),
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        // Second row: AI Images
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left label "ภาพจาก AI"
+            SizedBox(
+              width: 70,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 30),
+                child: Text(
+                  'ภาพจาก AI',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ),
+            ),
+            // Left eye AI image
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: _buildEyeImage('lefteyeai', item),
+              ),
+            ),
+            // Right eye AI image
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: _buildEyeImage('righteyeai', item),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildEyeScanGrid(Map<String, dynamic> photos) {
-    final leftEyePhoto = photos['leftEye'];
-    final rightEyePhoto = photos['rightEye'];
-    final leftEyeAI = photos['leftEyeAI'];
-    final rightEyeAI = photos['rightEyeAI'];
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Column(
-              children: [
-                Text('ตาซ้าย (ต้นฉบับ)', style: TextStyle(fontSize: 12)),
-                SizedBox(height: 4),
-                GestureDetector(
-                  onTap: leftEyePhoto != null && leftEyePhoto.isNotEmpty
-                      ? () => _showFullImage(leftEyePhoto)
-                      : null,
-                  child: _buildEyeImage(leftEyePhoto),
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                Text('ตาขวา (ต้นฉบับ)', style: TextStyle(fontSize: 12)),
-                SizedBox(height: 4),
-                GestureDetector(
-                  onTap: rightEyePhoto != null && rightEyePhoto.isNotEmpty
-                      ? () => _showFullImage(rightEyePhoto)
-                      : null,
-                  child: _buildEyeImage(rightEyePhoto),
-                ),
-              ],
-            ),
-          ],
-        ),
-        SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            Column(
-              children: [
-                Text('ตาซ้าย (AI วิเคราะห์)', style: TextStyle(fontSize: 12)),
-                SizedBox(height: 4),
-                GestureDetector(
-                  onTap: leftEyeAI != null && leftEyeAI.isNotEmpty
-                      ? () => _showFullImage(leftEyeAI)
-                      : null,
-                  child: _buildEyeImage(leftEyeAI),
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                Text('ตาขวา (AI วิเคราะห์)', style: TextStyle(fontSize: 12)),
-                SizedBox(height: 4),
-                GestureDetector(
-                  onTap: rightEyeAI != null && rightEyeAI.isNotEmpty
-                      ? () => _showFullImage(rightEyeAI)
-                      : null,
-                  child: _buildEyeImage(rightEyeAI),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEyeImage(String? imageUrl) {
-    if (imageUrl == null || imageUrl.isEmpty) {
-      return Container(
-        width: 120,
-        height: 120,
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(Icons.image_not_supported, color: Colors.grey),
-      );
+  Widget _buildEyeImage(String? eyeType, Map<String, dynamic> scanData) {
+    // Get photo data directly from the API structure
+    final photoData = scanData['photo'] as Map<String, dynamic>? ?? {};
+    
+    // Map the eyeType parameter to the correct field in the API response
+    String? imageUrl;
+    switch (eyeType?.toLowerCase()) {
+      case 'lefteye':
+        imageUrl = photoData['left_eye'];
+        break;
+      case 'righteye':
+        imageUrl = photoData['right_eye'];
+        break;
+      case 'lefteyeai':
+        imageUrl = photoData['ai_left'];
+        break;
+      case 'righteyeai':
+        imageUrl = photoData['ai_right'];
+        break;
     }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: CachedNetworkImage(
-        imageUrl: imageUrl,
-        width: 120,
-        height: 120,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          color: Colors.grey[200],
-          child: Center(child: CircularProgressIndicator()),
+    
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
         ),
-        errorWidget: (context, url, error) => Container(
-          color: Colors.grey[200],
-          child: Icon(Icons.error, color: Colors.red),
-        ),
-      ),
-    );
-  }
-
-  void _showFullImage(String imageUrl) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FullscreenImageViewer(imageUrl: imageUrl),
+        child: imageUrl != null && imageUrl.isNotEmpty
+            ? GestureDetector(
+                onTap: () {
+                  // Show fullscreen image when tapped
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FullscreenImageViewer(imageUrl: imageUrl ?? ''),
+                    ),
+                  );
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    httpHeaders: {
+                      'Accept': 'image/jpeg, image/png, image/*',
+                      'Cache-Control': 'max-age=86400', // 24 hours cache
+                    },
+                    placeholder: (context, url) => const Center(
+                      child: CircularProgressIndicator(color: Color(0xFF3B5998)),
+                    ),
+                    errorWidget: (context, url, error) => Center(
+                      child: Icon(
+                        Icons.remove_red_eye,
+                        color: const Color(0xFF3B5998).withOpacity(0.5),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : Center(
+                child: Icon(
+                  Icons.remove_red_eye,
+                  color: const Color(0xFF3B5998).withOpacity(0.5),
+                  size: 24,
+                ),
+              ),
       ),
     );
   }
@@ -779,9 +1017,9 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
 
 class FullscreenImageViewer extends StatelessWidget {
   final String imageUrl;
-
+  
   const FullscreenImageViewer({Key? key, required this.imageUrl}) : super(key: key);
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -791,15 +1029,16 @@ class FullscreenImageViewer extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Center(
-        child: InteractiveViewer(
-          panEnabled: true,
-          boundaryMargin: EdgeInsets.all(20),
-          minScale: 0.5,
-          maxScale: 4,
-          child: CachedNetworkImage(
-            imageUrl: imageUrl,
-            placeholder: (context, url) => CircularProgressIndicator(),
-            errorWidget: (context, url, error) => Icon(Icons.error, color: Colors.red),
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          fit: BoxFit.contain,
+          placeholder: (context, url) => const Center(
+            child: CircularProgressIndicator(color: Color(0xFF3B5998)),
+          ),
+          errorWidget: (context, url, error) => const Icon(
+            Icons.error_outline,
+            color: Colors.white,
+            size: 48,
           ),
         ),
       ),
