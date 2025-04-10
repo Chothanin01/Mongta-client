@@ -106,6 +106,8 @@ class _OphtHomePageState extends State<OphtHomePage> {
       }
     }
 
+    
+
     return '$prefix$firstName $lastName';
   }
 
@@ -459,68 +461,73 @@ class _OphtHomePageState extends State<OphtHomePage> {
                                   .map((firstName) {
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 11.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: MainTheme.white,
-                                      borderRadius: BorderRadius.circular(15),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.25),
-                                          blurRadius: 2,
-                                          offset: const Offset(0, 0),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 10.0),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 32,
-                                            height: 32,
-                                            decoration: BoxDecoration(
-                                              color: Color(0xFFFFC0CB),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            child: Center(
-                                              child: Iconify(
-                                                MaterialSymbols.chat,
-                                                color: MainTheme.white,
-                                                size: 20,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 12),
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'แชท',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.w600,
-                                                    fontFamily: 'BaiJamjuree',
-                                                    fontSize: 14,
-                                                    letterSpacing: -0.5,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '$firstName ส่งข้อความเข้ามา',
-                                                  style: TextStyle(
-                                                    color: Colors.grey[600],
-                                                    fontFamily: 'BaiJamjuree',
-                                                    fontSize: 10,
-                                                    letterSpacing: -0.5,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      context.go('/chat-ophth-history');
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: MainTheme.white,
+                                        borderRadius: BorderRadius.circular(15),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.25),
+                                            blurRadius: 2,
+                                            offset: const Offset(0, 0),
                                           ),
                                         ],
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 10.0),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 32,
+                                              height: 32,
+                                              decoration: BoxDecoration(
+                                                color: Color(0xFFFFC0CB),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              child: Center(
+                                                child: Iconify(
+                                                  MaterialSymbols.chat,
+                                                  color: MainTheme.white,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 12),
+                                            Expanded(
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'แชท',
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.w600,
+                                                      fontFamily: 'BaiJamjuree',
+                                                      fontSize: 14,
+                                                      letterSpacing: -0.5,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    '$firstName ส่งข้อความเข้ามา',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontFamily: 'BaiJamjuree',
+                                                      fontSize: 10,
+                                                      letterSpacing: -0.5,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),

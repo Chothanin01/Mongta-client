@@ -60,6 +60,26 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      // Format date in Thai Buddhist calendar (BE = CE + 543)
+      final thaiYear = date.year + 543;
+      const thaiMonths = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+      ];
+      final day = date.day;
+      final month = thaiMonths[date.month - 1];
+      final hour = date.hour.toString().padLeft(2, '0'); // ทำให้เป็น 2 หลัก
+      final minute = date.minute.toString().padLeft(2, '0'); // ทำให้เป็น 2 หลัก
+
+      return 'วันที่ $day $month พ.ศ. $thaiYear เวลา $hour:$minute น.';
+    } catch (e) {
+      return dateString;
+    }
+  }
+
   Future<void> fetchUserNotification() async {
     try {
       final data = await apiService.getUserNotifications();
@@ -77,14 +97,20 @@ class _HomePageState extends State<HomePage> {
                     })
                 .toList();
 
-        // Process scan notifications
+        // Process scan notifications with formatted date
         List<Map<String, String>> scanNotifications = [];
         if (data['scan'] != null) {
           eyeStatus = data['scan']['eye'] as String?;
           vaStatus = data['scan']['va'] as String?;
+          
+          // Format the date using _formatDate
+          final String rawDate = data['scan']['date'] as String;
+          final String formattedDate = _formatDate(rawDate);
+          
           scanNotifications.add({
             'type': 'scan',
-            'content': data['scan']['date'] as String,
+            'content': formattedDate,
+            'rawDate': rawDate, // Store original date if needed for sorting
           });
         } else {
           eyeStatus = 'ไม่พบข้อมูล';
