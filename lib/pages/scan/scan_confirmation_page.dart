@@ -50,7 +50,6 @@ class ScanConfirmationPage extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  // Empty container to balance the layout
                   Container(width: 48),
                 ],
               ),

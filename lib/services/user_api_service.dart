@@ -107,7 +107,6 @@ class ApiService {
         request.files.add(multipartFile);
       }
       
-      // Rest of the method remains the same
       print('Sending update request to server...');
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);

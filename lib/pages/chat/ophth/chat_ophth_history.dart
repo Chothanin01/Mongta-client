@@ -67,11 +67,11 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> with AutomaticKeepA
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MainTheme.white,
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: Icon(Icons.arrow_back_ios, color: MainTheme.black),
           onPressed: () {
             context.go('/home-opht');
           },
@@ -158,7 +158,7 @@ class _ChatOphthHistoryState extends State<ChatOphthHistory> with AutomaticKeepA
           text,
           style: TextStyle(
             fontSize: 16,
-            color: Colors.white,
+            color: MainTheme.white,
             fontFamily: 'BaiJamjuree',
           ),
           textAlign: TextAlign.center,

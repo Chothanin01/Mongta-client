@@ -160,7 +160,7 @@ class _ChatInputState extends State<ChatInput> {
                   decoration: InputDecoration(
                     hintText: 'พิมพ์ข้อความ...',
                     hintStyle: TextStyle(
-                      color: Colors.grey,
+                      color: MainTheme.grey,
                       fontFamily: 'BaiJamjuree',
                     ),
                     border: InputBorder.none,
@@ -194,7 +194,7 @@ class _ChatInputState extends State<ChatInput> {
                         }),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.red,
+                            color: MainTheme.redText,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(Icons.close, size: 16, color: Colors.white),

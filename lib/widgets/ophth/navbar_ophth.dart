@@ -80,7 +80,7 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
     if (_isLoading) {
       return AppBar(
         toolbarHeight: toolbarHeight,
-        backgroundColor: Colors.transparent,
+        backgroundColor: MainTheme.transparent,
         elevation: 0,
         flexibleSpace: Container(
           margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
@@ -96,7 +96,7 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
     return AppBar(
       toolbarHeight: toolbarHeight,
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.transparent,
+      backgroundColor: MainTheme.transparent,
       elevation: 0,
       flexibleSpace: Container(
         margin: const EdgeInsets.only(top: 16, left: 16, right: 16),
@@ -109,7 +109,7 @@ class ChatAppBarOphthState extends State<ChatAppBarOphth> {
           child: AppBar(
             automaticallyImplyLeading: false,
             toolbarHeight: toolbarHeight,
-            backgroundColor: Colors.transparent,
+            backgroundColor: MainTheme.transparent,
             elevation: 0,
             title: Row(
               children: [

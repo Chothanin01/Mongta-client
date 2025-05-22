@@ -277,7 +277,6 @@ class _ScanHistoryScreenState extends State<ScanHistoryScreen> {
     // Add UI state
     scanData['isExpanded'] = false;
     
-    // Rest of your processing...
     
     return scanData;
   }

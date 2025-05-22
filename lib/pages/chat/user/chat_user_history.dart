@@ -115,7 +115,6 @@ class _ChatUserHistoryState extends State<ChatUserHistory> with AutomaticKeepAli
     );
   }
   
-  // Keep your existing widget methods
   Widget _buildRoundedBox(BuildContext context, String imageUrl) {
     // Existing implementation
     double boxSize = MediaQuery.of(context).size.width * 0.18;

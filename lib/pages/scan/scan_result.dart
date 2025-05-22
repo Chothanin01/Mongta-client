@@ -114,7 +114,6 @@ class ScanResultPage extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      // Placeholder to balance layout
                       const SizedBox(width: 48),
                     ],
                   ),

@@ -193,7 +193,6 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
         
         print('Registration response: ${result.toString()}');
         
-        // Rest of the method stays the same...
         loadingOverlay.remove();
         
         if (!mounted) return;
@@ -203,8 +202,6 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
           final user = result['user'];
           if (user != null) {
             await UserService.saveUserId(user['id']?.toString() ?? '');
-            // Note: token is not returned from backend on registration,
-            // you may need to login separately or handle this differently
           }
           
           ScaffoldMessenger.of(context).showSnackBar(
@@ -260,7 +257,7 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
         top: 0,
         bottom: 0,
         child: Container(
-          color: Colors.black.withOpacity(0.5),
+          color: MainTheme.black.withOpacity(0.5),
           child: Center(
             child: CircularProgressIndicator(
               color: MainTheme.blueText,
@@ -279,7 +276,7 @@ class _GoogleFacebookRegisterPageState extends State<GoogleFacebookRegisterPage>
     return Scaffold(
       backgroundColor: MainTheme.mainBackground,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: MainTheme.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: MainTheme.mainText),

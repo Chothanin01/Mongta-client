@@ -28,7 +28,6 @@ class CompleteChangePasswordPage extends StatelessWidget {
                       children: [
                         const SizedBox(height: 80),
                         
-                        // Success image (keeping your original image)
                         Image.asset(
                           'assets/images/complete_verify.png', 
                           height: 150,

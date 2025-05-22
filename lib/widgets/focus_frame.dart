@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:client/core/theme/theme.dart';
+
 
 class FocusFrame extends StatelessWidget {
   final double size;
@@ -9,7 +11,7 @@ class FocusFrame extends StatelessWidget {
   const FocusFrame({
     super.key,
     this.size = 240,
-    this.color = Colors.white,
+    this.color = MainTheme.white,
     this.lineWidth = 3,
     this.cornerLength = 40,
   });
@@ -19,7 +21,7 @@ class FocusFrame extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      color: Colors.transparent,
+      color: MainTheme.transparent,
       child: Stack(
         children: [
           // Top-left corner

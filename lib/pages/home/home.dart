@@ -376,13 +376,13 @@ class _HomePageState extends State<HomePage> {
                                   width: 50,
                                   height: 50,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: MainTheme.white,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Center(
                                     child: Iconify(
                                       Mdi.comment_eye,
-                                      color: Colors.black,
+                                      color: MainTheme.black,
                                       size: 43,
                                     ),
                                   ),
@@ -441,7 +441,7 @@ class _HomePageState extends State<HomePage> {
                               Text(
                                 'ประวัติการสแกนตา',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: MainTheme.white,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'BaiJamjuree',
                                   fontSize: 16,
@@ -454,7 +454,7 @@ class _HomePageState extends State<HomePage> {
                                     ? 'กำลังโหลด...'
                                     : 'สแกนไปแล้วทั้งหมด $scanCount ครั้ง',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: MainTheme.white,
                                   fontFamily: 'BaiJamjuree',
                                   fontSize: 14,
                                   letterSpacing: -0.5,
@@ -575,7 +575,7 @@ class _HomePageState extends State<HomePage> {
                                               height: 32,
                                               decoration: BoxDecoration(
                                                 color: type == 'chat'
-                                                    ? Color(0xFFFFC0CB)
+                                                    ? MainTheme.pinkBox2
                                                     : MainTheme.blueBox,
                                                 borderRadius:
                                                     BorderRadius.circular(12),

@@ -33,7 +33,7 @@ class EyeScanTabSelector extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isRightEyeSelected 
                       ? MainTheme.blueText 
-                      : Colors.transparent,
+                      : MainTheme.transparent,
                   borderRadius: BorderRadius.circular(21),
                 ),
                 child: Center(
@@ -41,7 +41,7 @@ class EyeScanTabSelector extends StatelessWidget {
                     'ตาขวา',
                     style: TextStyle(
                       color: isRightEyeSelected 
-                          ? Colors.white 
+                          ? MainTheme.white 
                           : MainTheme.blueText,
                       fontFamily: 'BaiJamjuree',
                       fontWeight: FontWeight.w500,
@@ -60,7 +60,7 @@ class EyeScanTabSelector extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: !isRightEyeSelected 
                       ? MainTheme.blueText 
-                      : Colors.transparent,
+                      : MainTheme.transparent,
                   borderRadius: BorderRadius.circular(21),
                 ),
                 child: Center(
@@ -68,7 +68,7 @@ class EyeScanTabSelector extends StatelessWidget {
                     'ตาซ้าย',
                     style: TextStyle(
                       color: !isRightEyeSelected 
-                          ? Colors.white 
+                          ? MainTheme.white 
                           : isRightEyeCaptured
                               ? MainTheme.blueText
                               : MainTheme.placeholderText,

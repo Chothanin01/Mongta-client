@@ -286,7 +286,7 @@ class _LoginPageState extends State<LoginPage> {
                         Expanded(
                           child: Divider(
                             thickness: 0.5,
-                            color: Colors.transparent,
+                            color: MainTheme.transparent,
                           ),
                         ),
                         Padding(
@@ -305,7 +305,7 @@ class _LoginPageState extends State<LoginPage> {
                         Expanded(
                           child: Divider(
                             thickness: 0.5,
-                            color: Colors.transparent,
+                            color: MainTheme.transparent,
                           ),
                         ),
                       ],

@@ -557,7 +557,7 @@ class _RegisterPageState extends State<RegisterPage> {
       backgroundColor: MainTheme.mainBackground,
       appBar: currentPage == 1
           ? AppBar(
-              backgroundColor: Colors.transparent,
+              backgroundColor: MainTheme.transparent,
               elevation: 0,
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios, color: MainTheme.mainText),
@@ -697,7 +697,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           Expanded(
                             child: Divider(
                               thickness: 0.5,
-                              color: Colors.transparent,
+                              color: MainTheme.transparent,
                             ),
                           ),
                           Padding(
@@ -716,7 +716,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           Expanded(
                             child: Divider(
                               thickness: 0.5,
-                              color: Colors.transparent,
+                              color: MainTheme.transparent,
                             ),
                           ),
                         ],
