@@ -13,6 +13,7 @@ class MainTheme {
 
   // home page
   static const Color pinkBox = Color.fromRGBO(245, 187, 209, 1);
+  static const Color pinkBox2 = Color.fromRGBO(255, 192, 203, 1);
   static const Color blueBox = Color.fromRGBO(18, 53, 143, 1);
 
   // near chart
